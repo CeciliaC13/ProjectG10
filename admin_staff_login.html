@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <title>Staff/Admin Sign In - UTMSPACE College Booking</title>
+
+  <link href="https://fonts.googleapis.com" rel="preconnect">
+  <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&family=Montserrat:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Roboto', sans-serif;
+      background: #5c001f;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .signin-container {
+      max-width: 450px;
+      width: 100%;
+      background: white;
+      border-radius: 24px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      overflow: hidden;
+    }
+
+    .signin-header {
+      background: linear-gradient(135deg, #1a3c5e 0%, #2c5a7a 100%);
+      padding: 40px 30px;
+      text-align: center;
+    }
+
+    .signin-header h1 {
+      color: white;
+      font-size: 32px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      font-family: 'Montserrat', sans-serif;
+    }
+
+    .signin-header .subtitle {
+      color: rgba(255, 255, 255, 0.8);
+      font-size: 14px;
+      font-weight: 500;
+      letter-spacing: 1px;
+    }
+
+    .signin-form {
+      padding: 40px 35px;
+    }
+
+    .form-group {
+      margin-bottom: 25px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 14px;
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 8px;
+      font-family: 'Montserrat', sans-serif;
+    }
+
+    .input-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .input-wrapper i {
+      position: absolute;
+      left: 15px;
+      color: #aaa;
+      font-size: 18px;
+    }
+
+    .form-control {
+      width: 100%;
+      padding: 14px 15px 14px 45px;
+      font-size: 15px;
+      border: 1.5px solid #e0e0e0;
+      border-radius: 12px;
+      transition: all 0.3s ease;
+      font-family: 'Roboto', sans-serif;
+      background: white;
+    }
+
+    .form-control:focus {
+      outline: none;
+      border-color: #2c5a7a;
+      box-shadow: 0 0 0 3px rgba(44, 90, 122, 0.1);
+    }
+
+    select.form-control {
+      cursor: pointer;
+    }
+
+    .forgot-password {
+      text-align: right;
+      margin-bottom: 30px;
+    }
+
+    .forgot-password a {
+      color: #2c5a7a;
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 500;
+    }
+
+    .forgot-password a:hover {
+      color: #5c001f;
+      text-decoration: underline;
+    }
+
+    .login-btn {
+      width: 100%;
+      background: linear-gradient(135deg, #1a3c5e 0%, #2c5a7a 100%);
+      color: white;
+      border: none;
+      padding: 14px;
+      font-size: 16px;
+      font-weight: 600;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-family: 'Montserrat', sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .login-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 20px rgba(44, 90, 122, 0.3);
+    }
+
+    .student-link {
+      text-align: center;
+      margin-top: 30px;
+      padding-top: 20px;
+      border-top: 1px solid #eee;
+    }
+
+    .student-link p {
+      font-size: 14px;
+      color: #666;
+    }
+
+    .student-link a {
+      color: #2c5a7a;
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .error-message {
+      background-color: #fee2e2;
+      color: #dc2626;
+      padding: 12px;
+      border-radius: 10px;
+      font-size: 13px;
+      margin-bottom: 20px;
+      display: none;
+    }
+
+    .error-message.show {
+      display: block;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="signin-container">
+    <div class="signin-header">
+      <h1>Staff / Admin Sign In</h1>
+      <p class="subtitle">College Booking Management Portal</p>
+    </div>
+
+    <div class="signin-form">
+      <div class="error-message" id="errorMessage">
+        <i class="bi bi-exclamation-triangle-fill"></i> Please enter your ID, password, and role.
+      </div>
+
+      <div class="form-group">
+        <label>Login As</label>
+        <div class="input-wrapper">
+          <i class="bi bi-person-badge"></i>
+          <select class="form-control" id="role">
+            <option value="">Select Role</option>
+            <option value="staff">Staff</option>
+            <option value="admin">Admin</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Staff / Admin ID</label>
+        <div class="input-wrapper">
+          <i class="bi bi-person"></i>
+          <input type="text" class="form-control" id="userid" placeholder="Enter your Staff or Admin ID">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Password</label>
+        <div class="input-wrapper">
+          <i class="bi bi-lock"></i>
+          <input type="password" class="form-control" id="password" placeholder="Enter your password">
+        </div>
+      </div>
+
+      <div class="forgot-password">
+        <a href="forgotpswd_admin_staff.html">Forgot your password?</a>
+      </div>
+
+      <button class="login-btn" id="loginBtn">
+        Login <i class="bi bi-arrow-right"></i>
+      </button>
+
+      <div class="student-link">
+        <p>Student login? <a href="index.html">Go to Student Sign In</a></p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.getElementById("loginBtn").addEventListener("click", function () {
+      const role = document.getElementById("role").value;
+      const userid = document.getElementById("userid").value.trim();
+      const password = document.getElementById("password").value.trim();
+      const errorMessage = document.getElementById("errorMessage");
+
+      if (role === "" || userid === "" || password === "") {
+        errorMessage.classList.add("show");
+        return;
+      }
+
+      localStorage.setItem("userRole", role);
+      localStorage.setItem("currentUser", JSON.stringify({
+        name: role === "admin" ? "Admin User" : "Staff User",
+        role: role === "admin" ? "Admin" : "Staff",
+        email: userid + "@utmspace.my"
+      }));
+
+      window.location.href = "admin_staff_dashboard.html";
+    });
+  </script>
+
+</body>
+</html>
