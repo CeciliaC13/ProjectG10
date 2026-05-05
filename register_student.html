@@ -358,7 +358,7 @@
         <label>Full Name <span class="required">*</span></label>
         <div class="input-wrapper">
           <i class="bi bi-person"></i>
-          <input type="text" class="form-control" id="fullName" placeholder="Enter your full name">
+          <input type="text" class="form-control" id="name" placeholder="Enter your full name">
         </div>
       </div>
 
@@ -367,7 +367,7 @@
           <label>Student ID <span class="required">*</span></label>
           <div class="input-wrapper">
             <i class="bi bi-card-text"></i>
-            <input type="text" class="form-control" id="utmid" placeholder="e.g., A20CS0001">
+            <input type="text" class="form-control" id="studentId" placeholder="e.g., A20CS0001">
           </div>
         </div>
       </div>
@@ -423,6 +423,84 @@
     </div>
   </div>
 
+   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase.js"></script>
+  <script>
+    document.getElementById('signupBtn').addEventListener('click', async () =>{
+      const studentId = document.getElementById('studentId').value.trim();
+      const name = document.getElementById('name').value.trim();
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value.trim();
+      const confirmPassword = document.getElementById('confirmPassword').value.trim();
+
+      const errorAlert = document.getElementById('errorMessage');
+      const errorText = document.getElementById('errorMessage');
+      const SuccessAlert = document.getElementById('successMessage');
+      const signupBtn = document.getElementById('signupBtn');
+
+      errorAlert.classList.remove('show');
+      SuccessAlert.classList.remove('show');
+
+      if(!studentId || !name || !email || !password || !confirmPassword) {
+        errorText.textContent = 'Please fill in all fields.';
+        errorAlert.classList.add('show');
+        return;
+      }
+
+      if(password.length < 6) {
+        errorText.textContent = 'Password must be at least 6 characters. ';
+        errorAlert.classList.add('show');
+        return;
+      }
+
+      if( password !== confirmPassword){
+        errorText.textContent = 'Password do not match.'
+        errorAlert.classList.add('show');
+        return;
+      }
+
+      const { data: existing} = await db 
+        .from('Student')
+        .select('student_id')
+        .or ('student_id.eq.${studentId},email.eq.${email}')
+      
+        if(existing && existing.length > 0){
+          errorText.textContent = 'Student ID or email already registered.';
+          errorAlert.classList.add('show');
+          return;
+        }
+
+        signupBtn.classList.add('loading');
+        signupBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Creating account...';
+
+        const {error} = await db
+          .from('Student')
+          .insert({
+            student_id : studentId,
+            name : name,
+            email : email,
+            password : password
+          });
+
+          console.log('Supabase error:', error); // <-- Add this
+
+          if (error) {
+            errorText.textContent = 'Sign Up failed. Please try again.  ';
+            errorAlert.classList.add('show');
+            signupBtn.classList.remove('loading');
+            signupBtn.innerHTML = 'Create Account <i class = "bi bi-arrow-right"></i>';
+            return;
+          }
+
+          SuccessAlert.classList.add('show');
+          signupBtn.innerHTML = '<i class = "bi bi-check-lg"></i> Account Created!'
+
+          setTimeout(() => {
+            window.location.href = 'index.html'
+          }, 2000)
+      
+    })
+  </script>
 </body>
 
 </html>
