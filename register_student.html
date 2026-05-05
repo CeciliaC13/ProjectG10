@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <title>Sign Up - UTMSPACE College Booking</title>
+  <meta name="description" content="">
+  <meta name="keywords" content="">
+
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com" rel="preconnect">
+  <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&family=Montserrat:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
+
+  <!-- Bootstrap Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Roboto', sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    /* Sign Up Container */
+    .signup-container {
+      max-width: 500px;
+      width: 100%;
+      background: white;
+      border-radius: 24px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      overflow: hidden;
+      animation: fadeInUp 0.5s ease;
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Header Section */
+    .signup-header {
+      background: linear-gradient(135deg, #1a3c5e 0%, #2c5a7a 100%);
+      padding: 35px 30px;
+      text-align: center;
+    }
+
+    .signup-header h1 {
+      color: white;
+      font-size: 32px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      font-family: 'Montserrat', sans-serif;
+    }
+
+    .signup-header .subtitle {
+      color: rgba(255, 255, 255, 0.8);
+      font-size: 14px;
+      font-weight: 500;
+      letter-spacing: 1px;
+    }
+
+    /* Form Section */
+    .signup-form {
+      padding: 35px 35px;
+    }
+
+    /* Form Group */
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 6px;
+      font-family: 'Montserrat', sans-serif;
+    }
+
+    .form-group label .required {
+      color: #e74c3c;
+      margin-left: 3px;
+    }
+
+    .input-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .input-wrapper i {
+      position: absolute;
+      left: 15px;
+      color: #aaa;
+      font-size: 18px;
+    }
+
+    .form-control {
+      width: 100%;
+      padding: 12px 15px 12px 45px;
+      font-size: 14px;
+      border: 1.5px solid #e0e0e0;
+      border-radius: 12px;
+      transition: all 0.3s ease;
+      font-family: 'Roboto', sans-serif;
+    }
+
+    .form-control:focus {
+      outline: none;
+      border-color: #2c5a7a;
+      box-shadow: 0 0 0 3px rgba(44, 90, 122, 0.1);
+    }
+
+    .form-control.error {
+      border-color: #e74c3c;
+    }
+
+    /* Two columns layout */
+    .row {
+      display: flex;
+      gap: 15px;
+    }
+
+    .row .form-group {
+      flex: 1;
+    }
+
+    /* Password hint */
+    .password-hint {
+      font-size: 11px;
+      color: #888;
+      margin-top: 5px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .password-hint i {
+      font-size: 12px;
+    }
+
+    /* Role Selection */
+    .role-options {
+      display: flex;
+      gap: 20px;
+      margin-top: 5px;
+    }
+
+    .role-option {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+    }
+
+    .role-option input[type="radio"] {
+      width: 16px;
+      height: 16px;
+      cursor: pointer;
+      accent-color: #2c5a7a;
+    }
+
+    .role-option label {
+      margin: 0;
+      cursor: pointer;
+      font-weight: normal;
+      font-size: 14px;
+      color: #555;
+    }
+
+    /* Terms and Conditions */
+    .terms {
+      margin: 20px 0;
+    }
+
+    .checkbox-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+    }
+
+    .checkbox-wrapper input {
+      width: 16px;
+      height: 16px;
+      cursor: pointer;
+      accent-color: #2c5a7a;
+    }
+
+    .checkbox-wrapper label {
+      margin: 0;
+      font-weight: normal;
+      font-size: 13px;
+      color: #555;
+      cursor: pointer;
+    }
+
+    .checkbox-wrapper a {
+      color: #2c5a7a;
+      text-decoration: none;
+    }
+
+    .checkbox-wrapper a:hover {
+      text-decoration: underline;
+    }
+
+    /* Sign Up Button */
+    .signup-btn {
+      width: 100%;
+      background: linear-gradient(135deg, #1a3c5e 0%, #2c5a7a 100%);
+      color: white;
+      border: none;
+      padding: 14px;
+      font-size: 16px;
+      font-weight: 600;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-family: 'Montserrat', sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .signup-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 20px rgba(44, 90, 122, 0.3);
+    }
+
+    .signup-btn i {
+      font-size: 18px;
+      transition: transform 0.3s ease;
+    }
+
+    .signup-btn:hover i {
+      transform: translateX(5px);
+    }
+
+    /* Login Link */
+    .login-link {
+      text-align: center;
+      margin-top: 25px;
+      padding-top: 20px;
+      border-top: 1px solid #eee;
+    }
+
+    .login-link p {
+      font-size: 14px;
+      color: #666;
+    }
+
+    .login-link a {
+      color: #2c5a7a;
+      text-decoration: none;
+      font-weight: 600;
+      transition: color 0.3s ease;
+    }
+
+    .login-link a:hover {
+      color: #764ba2;
+    }
+
+    /* Error & Success Messages */
+    .error-message {
+      background-color: #fee2e2;
+      color: #dc2626;
+      padding: 12px;
+      border-radius: 10px;
+      font-size: 13px;
+      margin-bottom: 20px;
+      display: none;
+    }
+
+    .error-message.show {
+      display: block;
+    }
+
+    .success-message {
+      background-color: #dcfce7;
+      color: #16a34a;
+      padding: 12px;
+      border-radius: 10px;
+      font-size: 13px;
+      margin-bottom: 20px;
+      display: none;
+    }
+
+    .success-message.show {
+      display: block;
+    }
+
+    /* Responsive */
+    @media (max-width: 576px) {
+      .signup-header {
+        padding: 25px 20px;
+      }
+      
+      .signup-header h1 {
+        font-size: 28px;
+      }
+      
+      .signup-form {
+        padding: 25px 20px;
+      }
+      
+      .form-control {
+        padding: 10px 12px 10px 40px;
+        font-size: 13px;
+      }
+      
+      .row {
+        flex-direction: column;
+        gap: 0;
+      }
+      
+      .role-options {
+        flex-direction: column;
+        gap: 10px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="signup-container">
+    <!-- Header -->
+    <div class="signup-header">
+      <h1>Sign Up</h1>
+      <p class="subtitle">Create your account</p>
+    </div>
+
+    <!-- Form -->
+    <div class="signup-form">
+      <!-- Error Message -->
+      <div class="error-message" id="errorMessage"></div>
+      
+      <!-- Success Message -->
+      <div class="success-message" id="successMessage"></div>
+
+      <!-- Full Name -->
+      <div class="form-group">
+        <label>Full Name <span class="required">*</span></label>
+        <div class="input-wrapper">
+          <i class="bi bi-person"></i>
+          <input type="text" class="form-control" id="fullName" placeholder="Enter your full name">
+        </div>
+      </div>
+
+      <!-- Row for UTMID -->
+      <div class="row">
+        <div class="form-group">
+          <label>UTMID <span class="required">*</span></label>
+          <div class="input-wrapper">
+            <i class="bi bi-card-text"></i>
+            <input type="text" class="form-control" id="utmid" placeholder="e.g., A20CS0001">
+          </div>
+        </div>
+      </div>
+
+      <!-- Row for Email -->
+      <div class="row">
+        <div class="form-group">
+          <label>Email Address <span class="required">*</span></label>
+          <div class="input-wrapper">
+            <i class="bi bi-envelope"></i>
+            <input type="email" class="form-control" id="email" placeholder="you@example.com">
+          </div>
+        </div>
+      </div>
+
+      <!-- Row for Password and Confirm Password -->
+      <div class="row">
+        <div class="form-group">
+          <label>Password <span class="required">*</span></label>
+          <div class="input-wrapper">
+            <i class="bi bi-lock"></i>
+            <input type="password" class="form-control" id="password" placeholder="Create a password">
+          </div>
+          <div class="password-hint">
+            <i class="bi bi-info-circle"></i>
+            <span>Min. 8 characters with letters & numbers</span>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Confirm Password <span class="required">*</span></label>
+          <div class="input-wrapper">
+            <i class="bi bi-lock-fill"></i>
+            <input type="password" class="form-control" id="confirmPassword" placeholder="Confirm your password">
+          </div>
+        </div>
+      </div>
+
+      <!-- Terms and Conditions -->
+      <div class="terms">
+        <div class="checkbox-wrapper">
+          <input type="checkbox" id="agreeTerms">
+          <label for="agreeTerms">
+            I agree to the <a href="terms.html">Terms of Service</a> and <a href="privacy.html">Privacy Policy</a>
+          </label>
+        </div>
+      </div>
+
+      <!-- Sign Up Button -->
+      <button class="signup-btn" id="signupBtn">
+        Create Account <i class="bi bi-arrow-right"></i>
+      </button>
+
+      <!-- Login Link -->
+      <div class="login-link">
+        <p>Already have an account? <a href="student_login.html">Sign In</a></p>
+      </div>
+    </div>
+  </div>
+
+</body>
+
+</html>
