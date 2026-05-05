@@ -286,6 +286,44 @@
     </div>
   </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase.jas"></script>
+  <script>
+    document.getElementById('loginBTN').addEventListener('click', async () => {
+      const studentid = document.getElementById('studentid').value.trim();
+      const password = document.getElementById('password').value.trim();
+      const errorBox = document.getElementById('errorMessage');
+
+      errorBox.classList.remove('show');
+
+      if(!studentid || !password) {
+        errorBox.innerHTML = '<i class="bi bi-exclamation-triangle-fill"></i> Please fill in all fields.';
+        errorBox.classList.add('show');
+        return;
+      }
+
+      loginBtn.classList.add('loading');
+      loginBtn.innerHTML = '<i class = "bi bi-hourglass-split"></i> Signing in...';
+      
+      const { data, error } = await db 
+        .from('Student')
+        .select('*')
+        .eq(student_id, studentid)
+        .eq(password, password)
+        .single()
+
+      if (error || !data ){
+        errorBox.innerHTML = '<i class="bi bi-exclamation-triangle-fill"></i> Invalid Student ID or Password.';
+        errorBox.classList.add('show');
+        loginBtn.classList.remove('loading');
+        loginBtn.innerHTML = 'Login <i class="bi bi-arrow-right"></i>'
+        return;
+      }
+
+      window.location.href = 'Dashboard.html';
+    })
+  </script>
+
 </body>
 
 </html>
