@@ -33,90 +33,88 @@
 </head>
 
 <body class="index-page">
+<header id="header" class="header d-flex align-items-center position-relative">
+  <div class="container position-relative d-flex align-items-center">
 
-  <header id="header" class="header d-flex align-items-center position-relative">
-    <div class="container position-relative d-flex align-items-center justify-content-between">
+    <!-- Logo - Far Left -->
+    <a href="index.html" class="logo d-flex align-items-center">
+      <h1 class="sitename">UTM Space</h1>
+    </a>
 
-      <a href="index.html" class="logo d-flex align-items-center me-auto me-xl-0">
-        <!-- Uncomment the line below if you also wish to use an image logo -->
-        <!-- <img src="assets/img/logo.webp" alt=""> -->
-        <h1 class="sitename">Story</h1>
+    <!-- Navigation Menu -->
+    <nav id="navmenu" class="navmenu">
+      <ul>
+        <li><a href="index.html" class="active">Home</a></li>
+        <li><a href="about.html">About</a></li>
+        <li><a href="category.html">Category</a></li>
+        <li class="dropdown"><a href="#"><span>Pages</span> <i class="bi bi-chevron-down toggle-dropdown"></i></a>
+          <ul>
+            <li><a href="about.html">About</a></li>
+            <li><a href="category.html">Category</a></li>
+            <li><a href="search-results.html">Search Results</a></li>
+            <li><a href="404.html">404 Not Found Page</a></li>
+          </ul>
+        </li>
+        <li><a href="contact.html">Contact</a></li>
+      </ul>
+      <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>
+    </nav>
+
+    <!-- User Profile and Notification Section - Far Right -->
+    <div class="header-actions">
+      <!-- Notification Button -->
+      <a href="notification.html" class="notification-btn" title="Notifications">
+        <i class="bi bi-bell-fill"></i>
       </a>
 
-      <nav id="navmenu" class="navmenu">
-        <ul>
-          <li><a href="index.html" class="active">Home</a></li>
-          <li><a href="about.html">About</a></li>
-          <li><a href="category.html">Category</a></li>
-          <li class="dropdown"><a href="#"><span>Pages</span> <i class="bi bi-chevron-down toggle-dropdown"></i></a>
-            <ul>
-              <li><a href="about.html">About</a></li>
-              <li><a href="category.html">Category</a></li>
-              <li><a href="search-results.html">Search Results</a></li>
-              <li><a href="404.html">404 Not Found Page</a></li>
-            </ul>
-          </li>
-          <li><a href="contact.html">Contact</a></li>
-        </ul>
-        <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>
-      </nav>
-
-      <!-- User Profile and Notification Section -->
-      <div class="header-actions">
-        <!-- Notification Button -->
-        <a href="notification.html" class="notification-btn" title="Notifications">
-          <i class="bi bi-bell-fill"></i>
-          <span class="notification-badge" id="notificationCount">3</span>
-        </a>
-
-        <!-- User Profile with Dropdown -->
-        <div class="user-profile">
-            <div class="user-avatar">
-              <div class="avatar-placeholder" id="avatarInitial">S</div>
-            </div>
-          <div class="user-dropdown">
-            <div class="dropdown-header">
-              <div class="mini-avatar" id="dropdownAvatarInitial">S</div>
-                <div class="user-info">
-                  <div class="user-name" id="dropdownUserName">Student name</div>
-                  <div class="user-role" id="dropdownUserRole">Student</div>
-                  <div class="user-email" id="dropdownUserEmail">Their email@gmail.com</div>
-              </div>
-            </div>
-            <ul class="dropdown-menu-list">
-                <li><a href="profile.html"><i class="bi bi-person-circle"></i> Profile</a></li>
-                <li><a href="#" id="logoutBtn"><i class="bi bi-box-arrow-right"></i> Logout</a></li>
-            </ul>
-          </div>
+      <!-- User Profile with Dropdown -->
+      <div class="user-profile">
+        <div class="user-avatar">
+          <div class="avatar-placeholder" id="avatarInitial">S</div>
         </div>
+        <div class="user-dropdown">
+          <div class="dropdown-header">
+            <div class="user-info">
+              <div class="user-name" id="dropdownUserName">Student name</div>
+              <div class="user-role" id="dropdownUserRole">Student</div>
+              <div class="user-email" id="dropdownUserEmail">Their email@gmail.com</div>
+            </div>
+          </div>
+          <ul class="dropdown-menu-list">
+            <li><a href="profile.html"><i class="bi bi-person-circle"></i> Profile</a></li>
+            <li><a href="#" id="logoutBtn"><i class="bi bi-box-arrow-right"></i> Logout</a></li>
+          </ul>
+        </div>
+      </div>
 
-        <div class="header-social-links d-none d-xl-flex">
-            <a href="#" class="facebook"><i class="bi bi-facebook"></i></a>
-            <a href="#" class="instagram"><i class="bi bi-instagram"></i></a>
-       </div>
-
+      <!-- Social Links -->
+      <div class="header-social-links">
+        <a href="#" class="facebook"><i class="bi bi-facebook"></i></a>
+        <a href="#" class="instagram"><i class="bi bi-instagram"></i></a>
       </div>
     </div>
-  </header>
+
+  </div>
+</header>
 
   <main class="main">
 
-    <!-- College Section -->
+    <!-- UTMSPACE Section -->
 <section id="college" class="college section">
-  <div class="container-fluid p-0" data-aos="fade">
-
-    <div class="college-item">
-      <img src="img/utmspace.webp" alt="UTMSPACE Image" class="img-fluid">
-      <div class="college-content">
-        <span class="category">UTM SPACE</span>
-        <h1>5 Efficient Rules How to Organize Working Place Relationship</h1>
-        <div class="meta">
-          <span class="views">1.9k views</span>
+  <div class="hero-container" data-aos="fade">
+    <div class="hero-image-wrapper">
+      <img src="img/utmspace.webp" alt="UTMSPACE Image">
+      <div class="hero-overlay"></div>
+      <div class="hero-content">
+        <span class="hero-category">UTM SPACE</span>
+        <h1 class="hero-title">UTM School of Professional and Continuing Education (SPACE)</h1>
+        <div class="hero-meta">
+          <span class="hero-views"><i class="bi bi-eye"></i> 1.9k views</span>
         </div>
       </div>
     </div>
   </div>
-</section><!-- College Section -->
+</section><!-- UTMSPACE Section -->
 
  <!-- Featured College Section -->
 <section id="featured-college" class="featured-posts section">
@@ -137,7 +135,6 @@
         <article class="featured-post-card">
           <div class="post-img position-relative overflow-hidden">
             <img src="img/U7.webp" class="img-fluid w-100" alt="College Image" style="height: 250px; object-fit: cover;">
-            <div class="category-badge position-absolute top-0 start-0 m-3">U7</div>
           </div>
           <div class="content p-4">
             <h3 class="title mb-3">Perdana Residence Block U7</h3>
@@ -159,7 +156,6 @@
         <article class="featured-post-card">
           <div class="post-img position-relative overflow-hidden">
             <img src="img/k9.jpg" class="img-fluid w-100" alt="College Image" style="height: 250px; object-fit: cover;">
-            <div class="category-badge position-absolute top-0 start-0 m-3">K9</div>
           </div>
           <div class="content p-4">
             <h3 class="title mb-3">Kolej 9</h3>
@@ -181,7 +177,6 @@
         <article class="featured-post-card">
           <div class="post-img position-relative overflow-hidden">
             <img src="img/k10.jpg" class="img-fluid w-100" alt="College Image" style="height: 250px; object-fit: cover;">
-            <div class="category-badge position-absolute top-0 start-0 m-3">K10</div>
           </div>
           <div class="content p-4">
             <h3 class="title mb-3">Kolej 10</h3>
