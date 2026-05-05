@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <title>Forgot Password - UTMSPACE College Booking</title>
+  <meta name="description" content="">
+  <meta name="keywords" content="">
+
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com" rel="preconnect">
+  <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&family=Montserrat:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
+
+  <!-- Bootstrap Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Roboto', sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    /* Container */
+    .forgot-container {
+      max-width: 500px;
+      width: 100%;
+      background: white;
+      border-radius: 24px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      overflow: hidden;
+      animation: fadeInUp 0.5s ease;
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Header */
+    .forgot-header {
+      background: linear-gradient(135deg, #1a3c5e 0%, #2c5a7a 100%);
+      padding: 40px 30px;
+      text-align: center;
+    }
+
+    .forgot-header h1 {
+      color: white;
+      font-size: 32px;
+      font-weight: 700;
+      margin-bottom: 10px;
+      font-family: 'Montserrat', sans-serif;
+    }
+
+    .forgot-header .subtitle {
+      color: rgba(255, 255, 255, 0.8);
+      font-size: 14px;
+    }
+
+    /* Form Section */
+    .forgot-form {
+      padding: 35px;
+    }
+
+    /* Steps Indicator */
+    .steps {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 35px;
+      position: relative;
+    }
+
+    .steps::before {
+      content: '';
+      position: absolute;
+      top: 20px;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: #e0e0e0;
+      z-index: 1;
+    }
+
+    .step {
+      text-align: center;
+      position: relative;
+      z-index: 2;
+      flex: 1;
+    }
+
+    .step-number {
+      width: 40px;
+      height: 40px;
+      background: #e0e0e0;
+      color: #888;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 10px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+    }
+
+    .step.active .step-number {
+      background: #2c5a7a;
+      color: white;
+    }
+
+    .step.completed .step-number {
+      background: #22c55e;
+      color: white;
+    }
+
+    .step-label {
+      font-size: 12px;
+      color: #888;
+    }
+
+    .step.active .step-label {
+      color: #2c5a7a;
+      font-weight: 600;
+    }
+
+    .step.completed .step-label {
+      color: #22c55e;
+    }
+
+    /* Form Group */
+    .form-group {
+      margin-bottom: 25px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 14px;
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 8px;
+      font-family: 'Montserrat', sans-serif;
+    }
+
+    .input-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .input-wrapper i {
+      position: absolute;
+      left: 15px;
+      color: #aaa;
+      font-size: 18px;
+    }
+
+    .form-control {
+      width: 100%;
+      padding: 14px 15px 14px 45px;
+      font-size: 15px;
+      border: 1.5px solid #e0e0e0;
+      border-radius: 12px;
+      transition: all 0.3s ease;
+      font-family: 'Roboto', sans-serif;
+    }
+
+    .form-control:focus {
+      outline: none;
+      border-color: #2c5a7a;
+      box-shadow: 0 0 0 3px rgba(44, 90, 122, 0.1);
+    }
+
+    .form-control.error {
+      border-color: #e74c3c;
+    }
+
+    /* Password Hint */
+    .password-hint {
+      font-size: 11px;
+      color: #888;
+      margin-top: 5px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    /* Reset Button */
+    .reset-btn {
+      width: 100%;
+      background: linear-gradient(135deg, #1a3c5e 0%, #2c5a7a 100%);
+      color: white;
+      border: none;
+      padding: 14px;
+      font-size: 16px;
+      font-weight: 600;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-family: 'Montserrat', sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .reset-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 20px rgba(44, 90, 122, 0.3);
+    }
+
+    .reset-btn i {
+      font-size: 18px;
+      transition: transform 0.3s ease;
+    }
+
+    .reset-btn:hover i {
+      transform: translateX(5px);
+    }
+
+    /* Back to Login Link */
+    .back-link {
+      text-align: center;
+      margin-top: 25px;
+    }
+
+    .back-link a {
+      color: #2c5a7a;
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+      transition: color 0.3s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .back-link a:hover {
+      color: #764ba2;
+    }
+
+    /* Alert Messages */
+    .alert {
+      padding: 14px;
+      border-radius: 12px;
+      font-size: 13px;
+      margin-bottom: 25px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .alert i {
+      font-size: 18px;
+    }
+
+    .alert-success {
+      background-color: #dcfce7;
+      color: #16a34a;
+      border: 1px solid #bbf7d0;
+    }
+
+    .alert-error {
+      background-color: #fee2e2;
+      color: #dc2626;
+      border: 1px solid #fecaca;
+    }
+
+    .alert-info {
+      background-color: #e8f4fd;
+      color: #2c5a7a;
+      border: 1px solid #b8e1fc;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    /* Success Card */
+    .success-card {
+      text-align: center;
+      padding: 20px;
+    }
+
+    .success-icon {
+      width: 80px;
+      height: 80px;
+      background: #22c55e;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 20px;
+    }
+
+    .success-icon i {
+      font-size: 40px;
+      color: white;
+    }
+
+    .success-card h3 {
+      color: #1a3c5e;
+      font-size: 24px;
+      margin-bottom: 10px;
+    }
+
+    .success-card p {
+      color: #666;
+      margin-bottom: 25px;
+    }
+
+    /* Responsive */
+    @media (max-width: 576px) {
+      .forgot-header {
+        padding: 30px 20px;
+      }
+      
+      .forgot-header h1 {
+        font-size: 28px;
+      }
+      
+      .forgot-form {
+        padding: 25px 20px;
+      }
+      
+      .form-control {
+        padding: 12px 12px 12px 42px;
+        font-size: 14px;
+      }
+      
+      .step-number {
+        width: 32px;
+        height: 32px;
+        font-size: 12px;
+      }
+      
+      .step-label {
+        font-size: 10px;
+      }
+      
+      .steps::before {
+        top: 16px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="forgot-container">
+    <!-- Header -->
+    <div class="forgot-header">
+      <h1>Forgot Password</h1>
+      <p class="subtitle">Reset your account password</p>
+    </div>
+
+    <div class="forgot-form">
+      <div class="steps">
+        <div class="step active" id="step1Indicator">
+          <div class="step-number">1</div>
+          <div class="step-label">Verify Identity</div>
+        </div>
+        <div class="step" id="step2Indicator">
+          <div class="step-number">2</div>
+          <div class="step-label">Reset Password</div>
+        </div>
+        <div class="step" id="step3Indicator">
+          <div class="step-number">3</div>
+          <div class="step-label">Complete</div>
+        </div>
+      </div>
+
+      <!-- Email verification -->
+      <div id="step1">
+        <div class="alert alert-info">
+          <i class="bi bi-info-circle-fill"></i>
+          <span>Enter your registered email address or Student ID to receive a verification code.</span>
+        </div>
+        
+        <div class="form-group">
+          <label>Email Address or Student ID</label>
+          <div class="input-wrapper">
+            <i class="bi bi-envelope"></i>
+            <input type="text" class="form-control" id="userIdentifier" placeholder="Enter your email or Student ID">
+          </div>
+        </div>
+
+        <button class="reset-btn" id="sendCodeBtn">
+          Send Verification Code <i class="bi bi-send"></i>
+        </button>
+      </div>
+
+      <!-- Verification code for new pass-->
+      <div id="step2" class="hidden">
+        <div class="alert alert-info">
+          <i class="bi bi-shield-lock-fill"></i>
+          <span>Enter the 6-digit code sent to your email and create a new password.</span>
+        </div>
+        
+        <div class="form-group">
+          <label>Verification Code</label>
+          <div class="input-wrapper">
+            <i class="bi bi-key"></i>
+            <input type="text" class="form-control" id="verificationCode" placeholder="Enter 6-digit code" maxlength="6">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>New Password</label>
+          <div class="input-wrapper">
+            <i class="bi bi-lock"></i>
+            <input type="password" class="form-control" id="newPassword" placeholder="Create a new password">
+          </div>
+          <div class="password-hint">
+            <i class="bi bi-info-circle"></i>
+            <span>Min. 8 characters with letters & numbers</span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Confirm New Password</label>
+          <div class="input-wrapper">
+            <i class="bi bi-lock-fill"></i>
+            <input type="password" class="form-control" id="confirmNewPassword" placeholder="Confirm your new password">
+          </div>
+        </div>
+
+        <button class="reset-btn" id="resetPasswordBtn">
+          Reset Password <i class="bi bi-check-circle"></i>
+        </button>
+      </div>
+
+      <div id="step3" class="hidden">
+        <div class="success-card">
+          <div class="success-icon">
+            <i class="bi bi-check-lg"></i>
+          </div>
+          <h3>Password Reset Successfully!</h3>
+          <p>Your password has been changed. You can now log in with your new password.</p>
+          <a href="login.html" class="reset-btn" style="text-decoration: none; display: inline-flex; width: auto; padding: 12px 30px;">
+            Go to Login <i class="bi bi-arrow-right"></i>
+          </a>
+        </div>
+      </div>
+
+      <div id="messageContainer"></div>
+
+      <div class="back-link" id="backLink">
+        <a href="login.html">
+          <i class="bi bi-arrow-left"></i> Back to Login
+        </a>
+      </div>
+    </div>
+  </div>
+
+</body>
+
+</html>
