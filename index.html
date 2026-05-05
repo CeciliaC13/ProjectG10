@@ -4,362 +4,287 @@
 <head>
   <meta charset="utf-8">
   <meta content="width=device-width, initial-scale=1.0" name="viewport">
-  <title>UTMSPACE College Booking</title>
+  <title>Sign In - UTMSPACE College Booking</title>
   <meta name="description" content="">
   <meta name="keywords" content="">
-
-  <!-- Favicons -->
-  <link href="img/favicon.png" rel="icon">
-  <link href="img/apple-touch-icon.png" rel="apple-touch-icon">
 
   <!-- Fonts -->
   <link href="https://fonts.googleapis.com" rel="preconnect">
   <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;
-  0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&family=Montserrat:ital,wght@0,100;
-  0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;
-  1,800;1,900&family=Raleway:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;
-  1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&family=Montserrat:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
 
-  <!-- Vendor CSS Files -->
-  <link href="vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
-  <link href="vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
-  <link href="vendor/aos/aos.css" rel="stylesheet">
-  <link href="vendor/swiper/swiper-bundle.min.css" rel="stylesheet">
+  <!-- Bootstrap Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
 
-  <!-- Main CSS File -->
-  <link href="main.css" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
 
+    body {
+      font-family: 'Roboto', sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    /* Sign In Container */
+    .signin-container {
+      max-width: 450px;
+      width: 100%;
+      background: white;
+      border-radius: 24px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      overflow: hidden;
+      animation: fadeInUp 0.5s ease;
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Header Section */
+    .signin-header {
+      background: linear-gradient(135deg, #1a3c5e 0%, #2c5a7a 100%);
+      padding: 40px 30px;
+      text-align: center;
+    }
+
+    .signin-header h1 {
+      color: white;
+      font-size: 32px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      font-family: 'Montserrat', sans-serif;
+    }
+
+    .signin-header .subtitle {
+      color: rgba(255, 255, 255, 0.8);
+      font-size: 14px;
+      font-weight: 500;
+      letter-spacing: 1px;
+    }
+
+    /* Form Section */
+    .signin-form {
+      padding: 40px 35px;
+    }
+
+    /* Form Group */
+    .form-group {
+      margin-bottom: 25px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 14px;
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 8px;
+      font-family: 'Montserrat', sans-serif;
+    }
+
+    .input-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .input-wrapper i {
+      position: absolute;
+      left: 15px;
+      color: #aaa;
+      font-size: 18px;
+    }
+
+    .form-control {
+      width: 100%;
+      padding: 14px 15px 14px 45px;
+      font-size: 15px;
+      border: 1.5px solid #e0e0e0;
+      border-radius: 12px;
+      transition: all 0.3s ease;
+      font-family: 'Roboto', sans-serif;
+    }
+
+    .form-control:focus {
+      outline: none;
+      border-color: #2c5a7a;
+      box-shadow: 0 0 0 3px rgba(44, 90, 122, 0.1);
+    }
+
+    /* Forgot Password Link */
+    .forgot-password {
+      text-align: right;
+      margin-bottom: 30px;
+    }
+
+    .forgot-password a {
+      color: #2c5a7a;
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 500;
+      transition: color 0.3s ease;
+    }
+
+    .forgot-password a:hover {
+      color: #764ba2;
+      text-decoration: underline;
+    }
+
+    /* Login Button */
+    .login-btn {
+      width: 100%;
+      background: linear-gradient(135deg, #1a3c5e 0%, #2c5a7a 100%);
+      color: white;
+      border: none;
+      padding: 14px;
+      font-size: 16px;
+      font-weight: 600;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-family: 'Montserrat', sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .login-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 20px rgba(44, 90, 122, 0.3);
+    }
+
+    .login-btn i {
+      font-size: 18px;
+      transition: transform 0.3s ease;
+    }
+
+    .login-btn:hover i {
+      transform: translateX(5px);
+    }
+
+    /* Register Link */
+    .register-link {
+      text-align: center;
+      margin-top: 30px;
+      padding-top: 20px;
+      border-top: 1px solid #eee;
+    }
+
+    .register-link p {
+      font-size: 14px;
+      color: #666;
+    }
+
+    .register-link a {
+      color: #2c5a7a;
+      text-decoration: none;
+      font-weight: 600;
+      transition: color 0.3s ease;
+    }
+
+    .register-link a:hover {
+      color: #764ba2;
+    }
+
+    /* Error Message */
+    .error-message {
+      background-color: #fee2e2;
+      color: #dc2626;
+      padding: 12px;
+      border-radius: 10px;
+      font-size: 13px;
+      margin-bottom: 20px;
+      display: none;
+    }
+
+    .error-message.show {
+      display: block;
+    }
+
+    /* Responsive */
+    @media (max-width: 576px) {
+      .signin-header {
+        padding: 30px 20px;
+      }
+      
+      .signin-header h1 {
+        font-size: 28px;
+      }
+      
+      .signin-form {
+        padding: 30px 25px;
+      }
+      
+      .form-control {
+        padding: 12px 15px 12px 42px;
+        font-size: 14px;
+      }
+    }
+  </style>
 </head>
 
-<body class="index-page">
+<body>
 
-  <header id="header" class="header d-flex align-items-center position-relative">
-    <div class="container position-relative d-flex align-items-center justify-content-between">
-
-      <a href="index.html" class="logo d-flex align-items-center me-auto me-xl-0">
-        <!-- Uncomment the line below if you also wish to use an image logo -->
-        <!-- <img src="assets/img/logo.webp" alt=""> -->
-        <h1 class="sitename">Story</h1>
-      </a>
-
-      <nav id="navmenu" class="navmenu">
-        <ul>
-          <li><a href="index.html" class="active">Home</a></li>
-          <li><a href="about.html">About</a></li>
-          <li><a href="category.html">Category</a></li>
-          <li class="dropdown"><a href="#"><span>Pages</span> <i class="bi bi-chevron-down toggle-dropdown"></i></a>
-            <ul>
-              <li><a href="about.html">About</a></li>
-              <li><a href="category.html">Category</a></li>
-              <li><a href="search-results.html">Search Results</a></li>
-              <li><a href="404.html">404 Not Found Page</a></li>
-            </ul>
-          </li>
-          <li><a href="contact.html">Contact</a></li>
-        </ul>
-        <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>
-      </nav>
-
-      <!-- User Profile and Notification Section -->
-      <div class="header-actions">
-        <!-- Notification Button -->
-        <a href="notification.html" class="notification-btn" title="Notifications">
-          <i class="bi bi-bell-fill"></i>
-          <span class="notification-badge" id="notificationCount">3</span>
-        </a>
-
-        <!-- User Profile with Dropdown -->
-        <div class="user-profile">
-            <div class="user-avatar">
-              <div class="avatar-placeholder" id="avatarInitial">S</div>
-            </div>
-          <div class="user-dropdown">
-            <div class="dropdown-header">
-              <div class="mini-avatar" id="dropdownAvatarInitial">S</div>
-                <div class="user-info">
-                  <div class="user-name" id="dropdownUserName">Student name</div>
-                  <div class="user-role" id="dropdownUserRole">Student</div>
-                  <div class="user-email" id="dropdownUserEmail">Their email@gmail.com</div>
-              </div>
-            </div>
-            <ul class="dropdown-menu-list">
-                <li><a href="profile.html"><i class="bi bi-person-circle"></i> Profile</a></li>
-                <li><a href="#" id="logoutBtn"><i class="bi bi-box-arrow-right"></i> Logout</a></li>
-            </ul>
-          </div>
-        </div>
-
-        <div class="header-social-links d-none d-xl-flex">
-            <a href="#" class="facebook"><i class="bi bi-facebook"></i></a>
-            <a href="#" class="instagram"><i class="bi bi-instagram"></i></a>
-       </div>
-
-      </div>
+  <div class="signin-container">
+    <div class="signin-header">
+      <h1>Sign In</h1>
+      <p class="subtitle">College Booking</p>
     </div>
-  </header>
 
-  <main class="main">
+    <!-- Form -->
+    <div class="signin-form">
+      <!-- Error Message -->
+      <div class="error-message" id="errorMessage">
+        <i class="bi bi-exclamation-triangle-fill"></i> Invalid Student ID or password. Please try again.
+      </div>
 
-    <!-- College Section -->
-<section id="college" class="college section">
-  <div class="container-fluid p-0" data-aos="fade">
-
-    <div class="college-item">
-      <img src="img/utmspace.webp" alt="UTMSPACE Image" class="img-fluid">
-      <div class="college-content">
-        <span class="category">UTM SPACE</span>
-        <h1>5 Efficient Rules How to Organize Working Place Relationship</h1>
-        <div class="meta">
-          <span class="views">1.9k views</span>
+      <!-- ID -->
+      <div class="form-group">
+        <label>Student ID</label>
+        <div class="input-wrapper">
+          <i class="bi bi-person"></i>
+          <input type="text" class="form-control" id="studentid" placeholder="Enter your Student ID" autocomplete="username">
         </div>
+      </div>
+
+      <!-- Password  -->
+      <div class="form-group">
+        <label>Password</label>
+        <div class="input-wrapper">
+          <i class="bi bi-lock"></i>
+          <input type="password" class="form-control" id="password" placeholder="Enter your password" autocomplete="current-password">
+        </div>
+      </div>
+
+      <!-- Forgot Password -->
+      <div class="forgot-password">
+        <a href="forgotpswd_student.html">Forgot your password?</a>
+      </div>
+
+      <button class="login-btn" id="loginBtn">
+        Login <i class="bi bi-arrow-right"></i>
+      </button>
+
+      <div class="register-link">
+        <p>Don't have an account? <a href="register_student.html">Create Account</a></p>
       </div>
     </div>
   </div>
-</section><!-- College Section -->
-
-    <!-- Featured College Section -->
-<section id="featured-college" class="featured-posts section">
-
-  <!-- Section Title -->
-  <div class="container section-title" data-aos="fade-up">
-    <span class="description-title">Featured College</span>
-    <h2>Featured College</h2>
-    <p>Student can choose the college that they want.</p>
-  </div><!-- End Section Title -->
-
-  <div class="container" data-aos="fade-up" data-aos-delay="100">
-
-    <div class="college-posts-slider swiper init-swiper">
-      <script type="application/json" class="swiper-config">
-        {
-          "loop": true,
-          "speed": 600,
-          "autoplay": {
-            "delay": 4500
-          },
-          "slidesPerView": 1,
-          "spaceBetween": 40,
-          "centeredSlides": true,
-          "breakpoints": {
-            "768": {
-              "slidesPerView": 1.5,
-              "spaceBetween": 30
-            },
-            "1200": {
-              "slidesPerView": 2.2,
-              "spaceBetween": 40
-            }
-          },
-          "pagination": {
-            "el": ".swiper-pagination",
-            "clickable": true
-          }
-        }
-      </script>
-
-      <div class="swiper-wrapper">
-        <div class="swiper-slide">
-          <article class="college-card">
-            <div class="college-image">
-              <img src="img/U7.webp" alt="College Image" loading="lazy">
-              <div class="college-badge">U7</div>
-            </div>
-            <div class="college-content">
-              <h3><a href="#">Perdana Residence Block U7</a></h3>
-              <p>Experience the perfect blend of comfort and convenience with our newly managed dorm accommodations, 
-                designed to cater to every student's needs. Currently managed by Scholar's Inn Universiti Teknologi Malaysia Johor Bahru.</p>
-              <div class="college-footer">
-                <a href="#" class="btn-read-more">
-                  <span>Continue</span>
-                  <i class="bi bi-arrow-right"></i>
-                </a>
-              </div>
-            </div>
-          </article>
-        </div>
-
-        <div class="swiper-slide">
-          <article class="college-card">
-            <div class="college-image">
-              <img src="img/k9.jpg" alt="College Image" loading="lazy">
-              <div class="college-badge">K9</div>
-            </div>
-            <div class="college-content">
-              <h3><a href="#">Kolej 9</a></h3>
-              <p>A residential college for female students, located at the Universiti Teknologi Malaysia (UTM) main campus in Johor Bahru.</p>
-              <div class="college-footer">
-                <a href="#" class="btn-read-more">
-                  <span>Continue</span>
-                  <i class="bi bi-arrow-right"></i>
-                </a>
-              </div>
-            </div>
-          </article>
-        </div>
-
-        <div class="swiper-slide">
-          <article class="college-card">
-            <div class="college-image">
-              <img src="img/k10.jpg" alt="College Image" loading="lazy">
-              <div class="college-badge">K10</div>
-            </div>
-            <div class="college-content">
-              <h3><a href="#">Kolej 10</a></h3>
-              <p>A residential college for male students, located at the Universiti Teknologi Malaysia (UTM) main campus in Johor Bahru.</p>
-              <div class="college-footer">
-                <a href="#" class="btn-read-more">
-                  <span>Continue</span>
-                  <i class="bi bi-arrow-right"></i>
-                </a>
-              </div>
-            </div>
-          </article>
-        </div>
-      </div>
-
-      <div class="swiper-pagination"></div>
-    </div>
-
-  </div>
-
-</section><!-- End Featured College Section -->
-
-    <!-- Latest Posts Section -->
-    <section id="latest-posts" class="latest-posts section">
-
-      <!-- Section Title -->
-      <div class="container section-title" data-aos="fade-up">
-        <span class="description-title">Latest Posts</span>
-        <h2>Pictures</h2>
-      </div><!-- End Section Title -->
-
-      <div class="container" data-aos="fade-up" data-aos-delay="100">
-
-        <div class="row gy-4 align-items-stretch">
-
-          <div class="col-lg-4" data-aos="fade-up" data-aos-delay="200">
-            <article class="card-post h-100">
-              <div class="post-img position-relative overflow-hidden">
-                <img src="img/pondokk9.jpg" class="img-fluid w-100" alt="Post image" loading="lazy">
-              </div>
-              <div class="content">
-                <div class="meta d-flex align-items-center flex-wrap gap-2">
-                  <span class="cat-badge">Kolej 9</span>
-                </div>
-                <h3 class="title">Pondok Kolej 9</h3>
-              </div>
-            </article>
-          </div><!-- End Grid Post -->
-
-          <div class="col-lg-4" data-aos="fade-up" data-aos-delay="250">
-            <article class="card-post h-100">
-              <div class="post-img position-relative overflow-hidden">
-                <img src="img/blog/blog-post-4.webp" class="img-fluid w-100" alt="Post image" loading="lazy">
-              </div>
-              <div class="content">
-                <div class="meta d-flex align-items-center flex-wrap gap-2">
-                  <span class="cat-badge">Kolej 9</span>
-                </div>
-                <h3 class="title">Pejabat Kolej 9&10</h3>
-              </div>
-            </article>
-          </div><!-- End Grid Post -->
-
-          <div class="col-lg-4" data-aos="fade-up" data-aos-delay="300">
-            <article class="card-post h-100">
-              <div class="post-img position-relative overflow-hidden">
-                <img src="img/busstopk10.jpg" class="img-fluid w-100" alt="Post image" loading="lazy">
-              </div>
-              <div class="content">
-                <div class="meta d-flex align-items-center flex-wrap gap-2">
-                  <span class="cat-badge">Kolej 10</span>
-                </div>
-                <h3 class="title">Bus Stop Kolej 10</h3>
-              </div>
-            </article>
-          </div><!-- End Grid Post -->
-
-        </div>
-
-      </div>
-
-    </section><!-- Pictures Section -->
-
-  </main>
-
-  <footer id="footer" class="footer position-relative light-background">
-
-    <div class="container">
-      <div class="row gy-5">
-
-        <div class="col-lg-4">
-          <div class="footer-brand">
-            <a href="index.html" class="logo d-flex align-items-center mb-3">
-              <span class="sitename">COLLEGE</span>
-            </a>
-            <p class="tagline">Innovating the digital landscape with elegant solutions and timeless design.</p>
-
-            <div class="social-links mt-4">
-              <a href="#" aria-label="Facebook"><i class="bi bi-facebook"></i></a>
-              <a href="#" aria-label="Instagram"><i class="bi bi-instagram"></i></a>
-            </div>
-          </div>
-        </div>
-
-        <div class="col-lg-6">
-          <div class="footer-links-grid">
-              <div class="col-6 col-md-4">
-                <h5>Support</h5>
-                <ul class="list-unstyled">
-                  <li><a href="#">Help Center</a></li>
-                  <li><a href="#">Contact Us</a></li>
-                  <li><a href="#">Privacy Policy</a></li>
-                  <li><a href="#">Terms of Service</a></li>
-                </ul>
-              </div>
-          </div>
-        </div>
-
-      </div>
-    </div>
-
-    <div class="footer-bottom">
-      <div class="container">
-        <div class="row">
-          <div class="col-12">
-            <div class="footer-bottom-content">
-              <p class="mb-0">© <strong>Story</strong>. All rights reserved.</p>
-              <div class="credits">
-                <!-- All the links in the footer should remain intact. -->
-                <!-- You can delete the links only if you've purchased the pro version. -->
-                <!-- Licensing information: https://bootstrapmade.com/license/ -->
-                <!-- Purchase the pro version with working PHP/AJAX contact form: [buy-url] -->
-                Designed by <a href="https://bootstrapmade.com/">BootstrapMade</a> | <a href="https://bootstrapmade.com/tools/">DevTools</a>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-  </footer>
-
-  <!-- Scroll Top -->
-  <a href="#" id="scroll-top" class="scroll-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
-
-  <!-- Preloader -->
-  <div id="preloader"></div>
-
-  <!-- Vendor JS Files -->
-  <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
-  <script src="vendor/php-email-form/validate.js"></script>
-  <script src="vendor/aos/aos.js"></script>
-  <script src="vendor/swiper/swiper-bundle.min.js"></script>
-  <script src="vendor/purecounter/purecounter_vanilla.js"></script>
-
-  <!-- Main JS File -->
-  <script src="main.js"></script>
 
 </body>
 
