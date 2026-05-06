@@ -429,7 +429,7 @@
           </div>
           <div class="password-hint">
             <i class="bi bi-info-circle"></i>
-            <span>Min. 8 characters with letters & numbers</span>
+            <span>Min. 8 characters with letters, numbers & symbols (e.g. Adam@1234)</span>
           </div>
         </div>
 
@@ -621,6 +621,11 @@
     const storedOTP = sessionStorage.getItem('resetOTP');
     if (code !== storedOTP) {
       showMessage('error', 'Invalid code. Please try again.');
+      return;
+    }
+     const passwordRegex = /^(?=.*[a-zA-Z])(?=.*[0-9])(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]).{8,}$/;
+    if (!passwordRegex.test(newPassword)) {
+      showMessage('error', 'Password must be at least 8 characters with letters, numbers & symbols (e.g. Adam@1234).');
       return;
     }
 
