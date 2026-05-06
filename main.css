@@ -169,6 +169,53 @@ h6 {
   }
 }
 
+/* Make header background blue */
+.header {
+  background-color: #6b092a; /* #2986cc */
+}
+
+/* Adjust text colors for better contrast on blue background */
+.header .logo h1,
+.header .logo .sitename {
+  color: var(--contrast-color); /* white */
+}
+
+.header .navmenu > ul > li > a {
+  color: var(--contrast-color); /* white */
+}
+
+.header .navmenu > ul > li > a:hover,
+.header .navmenu > ul > li:hover > a,
+.header .navmenu .active {
+  color: rgba(255, 255, 255, 0.8); /* slightly transparent white on hover */
+}
+
+.header .header-social-links a {
+  color: var(--contrast-color); /* white */
+}
+
+.header .header-social-links a:hover {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.header .notification-btn {
+  color: var(--contrast-color);
+}
+
+.header .avatar-placeholder {
+  background-color: rgba(255, 255, 255, 0.2);
+  color: var(--contrast-color);
+}
+
+/* Mobile menu toggle button on blue background */
+.mobile-nav-toggle {
+  color: var(--contrast-color);
+}
+
+.mobile-nav-toggle:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+  color: var(--contrast-color);
+}
 /*--------------------------------------------------------------
 # Navigation Menu
 --------------------------------------------------------------*/
@@ -1560,5 +1607,274 @@ section,
 @media (max-width: 576px) {
   .contact .social-links-panel .social-icons {
     flex-wrap: wrap;
+  }
+}
+
+/*--------------------------------------------------------------
+# KP Student Page - Perdana Residence Styles
+--------------------------------------------------------------*/
+
+/* KP Student Container */
+.kp-student-container {
+  max-width: 1280px;
+  margin: 0 auto;
+}
+
+/* Page Header */
+.kp-student-container .page-header {
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.kp-student-container .page-header h1 {
+  font-size: 2.2rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, #1a4d8c, #2c7ab1);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  letter-spacing: -0.3px;
+  margin-bottom: 0.5rem;
+}
+
+.kp-student-container .page-header .sub {
+  color: #4a627a;
+  border-bottom: 2px solid #cbdde6;
+  display: inline-block;
+  padding-bottom: 6px;
+  font-weight: 500;
+}
+
+/* Property Badge */
+.kp-student-container .managed-badge {
+  background: #eef2f9;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0.4rem 1.2rem;
+  border-radius: 40px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #1e5a7d;
+  margin-bottom: 1.2rem;
+}
+
+.kp-student-container .managed-badge i {
+  font-size: 1rem;
+  color: #2c7ab1;
+}
+
+/* Rooms Grid */
+.kp-student-container .rooms-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+  margin: 2rem 0 2.5rem;
+}
+
+/* Room Card */
+.kp-student-container .room-card {
+  background: white;
+  border-radius: 28px;
+  overflow: hidden;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.05);
+  transition: all 0.25s ease;
+  border: 1px solid #e2edf2;
+}
+
+.kp-student-container .room-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 22px 35px -12px rgba(0, 0, 0, 0.12);
+  border-color: #cbdde6;
+}
+
+/* Card Header */
+.kp-student-container .card-header {
+  background: #ffffff;
+  padding: 1.5rem 1.5rem 0.75rem 1.5rem;
+  border-bottom: 1px solid #eef2f8;
+}
+
+.kp-student-container .room-type {
+  font-size: 1.65rem;
+  font-weight: 700;
+  color: #0f3b5c;
+  letter-spacing: -0.3px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+
+.kp-student-container .room-type span {
+  background: #e9f0f5;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.25rem 0.75rem;
+  border-radius: 30px;
+  color: #2c7ab1;
+}
+
+.kp-student-container .price {
+  margin-top: 1rem;
+  font-weight: 700;
+  font-size: 1.5rem;
+  color: #1f6392;
+}
+
+.kp-student-container .price small {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: #5a7b9c;
+}
+
+/* Features List */
+.kp-student-container .features-list {
+  padding: 1.2rem 1.5rem 1rem 1.5rem;
+}
+
+.kp-student-container .features-list p {
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+  font-size: 0.9rem;
+  color: #2c3e50;
+  border-left: 3px solid #2c7ab1;
+  padding-left: 10px;
+}
+
+.kp-student-container .features-list ul {
+  list-style: none;
+  margin-bottom: 1.2rem;
+}
+
+.kp-student-container .features-list li {
+  margin-bottom: 0.6rem;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.9rem;
+  color: #2c3f55;
+}
+
+.kp-student-container .features-list li i {
+  width: 20px;
+  color: #2c7ab1;
+  font-size: 0.9rem;
+}
+
+/* Note Box */
+.kp-student-container .note {
+  background: #fef7e0;
+  padding: 0.6rem 1rem;
+  border-radius: 16px;
+  font-size: 0.8rem;
+  color: #a16417;
+  margin: 0.8rem 1.5rem 1.2rem 1.5rem;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.kp-student-container .note i {
+  font-size: 0.9rem;
+}
+
+/* Book Button */
+.kp-student-container .btn-book {
+  display: block;
+  margin: 0.5rem 1.5rem 1.8rem 1.5rem;
+  background: #1a5d8f;
+  color: white;
+  text-align: center;
+  padding: 0.85rem 0;
+  border-radius: 44px;
+  font-weight: 600;
+  transition: 0.2s;
+  text-decoration: none;
+  font-size: 0.95rem;
+  border: none;
+  cursor: pointer;
+}
+
+.kp-student-container .btn-book:hover {
+  background: #0f466b;
+  transform: scale(0.98);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.05);
+}
+
+/* Facilities Section */
+.kp-student-container .facilities-section {
+  background: white;
+  border-radius: 32px;
+  padding: 2rem 1.8rem;
+  margin-top: 2rem;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.03);
+  border: 1px solid #e2edf2;
+}
+
+.kp-student-container .facilities-section h3 {
+  font-size: 1.6rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: #1b4d6e;
+}
+
+.kp-student-container .facilities-badge {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin-top: 0.8rem;
+}
+
+.kp-student-container .facility-tag {
+  background: #eff3f8;
+  padding: 0.5rem 1.2rem;
+  border-radius: 40px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #1f5d87;
+}
+
+/* Contact Info */
+.kp-student-container .contact-info {
+  background: #eef3fa;
+  border-radius: 24px;
+  padding: 1.2rem 1.8rem;
+  margin: 2rem 0 1rem;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 15px;
+}
+
+.kp-student-container .contact-details i {
+  margin-right: 6px;
+  color: #2c7ab1;
+}
+
+.kp-student-container .contact-details a {
+  text-decoration: none;
+  color: #1e5a7d;
+  font-weight: 500;
+}
+
+/* Responsive */
+@media (max-width: 680px) {
+  .kp-student-container .room-type {
+    font-size: 1.3rem;
+  }
+  .kp-student-container .page-header h1 {
+    font-size: 1.8rem;
+  }
+  .kp-student-container .contact-info {
+    flex-direction: column;
+    align-items: flex-start;
   }
 }
