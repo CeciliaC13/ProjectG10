@@ -424,83 +424,128 @@
   </div>
 
    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="supabase.js"></script>
-  <script>
-    document.getElementById('signupBtn').addEventListener('click', async () =>{
-      const studentId = document.getElementById('studentId').value.trim();
-      const name = document.getElementById('name').value.trim();
-      const email = document.getElementById('email').value.trim();
-      const password = document.getElementById('password').value.trim();
-      const confirmPassword = document.getElementById('confirmPassword').value.trim();
+<script src="supabase.js"></script>
+<script>
+  document.getElementById('signupBtn').addEventListener('click', async () => {
+    const studentId = document.getElementById('studentId').value.trim();
+    const name = document.getElementById('name').value.trim();
+    const email = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value.trim();
+    const confirmPassword = document.getElementById('confirmPassword').value.trim();
+    const agreeTerms = document.getElementById('agreeTerms').checked;
 
-      const errorAlert = document.getElementById('errorMessage');
-      const errorText = document.getElementById('errorMessage');
-      const SuccessAlert = document.getElementById('successMessage');
-      const signupBtn = document.getElementById('signupBtn');
+    const errorAlert = document.getElementById('errorMessage');
+    const successAlert = document.getElementById('successMessage'); // ✅ fixed name
+    const signupBtn = document.getElementById('signupBtn');
 
-      errorAlert.classList.remove('show');
-      SuccessAlert.classList.remove('show');
+    errorAlert.classList.remove('show');
+    successAlert.classList.remove('show');
 
-      if(!studentId || !name || !email || !password || !confirmPassword) {
-        errorText.textContent = 'Please fill in all fields.';
-        errorAlert.classList.add('show');
-        return;
+   
+    if (!studentId || !name || !email || !password || !confirmPassword) {
+      errorAlert.textContent = 'Please fill in all fields.';
+      errorAlert.classList.add('show');
+      return;
+    }
+
+   
+    const passwordRegex = /^(?=.*[a-zA-Z])(?=.*[0-9])(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]).{8,}$/;
+    if (!passwordRegex.test(password)) {
+      errorAlert.textContent = 'Password must be at least 8 characters with letters, numbers & symbols (e.g. Adam@1234).';
+      errorAlert.classList.add('show');
+      return;
+    }
+
+    
+    if (password !== confirmPassword) {
+      errorAlert.textContent = 'Passwords do not match.';
+      errorAlert.classList.add('show');
+      return;
+    }
+
+   
+    if (!email.endsWith('@graduate.utm.my') && !email.endsWith('@utm.my')) {
+      errorAlert.textContent = 'Please use your UTM email address (@graduate.utm.my or @utm.my).';
+      errorAlert.classList.add('show');
+      return;
+    }
+
+   
+    if (!agreeTerms) {
+      errorAlert.textContent = 'Please agree to the Terms of Service.';
+      errorAlert.classList.add('show');
+      return;
+    }
+
+  
+    const { data: existing } = await db
+      .from('Student')
+      .select('student_id')
+      .or(`student_id.eq.${studentId},email.eq.${email}`);
+
+    if (existing && existing.length > 0) {
+      errorAlert.textContent = 'Student ID or email already registered.';
+      errorAlert.classList.add('show');
+      return;
+    }
+
+    signupBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Creating account...';
+    signupBtn.disabled = true;
+
+   
+    const { error: dbError } = await db
+      .from('Student')
+      .insert({
+        student_id: studentId,
+        name: name,
+        email: email,
+        password: password,
+        is_verified: false
+      });
+
+    console.log('Supabase error:', dbError);
+
+    if (dbError) {
+      errorAlert.textContent = 'Sign Up failed. Please try again.';
+      errorAlert.classList.add('show');
+      signupBtn.innerHTML = 'Create Account <i class="bi bi-arrow-right"></i>';
+      signupBtn.disabled = false;
+      return;
+    }
+
+   
+    const { error: magicError } = await db.auth.signInWithOtp({
+      email: email,
+      options: {
+        shouldCreateUser: true,
+        emailRedirectTo: 'http://127.0.0.1:5500/index.html'
       }
+    });
 
-      if(password.length < 6) {
-        errorText.textContent = 'Password must be at least 6 characters. ';
-        errorAlert.classList.add('show');
-        return;
+    if (magicError) {
+      errorAlert.textContent = 'Failed to send verification email. Please try again.';
+      errorAlert.classList.add('show');
+      signupBtn.innerHTML = 'Create Account <i class="bi bi-arrow-right"></i>';
+      signupBtn.disabled = false;
+      return;
+    }
+
+   
+    let countdown = 5;
+    successAlert.textContent = `✅ Account created! Check your email and click the link to verify. Redirecting in ${countdown}s...`;
+    successAlert.classList.add('show');
+    signupBtn.innerHTML = '<i class="bi bi-check-lg"></i> Check Your Email!';
+
+    const timer = setInterval(() => {
+      countdown--;
+      successAlert.textContent = `✅ Account created! Check your email and click the link to verify. Redirecting in ${countdown}s...`;
+      if (countdown === 0) {
+        clearInterval(timer);
+        window.location.href = 'index.html';
       }
-
-      if( password !== confirmPassword){
-        errorText.textContent = 'Password do not match.'
-        errorAlert.classList.add('show');
-        return;
-      }
-
-      const { data: existing} = await db 
-        .from('Student')
-        .select('student_id')
-        .or ('student_id.eq.${studentId},email.eq.${email}')
-      
-        if(existing && existing.length > 0){
-          errorText.textContent = 'Student ID or email already registered.';
-          errorAlert.classList.add('show');
-          return;
-        }
-
-        signupBtn.classList.add('loading');
-        signupBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Creating account...';
-
-        const {error} = await db
-          .from('Student')
-          .insert({
-            student_id : studentId,
-            name : name,
-            email : email,
-            password : password
-          });
-
-          console.log('Supabase error:', error); // <-- Add this
-
-          if (error) {
-            errorText.textContent = 'Sign Up failed. Please try again.  ';
-            errorAlert.classList.add('show');
-            signupBtn.classList.remove('loading');
-            signupBtn.innerHTML = 'Create Account <i class = "bi bi-arrow-right"></i>';
-            return;
-          }
-
-          SuccessAlert.classList.add('show');
-          signupBtn.innerHTML = '<i class = "bi bi-check-lg"></i> Account Created!'
-
-          setTimeout(() => {
-            window.location.href = 'index.html'
-          }, 2000)
-      
-    })
-  </script>
+    }, 1000);
+  });
+</script>
 </body>
 
 </html>

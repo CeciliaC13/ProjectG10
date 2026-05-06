@@ -397,7 +397,7 @@
           <label>Email Address </label>
           <div class="input-wrapper">
             <i class="bi bi-envelope"></i>
-            <input type="text" class="form-control" id="userIdentifier" placeholder="Enter your email">
+            <input type="text" class="form-control" id="userIdentifier" placeholder="Enter your email address">
           </div>
         </div>
 
@@ -453,7 +453,7 @@
           </div>
           <h3>Password Reset Successfully!</h3>
           <p>Your password has been changed. You can now log in with your new password.</p>
-          <a href="login.html" class="reset-btn" style="text-decoration: none; display: inline-flex; width: auto; padding: 12px 30px;">
+          <a href="index.html" class="reset-btn" style="text-decoration: none; display: inline-flex; width: auto; padding: 12px 30px;">
             Go to Login <i class="bi bi-arrow-right"></i>
           </a>
         </div>
@@ -469,6 +469,185 @@
     </div>
   </div>
 
-</body>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+  <script src="supabase.js"></script>
+  <script>
+    
+    const EMAILJS_SERVICE_ID = 'service_x3zs86e';
+    const EMAILJS_TEMPLATE_ID = 'template_9f33875';
+    const EMAILJS_PUBLIC_KEY = 'bNN5M_YW8MpFI0ABw';
 
+    emailjs.init(EMAILJS_PUBLIC_KEY);
+
+    let userEmail = '';
+    let generatedOTP = '';
+
+    function generateOTP(){
+      return Math.floor(100000 + Math.random() * 900000).toString();
+    }
+
+    function showMessage(type, text){
+      const icons = {
+        error: 'exclamation-triangle-fill',
+        success: 'check-circle-fill',
+        info: 'info-circle-fill'
+      };
+       const container = document.getElementById('messageContainer');
+         container.innerHTML = `
+        <div class="alert alert-${type}">
+        <i class="bi bi-${icons[type]}"></i>
+        <span>${text}</span>
+        </div>`;
+    }
+
+    function setStep(step) {
+    document.getElementById('step1').classList.add('hidden');
+    document.getElementById('step2').classList.add('hidden');
+    document.getElementById('step3').classList.add('hidden');
+    document.getElementById('messageContainer').innerHTML = '';
+
+    document.getElementById(`step${step}`).classList.remove('hidden');
+    document.getElementById('backLink').style.display = step === 3 ? 'none' : 'block';
+
+    [1, 2, 3].forEach(n => {
+      const indicator = document.getElementById(`step${n}Indicator`);
+      indicator.classList.remove('active', 'completed');
+      if (n < step) {
+        indicator.classList.add('completed');
+        indicator.querySelector('.step-number').innerHTML = '<i class="bi bi-check"></i>';
+      } else if (n === step) {
+        indicator.classList.add('active');
+      }
+    });
+  }
+
+  // ── STEP 1: Send OTP via EmailJS ──
+  document.getElementById('sendCodeBtn').addEventListener('click', async () => {
+    const identifier = document.getElementById('userIdentifier').value.trim();
+    const sendCodeBtn = document.getElementById('sendCodeBtn');
+
+    document.getElementById('messageContainer').innerHTML = '';
+
+    if (!identifier) {
+      showMessage('error', 'Please enter your email address.');
+      return;
+    }
+
+    sendCodeBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Sending...';
+    sendCodeBtn.disabled = true;
+
+    // Check if email exists in Student table
+    const { data: student, error } = await db
+      .from('Student')
+      .select('email')
+      .eq('email', identifier)
+      .single();
+
+    if (error || !student) {
+      showMessage('error', 'No account found with that email address.');
+      sendCodeBtn.innerHTML = 'Send Verification Code <i class="bi bi-send"></i>';
+      sendCodeBtn.disabled = false;
+      return;
+    }
+
+    userEmail = student.email;
+
+    // Generate OTP and store with expiry
+    generatedOTP = generateOTP();
+    const expiry = Date.now() + 10 * 60 * 1000; // 10 minutes
+    sessionStorage.setItem('resetOTP', generatedOTP);
+    sessionStorage.setItem('resetOTPExpiry', expiry);
+
+    // Send OTP via EmailJS
+    try {
+      await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
+        to_email: userEmail,
+        otp_code: generatedOTP
+      });
+
+      setStep(2);
+      showMessage('success', `Verification code sent to ${userEmail}`);
+    } catch (err) {
+      console.log('EmailJS error:', err);
+      showMessage('error', 'Failed to send email. Please try again.');
+      sendCodeBtn.innerHTML = 'Send Verification Code <i class="bi bi-send"></i>';
+      sendCodeBtn.disabled = false;
+    }
+  });
+
+  // ── STEP 2: Verify OTP + Reset Password ──
+  document.getElementById('resetPasswordBtn').addEventListener('click', async () => {
+    const code = document.getElementById('verificationCode').value.trim();
+    const newPassword = document.getElementById('newPassword').value.trim();
+    const confirmNewPassword = document.getElementById('confirmNewPassword').value.trim();
+    const resetPasswordBtn = document.getElementById('resetPasswordBtn');
+
+    document.getElementById('messageContainer').innerHTML = '';
+
+    if (!code) {
+      showMessage('error', 'Please enter the verification code.');
+      return;
+    }
+
+    if (code.length !== 6) {
+      showMessage('error', 'Verification code must be 6 digits.');
+      return;
+    }
+
+    if (!newPassword || !confirmNewPassword) {
+      showMessage('error', 'Please fill in both password fields.');
+      return;
+    }
+
+    if (newPassword.length < 8) {
+      showMessage('error', 'Password must be at least 8 characters.');
+      return;
+    }
+
+    if (newPassword !== confirmNewPassword) {
+      showMessage('error', 'Passwords do not match.');
+      return;
+    }
+
+    // Check OTP expiry
+    const expiry = sessionStorage.getItem('resetOTPExpiry');
+    if (Date.now() > parseInt(expiry)) {
+      showMessage('error', 'Code has expired. Please request a new one.');
+      return;
+    }
+
+    // Check OTP match
+    const storedOTP = sessionStorage.getItem('resetOTP');
+    if (code !== storedOTP) {
+      showMessage('error', 'Invalid code. Please try again.');
+      return;
+    }
+
+    resetPasswordBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Resetting...';
+    resetPasswordBtn.disabled = true;
+
+    // Update password in Student table
+    const { error: updateError } = await db
+      .from('Student')
+      .update({ password: newPassword })
+      .eq('email', userEmail);
+
+    if (updateError) {
+      showMessage('error', 'Failed to update password. Please try again.');
+      resetPasswordBtn.innerHTML = 'Reset Password <i class="bi bi-check-circle"></i>';
+      resetPasswordBtn.disabled = false;
+      return;
+    }
+
+    // Clear session
+    sessionStorage.removeItem('resetOTP');
+    sessionStorage.removeItem('resetOTPExpiry');
+
+    setStep(3);
+  });
+
+  </script>
+
+</body>
 </html>

@@ -287,44 +287,78 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="supabase.js"></script>
-  <script>
-    document.getElementById('loginBtn').addEventListener('click', async () => {
-      const studentid = document.getElementById('studentid').value.trim();
-      const password = document.getElementById('password').value.trim();
-      const errorBox = document.getElementById('errorMessage');
-      const loginBtn = document.getElementById('loginBtn');
+<script src="supabase.js"></script>
+<script>
 
-      errorBox.classList.remove('show');
+ 
+  db.auth.onAuthStateChange(async (event, session) => {
+  console.log('Auth event:', event);
 
-      if(!studentid || !password) {
-        errorBox.innerHTML = '<i class="bi bi-exclamation-triangle-fill"></i> Please fill in all fields.';
-        errorBox.classList.add('show');
-        return;
-      }
+  if ((event === 'SIGNED_IN' || event === 'INITIAL_SESSION') && session?.user) {
+    console.log('User email:', session.user.email);
 
-      loginBtn.classList.add('loading');
-      loginBtn.innerHTML = '<i class = "bi bi-hourglass-split"></i> Signing in...';
-      
-      const { data, error } = await db 
+    const { data: student } = await db
+      .from('Student')
+      .select('is_verified')
+      .eq('email', session.user.email)
+      .single();
+
+    if (student && !student.is_verified) {
+      const { error } = await db
         .from('Student')
-        .select('*')
-        .eq('student_id', studentid)
-        .eq('password', password)
-        .single()
+        .update({ is_verified: true })
+        .eq('email', session.user.email);
 
-      if (error || !data ){
-        errorBox.innerHTML = '<i class="bi bi-exclamation-triangle-fill"></i> Invalid Student ID or Password.';
-        errorBox.classList.add('show');
-        loginBtn.classList.remove('loading');
-        loginBtn.innerHTML = 'Login <i class="bi bi-arrow-right"></i>'
-        return;
-      }
+      console.log('Verification update error:', error);
+    }
 
-      window.location.href = 'Dashboard.html';
-    })
-  </script>
+    await db.auth.signOut();
+  }
+});
 
+  document.getElementById('loginBtn').addEventListener('click', async () => {
+    const studentid = document.getElementById('studentid').value.trim();
+    const password = document.getElementById('password').value.trim();
+    const errorBox = document.getElementById('errorMessage');
+    const loginBtn = document.getElementById('loginBtn');
+
+    errorBox.classList.remove('show');
+
+    if (!studentid || !password) {
+      errorBox.innerHTML = '<i class="bi bi-exclamation-triangle-fill"></i> Please fill in all fields.';
+      errorBox.classList.add('show');
+      return;
+    }
+
+    loginBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Signing in...';
+    loginBtn.disabled = true;
+
+    const { data, error } = await db
+      .from('Student')
+      .select('*')
+      .eq('student_id', studentid)
+      .eq('password', password)
+      .single();
+
+    if (error || !data) {
+      errorBox.innerHTML = '<i class="bi bi-exclamation-triangle-fill"></i> Invalid Student ID or Password.';
+      errorBox.classList.add('show');
+      loginBtn.innerHTML = 'Login <i class="bi bi-arrow-right"></i>';
+      loginBtn.disabled = false;
+      return;
+    }
+
+    if (!data.is_verified) {
+      errorBox.innerHTML = '<i class="bi bi-exclamation-triangle-fill"></i> Please verify your email before logging in.';
+      errorBox.classList.add('show');
+      loginBtn.innerHTML = 'Login <i class="bi bi-arrow-right"></i>';
+      loginBtn.disabled = false;
+      return;
+    }
+
+    window.location.href = 'Dashboard.html';
+  });
+</script>
 </body>
 
 </html>
