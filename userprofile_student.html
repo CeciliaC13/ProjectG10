@@ -201,11 +201,8 @@
           </div>
           <div class="mb-3">
             <label for="editEmail" class="form-label">Email Address</label>
-            <input type="email" class="form-control" id="editEmail" value="sarah.johnson@utm.my">
-          </div>
-          <div class="mb-3">
-            <label for="editAltEmail" class="form-label">Alternative Email</label>
-            <input type="email" class="form-control" id="editAltEmail" value="sarah.j@gmail.com">
+            <input type="email" class="form-control" id="editEmail" readonly disabled style="background:#f5f5f5; cursor:not-allowed; user-select:none;">
+            <small class="text-muted">Email cannot be changed.</small>
           </div>
           <div class="mb-3">
             <label for="editPhone" class="form-label">Phone Number</label>
@@ -213,7 +210,8 @@
           </div>
           <div class="mb-3">
             <label for="editMatric" class="form-label">Matric Number</label>
-            <input type="text" class="form-control" id="editMatric" value="A20CS1234">
+            <input type="text" class="form-control" id="editMatric" readonly disabled style="background:#f5f5f5; cursor:not-allowed; user-select:none;">
+            <small class="text-muted">Matric number cannot be changed.</small>
           </div>
         </form>
       </div>
@@ -268,5 +266,178 @@
 <script>
   console.log("Student Profile Page Loaded");
 </script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase.js"></script>
+<script>
+  async function loadStudentProfile() {
+    const email = localStorage.getItem('studentEmail');
+    
+    // DEBUG - check what's stored
+    console.log('Email from localStorage:', email);
+    console.log('StudentId from localStorage:', localStorage.getItem('studentId'));
+    console.log('Name from localStorage:', localStorage.getItem('studentName'));
+
+    if (!email) {
+        console.log('No email found, redirecting...');
+        window.location.href = 'index.html';
+        return;
+    }
+
+    const { data, error } = await db
+        .from('Student')
+        .select('*')
+        .eq('email', email)
+        .single();
+
+    
+    console.log('Supabase data:', data);
+    console.log('Supabase error:', error);
+
+    const initial = data.name ? data.name.charAt(0).toUpperCase() : 'S';
+    document.getElementById('avatarInitial').textContent = initial;
+    document.getElementById('profileAvatar').textContent = initial;
+    document.getElementById('dropdownUserName').textContent = data.name;
+    document.getElementById('dropdownUserEmail').textContent = data.email;
+
+    
+    document.getElementById('profileName').textContent = data.name;
+
+    
+    document.getElementById('displayName').textContent = data.name;
+    document.getElementById('displayMatric').textContent = data.student_id;
+
+    
+    document.getElementById('displayEmail').textContent = data.email;
+    document.getElementById('displayPhone').textContent = data.telephone || 'N/A';
+
+    
+    document.getElementById('editName').value = data.name;
+    document.getElementById('editEmail').value = data.email;
+    document.getElementById('editPhone').value = data.telephone || '';
+    document.getElementById('editMatric').value = data.student_id;
+  }
+
+  
+  async function saveProfileChanges() {
+    const email = localStorage.getItem('studentEmail');
+    const newName = document.getElementById('editName').value.trim();
+    const newPhone = document.getElementById('editPhone').value.trim();
+
+    
+    const telDigits = newPhone.replace(/[-\s+]/g, '');
+    if (!/^(60|0)[0-9]{9,10}$/.test(telDigits)) {
+        alert('Please enter a valid Malaysian phone number (e.g., 0123456789).');
+        return;
+    }
+
+    const { error } = await db
+        .from('Student')
+        .update({
+            name: newName,
+            telephone: newPhone
+        })
+        .eq('email', email);
+
+    if (error) {
+        alert('Failed to update profile. Please try again.');
+        console.error(error);
+        return;
+    }
+
+    // Update displayed values
+    document.getElementById('displayName').textContent = newName;
+    document.getElementById('displayPhone').textContent = newPhone;
+    document.getElementById('profileName').textContent = newName;
+    document.getElementById('dropdownUserName').textContent = newName;
+    document.getElementById('avatarInitial').textContent = newName.charAt(0).toUpperCase();
+    document.getElementById('profileAvatar').textContent = newName.charAt(0).toUpperCase();
+
+    bootstrap.Modal.getInstance(document.getElementById('editProfileModal')).hide();
+    alert('✅ Profile updated successfully!');
+}
+
+  
+  async function changePassword() {
+    const email = localStorage.getItem('studentEmail');
+    const currentPassword = document.getElementById('currentPassword').value.trim();
+    const newPassword = document.getElementById('newPassword').value.trim();
+    const confirmPassword = document.getElementById('confirmPassword').value.trim();
+
+    if (!currentPassword || !newPassword || !confirmPassword) {
+      alert('Please fill in all password fields.');
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      alert('New passwords do not match.');
+      return;
+    }
+
+    const passwordRegex = /^(?=.*[a-zA-Z])(?=.*[0-9])(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]).{8,}$/;
+    if (!passwordRegex.test(newPassword)) {
+      alert('Password must be at least 8 characters with letters, numbers & symbols.');
+      return;
+    }
+
+    // Verify current password
+    const { data, error } = await db
+      .from('Student')
+      .select('password')
+      .eq('email', email)
+      .single();
+
+    if (error || !data) {
+      alert('Failed to verify current password.');
+      return;
+    }
+
+    if (data.password !== currentPassword) {
+      alert('Current password is incorrect.');
+      return;
+    }
+
+    // Update to new password
+    const { error: updateError } = await db
+      .from('Student')
+      .update({ password: newPassword })
+      .eq('email', email);
+
+    if (updateError) {
+      alert('Failed to update password. Please try again.');
+      return;
+    }
+
+    bootstrap.Modal.getInstance(document.getElementById('changePasswordModal')).hide();
+    alert('✅ Password changed successfully!');
+  }
+
+  // ── Logout ──
+  document.getElementById('logoutBtn').addEventListener('click', () => {
+    localStorage.removeItem('studentEmail');
+    window.location.href = 'index.html';
+  });
+
+  // ── Open modals ──
+  function openEditProfileModal() {
+    new bootstrap.Modal(document.getElementById('editProfileModal')).show();
+  }
+
+  function openChangePasswordModal() {
+    // Clear all fields every time modal opens
+    document.getElementById('currentPassword').value = '';
+    document.getElementById('newPassword').value = '';
+    document.getElementById('confirmPassword').value = '';
+    
+    new bootstrap.Modal(document.getElementById('changePasswordModal')).show();
+}
+document.getElementById('changePasswordModal').addEventListener('hidden.bs.modal', function () {
+    document.getElementById('currentPassword').value = '';
+    document.getElementById('newPassword').value = '';
+    document.getElementById('confirmPassword').value = '';
+});
+  // ── Load on page ready ──
+  loadStudentProfile();
+</script>
+  
 </body>
 </html>

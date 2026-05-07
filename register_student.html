@@ -387,11 +387,11 @@
           <label>Telephone Number <span class="required">*</span></label>
           <div class="input-wrapper">
             <i class="bi bi-telephone"></i>
-            <input type="tel" class="form-control" id="telephone" placeholder="e.g., 012-3456789">
+            <input type="tel" class="form-control" id="telephone" placeholder="e.g., 0123456789">
           </div>
           <div class="password-hint">
             <i class="bi bi-info-circle"></i>
-            <span>Include country code if outside Malaysia (e.g., +60 12-3456789)</span>
+            <span>Malaysian numbers only  (e.g., 0123456789)</span>
           </div>
         </div>
       </div>
@@ -447,6 +447,7 @@
     const password = document.getElementById('password').value.trim();
     const confirmPassword = document.getElementById('confirmPassword').value.trim();
     const agreeTerms = document.getElementById('agreeTerms').checked;
+    let telephone = document.getElementById('telephone').value.trim();
 
     const errorAlert = document.getElementById('errorMessage');
     const successAlert = document.getElementById('successMessage'); // ✅ fixed name
@@ -456,12 +457,24 @@
     successAlert.classList.remove('show');
 
    
-    if (!studentId || !name || !email || !password || !confirmPassword) {
+    if (!studentId || !name || !email || !telephone || !password || !confirmPassword) {
       errorAlert.textContent = 'Please fill in all fields.';
       errorAlert.classList.add('show');
       return;
     }
 
+    
+    const telDigits = telephone.replace(/[-\s]/g, '');
+    if (!/^0[0-9]{9,10}$/.test(telDigits)) {
+      errorAlert.textContent = 'Please enter a valid Malaysian phone number (e.g., 0123456789).';
+      errorAlert.classList.add('show');
+      return;
+    }
+
+    // Auto-convert to +60 after validation passes
+    if (telephone.startsWith('0')) {
+      telephone = '+60' + telephone.substring(1);
+    }
    
     const passwordRegex = /^(?=.*[a-zA-Z])(?=.*[0-9])(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]).{8,}$/;
     if (!passwordRegex.test(password)) {
@@ -513,6 +526,7 @@
         student_id: studentId,
         name: name,
         email: email,
+        telephone: telephone,
         password: password,
         is_verified: false
       });

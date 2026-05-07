@@ -356,6 +356,9 @@
       return;
     }
 
+    localStorage.setItem('studentEmail', data.email);
+    localStorage.setItem('studentId', data.student_id);
+    localStorage.setItem('studentName', data.name);
     window.location.href = 'Dashboard.html';
   });
 </script>
