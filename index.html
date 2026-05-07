@@ -329,6 +329,13 @@
       errorBox.classList.add('show');
       return;
     }
+    if (!/^[Aa][0-9A-Za-z]+$/.test(studentid)) {
+      errorBox.innerHTML = '<i class="bi bi-exclamation-triangle-fill"></i> Student ID must start with the letter A (e.g., A24DW0001).';
+      errorBox.classList.add('show');
+      loginBtn.innerHTML = 'Login <i class="bi bi-arrow-right"></i>';
+      loginBtn.disabled = false;
+      return;
+    }
 
     loginBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Signing in...';
     loginBtn.disabled = true;

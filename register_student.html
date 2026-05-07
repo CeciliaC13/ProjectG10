@@ -462,7 +462,11 @@
       errorAlert.classList.add('show');
       return;
     }
-
+    if (!/^[Aa][0-9A-Za-z]+$/.test(studentId)) {
+      errorAlert.textContent = 'Student ID must start with the letter A (e.g., A24DW0001).';
+      errorAlert.classList.add('show');
+      return;
+    }
     
     const telDigits = telephone.replace(/[-\s]/g, '');
     if (!/^0[0-9]{9,10}$/.test(telDigits)) {
