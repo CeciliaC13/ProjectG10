@@ -205,7 +205,7 @@
     // Logout function
     logout: function() {
       localStorage.removeItem('currentUser');
-      window.location.href = 'login.html';
+      window.location.href = 'index.html';
     }
   };
 
@@ -222,5 +222,42 @@
       });
     }
   });
+  // Auto-sync header dropdown on all pages
+async function loadHeaderProfile() {
+  const email = localStorage.getItem('studentEmail');
+  if (!email) return;
+
+  // Check if dropdown elements exist on this page
+  const nameEl = document.getElementById('dropdownUserName');
+  const emailEl = document.getElementById('dropdownUserEmail');
+  const avatarEl = document.getElementById('avatarInitial');
+  if (!nameEl || !emailEl || !avatarEl) return;
+
+  const { data, error } = await db
+    .from('Student')
+    .select('name, email')
+    .eq('email', email)
+    .single();
+
+  if (error || !data) return;
+
+  const initial = data.name ? data.name.charAt(0).toUpperCase() : 'S';
+  avatarEl.textContent = initial;
+  nameEl.textContent = data.name;
+  emailEl.textContent = data.email;
+}
+
+// Logout on all pages
+const logoutBtn = document.getElementById('logoutBtn');
+if (logoutBtn) {
+  logoutBtn.addEventListener('click', () => {
+    localStorage.removeItem('studentEmail');
+    localStorage.removeItem('studentId');
+    localStorage.removeItem('studentName');
+    window.location.href = 'index.html';
+  });
+}
+
+loadHeaderProfile();
 
 })(); // End of main IIFE

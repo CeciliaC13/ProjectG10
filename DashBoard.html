@@ -328,7 +328,48 @@
   <script src="vendor/purecounter/purecounter_vanilla.js"></script>
 
   <!-- Main JS File -->
-  <script src="main.js"></script>
+  
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase.js"></script>
+<script src="main.js"></script>
+<script>
+  async function loadHeaderProfile() {
+    const email = localStorage.getItem('studentEmail');
+
+    if (!email) {
+      window.location.href = 'index.html';
+      return;
+    }
+
+    const { data, error } = await db
+      .from('Student')
+      .select('name, email, student_id')
+      .eq('email', email)
+      .single();
+
+    if (error || !data) {
+      console.error('Failed to load user:', error);
+      return;
+    }
+
+    // Sync dropdown with database info
+    const initial = data.name ? data.name.charAt(0).toUpperCase() : 'S';
+    document.getElementById('avatarInitial').textContent = initial;
+    document.getElementById('dropdownUserName').textContent = data.name;
+    document.getElementById('dropdownUserEmail').textContent = data.email;
+    document.getElementById('dropdownUserRole').textContent = 'Undergraduate Student';
+  }
+
+  // Logout
+  document.getElementById('logoutBtn').addEventListener('click', () => {
+    localStorage.removeItem('studentEmail');
+    localStorage.removeItem('studentId');
+    localStorage.removeItem('studentName');
+    window.location.href = 'index.html';
+  });
+
+  loadHeaderProfile();
+</script>
 
 </body>
 
