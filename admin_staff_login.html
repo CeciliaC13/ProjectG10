@@ -238,26 +238,61 @@
     </div>
   </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+` <script src="supabase.js"></script>
   <script>
-    document.getElementById("loginBtn").addEventListener("click", function () {
+    document.getElementById("loginBtn").addEventListener("click", async () => {
       const role = document.getElementById("role").value;
       const userid = document.getElementById("userid").value.trim();
       const password = document.getElementById("password").value.trim();
       const errorMessage = document.getElementById("errorMessage");
+      const loginBtn = document.getElementById('loginBtn');
 
-      if (role === "" || userid === "" || password === "") {
+      errorMessage.classList.remove('show');
+
+      if (!role  || !userid  || !password ) {
+         errorMessage.innerHTML = '<i class="bi bi-exclamation-triangle-fill"></i> Please fill in all fields.';
         errorMessage.classList.add("show");
         return;
       }
 
-      localStorage.setItem("userRole", role);
-      localStorage.setItem("currentUser", JSON.stringify({
-        name: role === "admin" ? "Admin User" : "Staff User",
-        role: role === "admin" ? "Admin" : "Staff",
-        email: userid + "@utmspace.my"
+      loginBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Signing in...';
+      loginBtn.disabled = true;
+
+      const tableName = role === 'admin' ? 'Admin' : 'Staff';
+      const idColumn = role === 'admin' ? 'admin_id' : 'staff_id';
+
+      const { data, error } = await db 
+        .from(tableName)
+        .select('*')
+        .eq(idColumn, userid)
+        .eq('password', password)
+        .single();
+      
+        console.log('Login data:', data);
+        console.log('Login error:', error);
+
+        if(error || !data) {
+           errorMessage.innerHTML = '<i class="bi bi-exclamation-triangle-fill"></i> Invalid ID or password.';
+            errorMessage.classList.add('show');
+            loginBtn.innerHTML = 'Login <i class="bi bi-arrow-right"></i>';
+            loginBtn.disabled = false;
+            return;
+        }
+
+      localStorage.setItem('userRole', role);
+      localStorage.setItem('currentUser', JSON.stringify({
+      id: role === 'admin' ? data.admin_id : data.staff_id,
+      name: data.name,
+      role: role === 'admin' ? 'Admin' : 'Staff',
+      email: data.email
       }));
 
-      window.location.href = "admin_staff_dashboard.html";
+       if (role === 'admin') {
+      window.location.href = 'admin_dashboard.html';
+    } else {
+      window.location.href = 'staff_dashboard.html';
+    }
     });
   </script>
 
