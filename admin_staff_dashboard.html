@@ -373,6 +373,11 @@
     const email = localStorage.getItem('staffAdminEmail');
     const name = localStorage.getItem('staffAdminName');
 
+    if (!role && !email) {
+      window.location.href = 'admin_staff_login.html';
+      return;
+    }
+
     const roleText = role === 'admin' || role === 'Admin' ? 'Admin' : 'Staff';
 
     document.getElementById('roleBadge').textContent = roleText.toUpperCase();
@@ -398,6 +403,7 @@
     localStorage.removeItem('userRole');
     localStorage.removeItem('currentUser');
 
+    window.location.href = 'admin_staff_login.html';
   });
 
   loadAdminStaffHeader();
