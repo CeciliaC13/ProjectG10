@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <title>Report Issue | UTM Space</title>
+  
+  <link href="https://fonts.googleapis.com" rel="preconnect">
+  <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500&family=Montserrat:wght@400;500;600;700;800&family=Raleway:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="main.css" rel="stylesheet">
+  
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Roboto', sans-serif;
+      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+      min-height: 100vh;
+    }
+
+  
+    /* Main Content */
+    .report-main {
+      padding: 40px 0;
+      min-height: calc(100vh - 300px);
+    }
+
+    /* Report Container - Centered */
+    .report-container {
+      max-width: 650px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+
+    /* Card */
+    .report-card {
+      background: white;
+      border-radius: 24px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
+      overflow: hidden;
+    }
+
+    /* Header */
+    .report-header {
+      background: linear-gradient(135deg, #6b092a 0%, #8b0e35 100%);
+      padding: 30px;
+      text-align: center;
+    }
+
+    .report-header h1 {
+      color: white;
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      font-family: 'Montserrat', sans-serif;
+    }
+
+    .report-header h1 i {
+      margin-right: 10px;
+    }
+
+    .report-header p {
+      color: rgba(255, 255, 255, 0.85);
+      font-size: 14px;
+    }
+
+    /* Body */
+    .report-body {
+      padding: 35px;
+    }
+
+    /* Form Groups */
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 14px;
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 8px;
+    }
+
+    .form-group label .required {
+      color: #e74c3c;
+      margin-left: 3px;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      padding: 12px 15px;
+      font-size: 14px;
+      border: 1.5px solid #e0e0e0;
+      border-radius: 12px;
+      transition: all 0.3s ease;
+      font-family: 'Roboto', sans-serif;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: #6b092a;
+      box-shadow: 0 0 0 3px rgba(107, 9, 42, 0.1);
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 120px;
+    }
+
+    /* Two columns layout */
+    .two-columns {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    /* Buttons */
+    .btn-back {
+      width: 100%;
+      background: #6c757d;
+      color: white;
+      border: none;
+      padding: 14px;
+      font-size: 16px;
+      font-weight: 600;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+
+    .btn-back:hover {
+      background: #5a6268;
+      transform: translateY(-2px);
+    }
+
+    .btn-submit {
+      width: 100%;
+      background: linear-gradient(135deg, #6b092a 0%, #8b0e35 100%);
+      color: white;
+      border: none;
+      padding: 14px;
+      font-size: 16px;
+      font-weight: 600;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .btn-submit:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 20px rgba(107, 9, 42, 0.3);
+    }
+
+    .btn-submit:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    /* Alerts */
+    .alert {
+      padding: 12px 16px;
+      border-radius: 12px;
+      margin-bottom: 20px;
+      display: none;
+      text-align: center;
+      font-size: 14px;
+    }
+
+    .alert.show {
+      display: block;
+    }
+
+    .alert-success {
+      background: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+
+    .alert-error {
+      background: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .header .container {
+        flex-wrap: wrap;
+      }
+      .navmenu ul {
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+      .header-actions {
+        margin-top: 10px;
+      }
+    }
+
+    @media (max-width: 550px) {
+      .report-body {
+        padding: 20px;
+      }
+      .two-columns {
+        grid-template-columns: 1fr;
+        gap: 0;
+      }
+      .report-header h1 {
+        font-size: 22px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+<header id="header" class="header">
+  <div class="container">
+    <a href="index.html" class="logo">
+      <img src="img/spacelogo.png" alt="UTM Space Logo" style="height: 50px; width: auto; max-height:60px;">
+    </a>
+
+    <nav id="navmenu" class="navmenu">
+      <ul>
+        <li><a href="dashboard.html">Home</a></li>
+        <li><a href="booking_history.html">History</a></li>
+        <li class="dropdown">
+          <a href="#"><span>Pages</span> <i class="bi bi-chevron-down"></i></a>
+          <ul>
+            <li><a href="about.html">About</a></li>
+            <li><a href="booking_history.html">History</a></li>
+            <li><a href="search-results.html">Search Results</a></li>
+          </ul>
+        </li>
+        <li><a href="report.html" class="active">Report</a></li>
+        <li><a href="contact.html">Contact</a></li>
+      </ul>
+    </nav>
+
+    <div class="header-actions">
+      <div class="header-social-links">
+        <a href="https://www.facebook.com/utmspace/" target="_blank"><i class="bi bi-facebook"></i></a>
+        <a href="https://www.instagram.com/spaceutm_official/" target="_blank"><i class="bi bi-instagram"></i></a>
+      </div>
+
+      <a href="notification.html" class="notification-btn" title="Notifications">
+        <i class="bi bi-bell-fill"></i>
+      </a>
+
+      <div class="user-profile">
+        <div class="user-avatar">
+          <div class="avatar-placeholder" id="avatarInitial">S</div>
+        </div>
+        <div class="user-dropdown">
+          <div class="dropdown-header">
+            <div class="user-info">
+              <div class="user-name" id="dropdownUserName">Student name</div>
+              <div class="user-role" id="dropdownUserRole">Student</div>
+              <div class="user-email" id="dropdownUserEmail">Their email@gmail.com</div>
+            </div>
+          </div>
+          <ul class="dropdown-menu-list">
+            <li><a href="userprofile_student.html"><i class="bi bi-person-circle"></i> Profile</a></li>
+            <li><a href="#" id="logoutBtn"><i class="bi bi-box-arrow-right"></i> Logout</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main class="report-main">
+  <div class="report-container">
+    <div class="report-card">
+      <div class="report-header">
+        <h1><i class="bi bi-flag-fill"></i> Report an Issue</h1>
+        <p>Submit your complaint or maintenance request</p>
+      </div>
+
+      <div class="report-body">
+        <div class="alert alert-success" id="successAlert"></div>
+        <div class="alert alert-error" id="errorAlert"></div>
+
+        <form id="reportForm">
+          <div class="form-group">
+            <label>Full Name <span class="required">*</span></label>
+            <input type="text" id="fullName" placeholder="Enter your full name">
+          </div>
+
+          <div class="two-columns">
+            <div class="form-group">
+              <label>Matric / Student ID <span class="required">*</span></label>
+              <input type="text" id="matricNo" placeholder="e.g., A24DW0000">
+            </div>
+            <div class="form-group">
+              <label>Phone Number <span class="required">*</span></label>
+              <input type="tel" id="phone" placeholder="e.g., 012-3456789">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Email Address <span class="required">*</span></label>
+            <input type="email" id="email" placeholder="you@utm.my">
+          </div>
+
+          <div class="two-columns">
+            <div class="form-group">
+              <label>Kolej <span class="required">*</span></label>
+              <select id="kolej">
+                <option value="">-- Select Kolej --</option>
+                <option value="Perdana Residence U7">Perdana Residence U7</option>
+                <option value="Kolej 9">Kolej 9</option>
+                <option value="Kolej 10">Kolej 10</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Room Number <span class="required">*</span></label>
+              <input type="text" id="roomNumber" placeholder="e.g., U7-01-01, K9-001">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Issue Category <span class="required">*</span></label>
+            <select id="issueCategory">
+              <option value="">-- Select Category --</option>
+              <option value="WiFi / Internet Problem">🌐 WiFi / Internet Problem</option>
+              <option value="Air-conditioner / Fan Problem">❄️ Air-conditioner / Fan Problem</option>
+              <option value="Broken Furniture">🪑 Broken Furniture (Bed, Chair, Table)</option>
+              <option value="Plumbing Issue">🚽 Plumbing Issue (Sink, Toilet, Shower)</option>
+              <option value="Electrical Problem">⚡ Electrical Problem (Light, Socket)</option>
+              <option value="Other">📝 Other (write below) </option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Priority Level <span class="required">*</span></label>
+            <select id="priority">
+              <option value="">-- Select Priority --</option>
+              <option value="High">🔴 High - Urgent (Immediate attention)</option>
+              <option value="Medium">🟠 Medium - Important (Needs attention soon)</option>
+              <option value="Low">🟢 Low - Normal (Can wait)</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Issue Description <span class="required">*</span></label>
+            <textarea id="description" placeholder="Please describe the issue in detail..."></textarea>
+          </div>
+
+          <button type="button" class="btn-back" id="backBtn">
+            <i class="bi bi-arrow-left"></i> Back
+          </button>
+
+          <button type="submit" class="btn-submit" id="submitBtn">
+            <i class="bi bi-send-fill"></i> Submit Report
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</main>
+
+<footer id="footer" class="footer">
+  <div class="container">
+    <div class="row gy-5">
+      <div class="col-lg-4">
+        <div class="footer-brand">
+          <a href="index.html" class="logo d-flex align-items-center mb-3">
+            <span class="sitename">UTM SPACE</span>
+          </a>
+          <p class="tagline">Transforming the way colleges book, manage, and connect — with modern simplicity.</p>
+          <div class="social-links mt-4">
+            <a href="https://www.facebook.com/utmspace/" target="_blank"><i class="bi bi-facebook"></i></a>
+            <a href="https://www.instagram.com/spaceutm_official/" target="_blank"><i class="bi bi-instagram"></i></a>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-6">
+        <div class="footer-links-grid">
+          <div class="col-6 col-md-4">
+            <h5>Support</h5>
+            <ul class="list-unstyled">
+              <li><a href="#">Contact Us: +607-531 8000</a></li>
+              <li><a href="#">Privacy Policy</a></li>
+              <li><a href="#">Terms of Service</a></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <div class="container">
+      <div class="row">
+        <div class="col-12">
+          <div class="footer-bottom-content">
+            <p class="mb-0">© <strong>UTMSPACE</strong>. All rights reserved.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase.js"></script>
+<script src="main.js"></script>
+<script>
+  // Back button
+  document.getElementById('backBtn').addEventListener('click', function() {
+    window.location.href = 'dashboard.html';
+  });
+
+  // Auto-fill student info
+  async function loadStudentInfo() {
+    const email = localStorage.getItem('studentEmail');
+    if (email) {
+      document.getElementById('email').value = email;
+      
+      if (typeof db !== 'undefined' && db) {
+        const { data, error } = await db
+          .from('Student')
+          .select('name, student_id')
+          .eq('email', email)
+          .single();
+        
+        if (!error && data) {
+          if (data.name) document.getElementById('fullName').value = data.name;
+          if (data.student_id) document.getElementById('matricNo').value = data.student_id;
+        }
+      }
+    }
+  }
+
+  // Form submission
+  document.getElementById('reportForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const fullName = document.getElementById('fullName').value.trim();
+    const matricNo = document.getElementById('matricNo').value.trim();
+    const phone = document.getElementById('phone').value.trim();
+    const email = document.getElementById('email').value.trim();
+    const kolej = document.getElementById('kolej').value;
+    const roomNumber = document.getElementById('roomNumber').value.trim();
+    const issueCategory = document.getElementById('issueCategory').value;
+    const priority = document.getElementById('priority').value;
+    const description = document.getElementById('description').value.trim();
+    
+    const errorAlert = document.getElementById('errorAlert');
+    const successAlert = document.getElementById('successAlert');
+    const submitBtn = document.getElementById('submitBtn');
+    
+    errorAlert.classList.remove('show');
+    successAlert.classList.remove('show');
+    
+    // Validation
+    if (!fullName || !matricNo || !phone || !email || !kolej || !roomNumber || !issueCategory || !priority || !description) {
+      errorAlert.textContent = 'Please fill in all required fields.';
+      errorAlert.classList.add('show');
+      setTimeout(() => errorAlert.classList.remove('show'), 3000);
+      return;
+    }
+    
+    if (!email.endsWith('@utm.my') && !email.endsWith('@graduate.utm.my')) {
+      errorAlert.textContent = 'Please use a valid UTM email address.';
+      errorAlert.classList.add('show');
+      setTimeout(() => errorAlert.classList.remove('show'), 3000);
+      return;
+    }
+    
+    // Create report
+    const report = {
+      reportId: 'RPT-' + Date.now(),
+      date: new Date().toLocaleString(),
+      fullName, matricNo, phone, email,
+      kolej, roomNumber, issueCategory, priority, description,
+      status: 'Pending'
+    };
+    
+    // Save to localStorage
+    let reports = JSON.parse(localStorage.getItem('studentReports') || '[]');
+    reports.push(report);
+    localStorage.setItem('studentReports', JSON.stringify(reports));
+    
+    // Show success
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Submitting...';
+    
+    successAlert.textContent = '✅ Report submitted! Reference: ' + report.reportId;
+    successAlert.classList.add('show');
+    
+    document.getElementById('reportForm').reset();
+    loadStudentInfo();
+    
+    setTimeout(() => {
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = '<i class="bi bi-send-fill"></i> Submit Report';
+    }, 2000);
+    
+    setTimeout(() => {
+      successAlert.classList.remove('show');
+    }, 5000);
+  });
+  
+  loadStudentInfo();
+
+  // Load header profile from main.js or directly
+  async function loadHeaderProfile() {
+    const email = localStorage.getItem('studentEmail');
+    if (!email) return;
+
+    if (typeof db !== 'undefined' && db) {
+      const { data, error } = await db
+        .from('Student')
+        .select('name, email')
+        .eq('email', email)
+        .single();
+
+      if (!error && data) {
+        const initial = data.name ? data.name.charAt(0).toUpperCase() : 'S';
+        const avatarInitial = document.getElementById('avatarInitial');
+        const dropdownUserName = document.getElementById('dropdownUserName');
+        const dropdownUserEmail = document.getElementById('dropdownUserEmail');
+        
+        if (avatarInitial) avatarInitial.textContent = initial;
+        if (dropdownUserName) dropdownUserName.textContent = data.name;
+        if (dropdownUserEmail) dropdownUserEmail.textContent = data.email;
+      }
+    }
+  }
+
+  loadHeaderProfile();
+
+  // Logout
+  const logoutBtn = document.getElementById('logoutBtn');
+  if (logoutBtn) {
+    logoutBtn.addEventListener('click', () => {
+      localStorage.removeItem('studentEmail');
+      localStorage.removeItem('studentId');
+      localStorage.removeItem('studentName');
+      window.location.href = 'index.html';
+    });
+  }
+</script>
+</body>
+</html>
