@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <title>Assign College Quota - UTMSPACE College Booking</title>
+
+  <link href="vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+  <link href="vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
+  <link href="main.css" rel="stylesheet">
+
+  <style>
+    body { background: #f8f9fa; }
+
+    .quota-page {
+      padding: 60px 0;
+      min-height: 100vh;
+    }
+
+    .page-header-box {
+      background: linear-gradient(135deg, #6b092a, #8b0e35);
+      color: white;
+      border-radius: 22px;
+      padding: 35px;
+      margin-bottom: 35px;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.12);
+    }
+
+    .page-header-box h1 {
+      color: white;
+      font-weight: 700;
+    }
+
+    .back-link-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: white;
+      background: rgba(255,255,255,0.18);
+      padding: 8px 16px;
+      border-radius: 30px;
+      text-decoration: none;
+      font-weight: 600;
+      margin-bottom: 18px;
+    }
+
+    .form-box, .table-box {
+      background: white;
+      border-radius: 18px;
+      padding: 28px;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+    }
+
+    .save-btn {
+      background: #6b092a;
+      color: white;
+      border: none;
+      border-radius: 12px;
+      padding: 12px 22px;
+      font-weight: 700;
+    }
+
+    .quota-table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 750px;
+    }
+
+    .quota-table th {
+      background: #6b092a;
+      color: white;
+      padding: 14px;
+      text-align: center;
+    }
+
+    .quota-table td {
+      padding: 14px;
+      border-bottom: 1px solid #eee;
+      text-align: center;
+    }
+
+    .edit-btn {
+      background: #2c5a7a;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      padding: 7px 12px;
+      font-weight: 600;
+    }
+
+    .delete-btn {
+      background: #dc2626;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      padding: 7px 12px;
+      font-weight: 600;
+    }
+
+    .message-box {
+      display: none;
+      padding: 12px;
+      border-radius: 12px;
+      margin-bottom: 18px;
+      font-weight: 500;
+    }
+
+    .message-box.show { display: block; }
+
+    .message-success {
+      background: #dcfce7;
+      color: #166534;
+      border: 1px solid #bbf7d0;
+    }
+
+    .message-error {
+      background: #fee2e2;
+      color: #991b1b;
+      border: 1px solid #fecaca;
+    }
+  </style>
+</head>
+
+<body>
+
+<section class="quota-page">
+  <div class="container">
+
+    <div class="page-header-box">
+      <a href="admin_staff_dashboard.html" class="back-link-btn">
+        <i class="bi bi-arrow-left"></i> Back to Dashboard
+      </a>
+      <h1>Assign College Quota</h1>
+      <p>Set the maximum number of students allowed for each college.</p>
+    </div>
+
+    <div class="row gy-4">
+
+      <div class="col-lg-5">
+        <div class="form-box">
+          <h3 class="mb-4">Quota Form</h3>
+
+          <div class="message-box" id="messageBox"></div>
+
+          <input type="hidden" id="editIndex">
+
+          <div class="mb-3">
+            <label class="form-label fw-semibold">College</label>
+            <select class="form-select" id="college">
+              <option value="">Select College</option>
+              <option value="Perdana Residence Block U7">Perdana Residence Block U7</option>
+              <option value="Kolej 9">Kolej 9</option>
+              <option value="Kolej 10">Kolej 10</option>
+            </select>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Total Quota</label>
+            <input type="number" class="form-control" id="totalQuota" placeholder="Enter total quota">
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Used Quota</label>
+            <input type="number" class="form-control" id="usedQuota" placeholder="Enter used quota">
+          </div>
+
+          <button class="save-btn" onclick="saveQuota()">Save Quota</button>
+        </div>
+      </div>
+
+      <div class="col-lg-7">
+        <div class="table-box">
+          <h3 class="mb-4">College Quota Records</h3>
+
+          <div style="overflow-x:auto;">
+            <table class="quota-table">
+              <thead>
+                <tr>
+                  <th>No.</th>
+                  <th>College</th>
+                  <th>Total Quota</th>
+                  <th>Used Quota</th>
+                  <th>Remaining</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="quotaTableBody"></tbody>
+            </table>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+</section>
+
+<script>
+  let quotas = JSON.parse(localStorage.getItem('collegeQuotas')) || [
+    {
+      college: 'Perdana Residence Block U7',
+      totalQuota: 100,
+      usedQuota: 40
+    },
+    {
+      college: 'Kolej 9',
+      totalQuota: 150,
+      usedQuota: 120
+    },
+    {
+      college: 'Kolej 10',
+      totalQuota: 150,
+      usedQuota: 150
+    }
+  ];
+
+  function saveToStorage() {
+    localStorage.setItem('collegeQuotas', JSON.stringify(quotas));
+  }
+
+  function showMessage(type, text) {
+    const box = document.getElementById('messageBox');
+    box.className = 'message-box show ' + (type === 'success' ? 'message-success' : 'message-error');
+    box.textContent = text;
+
+    setTimeout(function() {
+      box.className = 'message-box';
+      box.textContent = '';
+    }, 2500);
+  }
+
+  function renderQuotas() {
+    const tbody = document.getElementById('quotaTableBody');
+
+    tbody.innerHTML = quotas.map(function(item, index) {
+      const remaining = item.totalQuota - item.usedQuota;
+
+      return `
+        <tr>
+          <td>${index + 1}</td>
+          <td>${item.college}</td>
+          <td>${item.totalQuota}</td>
+          <td>${item.usedQuota}</td>
+          <td>${remaining}</td>
+          <td>
+            <button class="edit-btn" onclick="editQuota(${index})">Edit</button>
+            <button class="delete-btn" onclick="deleteQuota(${index})">Delete</button>
+          </td>
+        </tr>
+      `;
+    }).join('');
+  }
+
+  function saveQuota() {
+    const editIndex = document.getElementById('editIndex').value;
+    const college = document.getElementById('college').value;
+    const totalQuota = document.getElementById('totalQuota').value;
+    const usedQuota = document.getElementById('usedQuota').value;
+
+    if (!college || totalQuota === '' || usedQuota === '') {
+      showMessage('error', 'Please fill in all fields.');
+      return;
+    }
+
+    if (Number(usedQuota) > Number(totalQuota)) {
+      showMessage('error', 'Used quota cannot be more than total quota.');
+      return;
+    }
+
+    const quotaData = {
+      college: college,
+      totalQuota: Number(totalQuota),
+      usedQuota: Number(usedQuota)
+    };
+
+    if (editIndex === '') {
+      quotas.push(quotaData);
+      showMessage('success', 'Quota added successfully.');
+    } else {
+      quotas[editIndex] = quotaData;
+      showMessage('success', 'Quota updated successfully.');
+    }
+
+    saveToStorage();
+    renderQuotas();
+    clearForm();
+  }
+
+  function editQuota(index) {
+    const item = quotas[index];
+
+    document.getElementById('editIndex').value = index;
+    document.getElementById('college').value = item.college;
+    document.getElementById('totalQuota').value = item.totalQuota;
+    document.getElementById('usedQuota').value = item.usedQuota;
+  }
+
+  function deleteQuota(index) {
+    if (confirm('Are you sure you want to delete this quota record?')) {
+      quotas.splice(index, 1);
+      saveToStorage();
+      renderQuotas();
+      showMessage('success', 'Quota deleted successfully.');
+    }
+  }
+
+  function clearForm() {
+    document.getElementById('editIndex').value = '';
+    document.getElementById('college').value = '';
+    document.getElementById('totalQuota').value = '';
+    document.getElementById('usedQuota').value = '';
+  }
+
+  renderQuotas();
+</script>
+
+</body>
+</html>

@@ -17,7 +17,6 @@
   <link href="vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
   <link href="vendor/aos/aos.css" rel="stylesheet">
   <link href="vendor/swiper/swiper-bundle.min.css" rel="stylesheet">
-
   <link href="main.css" rel="stylesheet">
 
   <style>
@@ -79,6 +78,16 @@
       border-radius: 20px;
       margin-bottom: 10px;
     }
+
+    .function-group-title {
+      margin-top: 35px;
+      margin-bottom: 20px;
+      font-weight: 700;
+      color: #6b092a;
+      font-size: 24px;
+      border-left: 5px solid #6b092a;
+      padding-left: 12px;
+    }
   </style>
 </head>
 
@@ -96,14 +105,6 @@
         <li><a href="admin_staff_dashboard.html" class="active">Home</a></li>
         <li><a href="room_availability.html">Room Availability</a></li>
         <li><a href="view_approvals.html">Approvals</a></li>
-        <li class="dropdown"><a href="#"><span>Pages</span> <i class="bi bi-chevron-down toggle-dropdown"></i></a>
-          <ul>
-            <li><a href="userprofile_admin_staff.html">Profile</a></li>
-            <li><a href="edit_room_availability.html">Edit Room Availability</a></li>
-            <li><a href="view_issue.html">View Issue</a></li>
-            <li class="admin-only"><a href="#">Manage Staff</a></li>
-          </ul>
-        </li>
         <li><a href="view_issue.html">Issue</a></li>
         <li><a href="contact.html">Contact</a></li>
       </ul>
@@ -125,6 +126,7 @@
         <div class="user-avatar">
           <div class="avatar-placeholder" id="avatarInitial">A</div>
         </div>
+
         <div class="user-dropdown">
           <div class="dropdown-header">
             <div class="user-info">
@@ -133,6 +135,7 @@
               <div class="user-email" id="dropdownUserEmail">user@utmspace.my</div>
             </div>
           </div>
+
           <ul class="dropdown-menu-list">
             <li><a href="userprofile_admin_staff.html"><i class="bi bi-person-circle"></i> Profile</a></li>
             <li><a href="#" id="logoutBtn"><i class="bi bi-box-arrow-right"></i> Logout</a></li>
@@ -168,53 +171,16 @@
     <div class="container section-title" data-aos="fade-up">
       <span class="description-title">Management</span>
       <h2>Management Functions</h2>
-      <p>Staff and Admin can manage room availability, approvals, and student issues.</p>
+      <p>Staff and Admin can manage college booking operations from this dashboard.</p>
     </div>
 
     <div class="container" data-aos="fade-up" data-aos-delay="100">
 
+      <h3 class="function-group-title">Room Management</h3>
+
       <div class="row gy-4">
 
-        <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="200">
-          <article class="staff-feature-card">
-            <div class="content">
-              <i class="bi bi-person-circle staff-card-icon"></i>
-              <h3 class="title">View Profile</h3>
-              <p class="excerpt">View staff or admin account details such as name, email, role, and contact information.</p>
-              <a href="userprofile_admin_staff.html" class="readmore">
-                <span>Open</span> <i class="bi bi-arrow-right"></i>
-              </a>
-            </div>
-          </article>
-        </div>
-
         <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="250">
-          <article class="staff-feature-card">
-            <div class="content">
-              <i class="bi bi-pencil-square staff-card-icon"></i>
-              <h3 class="title">Edit Profile</h3>
-              <p class="excerpt">Update staff or admin profile information through the profile page.</p>
-              <a href="userprofile_admin_staff.html" class="readmore">
-                <span>Open</span> <i class="bi bi-arrow-right"></i>
-              </a>
-            </div>
-          </article>
-        </div>
-
-        <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="300">
-          <article class="staff-feature-card">
-            <div class="content">
-              <i class="bi bi-key staff-card-icon"></i>
-              <h3 class="title">Change Password</h3>
-              <p class="excerpt">Change the current staff or admin account password safely.</p>
-              <a href="userprofile_admin_staff.html" class="readmore">
-                <span>Open</span> <i class="bi bi-arrow-right"></i>
-              </a>
-            </div>
-          </article>
-        </div>
-
-        <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="350">
           <article class="staff-feature-card">
             <div class="content">
               <i class="bi bi-house-door staff-card-icon"></i>
@@ -227,7 +193,7 @@
           </article>
         </div>
 
-        <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="400">
+        <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="300">
           <article class="staff-feature-card">
             <div class="content">
               <i class="bi bi-door-open staff-card-icon"></i>
@@ -240,7 +206,26 @@
           </article>
         </div>
 
-        <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="450">
+        <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="350">
+          <article class="staff-feature-card">
+            <div class="content">
+              <i class="bi bi-building staff-card-icon"></i>
+              <h3 class="title">Assign College Quota</h3>
+              <p class="excerpt">Set room quota and manage student placement limits for each college.</p>
+              <a href="#" class="readmore">
+                <span>Open</span> <i class="bi bi-arrow-right"></i>
+              </a>
+            </div>
+          </article>
+        </div>
+
+      </div>
+
+      <h3 class="function-group-title">Booking Management</h3>
+
+      <div class="row gy-4">
+
+        <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="400">
           <article class="staff-feature-card">
             <div class="content">
               <i class="bi bi-check2-square staff-card-icon"></i>
@@ -253,7 +238,39 @@
           </article>
         </div>
 
+        <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="450">
+          <article class="staff-feature-card">
+            <div class="content">
+              <i class="bi bi-arrow-repeat staff-card-icon"></i>
+              <h3 class="title">Update Booking Status</h3>
+              <p class="excerpt">Update booking status such as pending, approved, rejected, or cancelled.</p>
+              <a href="#" class="readmore">
+                <span>Open</span> <i class="bi bi-arrow-right"></i>
+              </a>
+            </div>
+          </article>
+        </div>
+
         <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="500">
+          <article class="staff-feature-card">
+            <div class="content">
+              <i class="bi bi-trash3 staff-card-icon"></i>
+              <h3 class="title">Delete Booking</h3>
+              <p class="excerpt">Remove invalid, duplicated, or cancelled booking records from the system.</p>
+              <a href="#" class="readmore">
+                <span>Open</span> <i class="bi bi-arrow-right"></i>
+              </a>
+            </div>
+          </article>
+        </div>
+
+      </div>
+
+      <h3 class="function-group-title">Student Support</h3>
+
+      <div class="row gy-4">
+
+        <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="550">
           <article class="staff-feature-card">
             <div class="content">
               <i class="bi bi-exclamation-triangle staff-card-icon"></i>
@@ -266,13 +283,12 @@
           </article>
         </div>
 
-        <div class="col-lg-4 col-md-6 admin-only" data-aos="fade-up" data-aos-delay="550">
+        <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="600">
           <article class="staff-feature-card">
             <div class="content">
-              <span class="admin-only-badge">Admin Only</span>
-              <i class="bi bi-person-plus staff-card-icon"></i>
-              <h3 class="title">Add Staff</h3>
-              <p class="excerpt">Add new staff accounts into the college booking system.</p>
+              <i class="bi bi-clipboard-check staff-card-icon"></i>
+              <h3 class="title">View Appliance Form</h3>
+              <p class="excerpt">View and check appliance registration forms submitted by students.</p>
               <a href="#" class="readmore">
                 <span>Open</span> <i class="bi bi-arrow-right"></i>
               </a>
@@ -280,13 +296,94 @@
           </article>
         </div>
 
-        <div class="col-lg-4 col-md-6 admin-only" data-aos="fade-up" data-aos-delay="600">
+        <div class="col-lg-4 col-md-6 admin-only" data-aos="fade-up" data-aos-delay="650">
+          <article class="staff-feature-card">
+            <div class="content">
+              <span class="admin-only-badge">Admin Only</span>
+              <i class="bi bi-person-x staff-card-icon"></i>
+              <h3 class="title">Delete Student</h3>
+              <p class="excerpt">Remove student accounts or records from the system when required.</p>
+              <a href="#" class="readmore">
+                <span>Open</span> <i class="bi bi-arrow-right"></i>
+              </a>
+            </div>
+          </article>
+        </div>
+
+      </div>
+
+      <h3 class="function-group-title">Communication</h3>
+
+      <div class="row gy-4">
+
+        <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="700">
+          <article class="staff-feature-card">
+            <div class="content">
+              <i class="bi bi-megaphone staff-card-icon"></i>
+              <h3 class="title">Upload Message Broadcast</h3>
+              <p class="excerpt">Create announcements and send important information to students.</p>
+              <a href="#" class="readmore">
+                <span>Open</span> <i class="bi bi-arrow-right"></i>
+              </a>
+            </div>
+          </article>
+        </div>
+
+      </div>
+
+      <h3 class="function-group-title admin-only">Staff Management</h3>
+
+      <div class="row gy-4 admin-only">
+
+        <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="750">
           <article class="staff-feature-card">
             <div class="content">
               <span class="admin-only-badge">Admin Only</span>
               <i class="bi bi-people staff-card-icon"></i>
               <h3 class="title">View Staff</h3>
               <p class="excerpt">View registered staff records and staff account details.</p>
+              <a href="#" class="readmore">
+                <span>Open</span> <i class="bi bi-arrow-right"></i>
+              </a>
+            </div>
+          </article>
+        </div>
+
+        <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="800">
+          <article class="staff-feature-card">
+            <div class="content">
+              <span class="admin-only-badge">Admin Only</span>
+              <i class="bi bi-pencil staff-card-icon"></i>
+              <h3 class="title">Edit Staff</h3>
+              <p class="excerpt">Edit staff account information and update staff details.</p>
+              <a href="#" class="readmore">
+                <span>Open</span> <i class="bi bi-arrow-right"></i>
+              </a>
+            </div>
+          </article>
+        </div>
+
+        <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="850">
+          <article class="staff-feature-card">
+            <div class="content">
+              <span class="admin-only-badge">Admin Only</span>
+              <i class="bi bi-person-dash staff-card-icon"></i>
+              <h3 class="title">Delete Staff</h3>
+              <p class="excerpt">Remove staff accounts that are no longer active in the system.</p>
+              <a href="#" class="readmore">
+                <span>Open</span> <i class="bi bi-arrow-right"></i>
+              </a>
+            </div>
+          </article>
+        </div>
+
+        <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="900">
+          <article class="staff-feature-card">
+            <div class="content">
+              <span class="admin-only-badge">Admin Only</span>
+              <i class="bi bi-person-plus staff-card-icon"></i>
+              <h3 class="title">Add Staff</h3>
+              <p class="excerpt">Add new staff accounts into the college booking system.</p>
               <a href="#" class="readmore">
                 <span>Open</span> <i class="bi bi-arrow-right"></i>
               </a>
@@ -410,5 +507,4 @@
 </script>
 
 </body>
-
 </html>
