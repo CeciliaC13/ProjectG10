@@ -133,7 +133,121 @@
   }
 
   // ==============================================
-  // USER PROFILE MANAGEMENT (ADDED)
+  // NOTIFICATION FUNCTIONS
+  // ==============================================
+  
+  // Render notification dropdown
+  function renderNotificationDropdown() {
+    const container = document.getElementById('notificationList');
+    if (!container) return;
+    
+    if (notifications.length === 0) {
+      container.innerHTML = `
+        <div class="notification-empty">
+          <i class="bi bi-bell-slash"></i>
+          <p>No notifications yet</p>
+        </div>
+      `;
+      return;
+    }
+
+    container.innerHTML = notifications.map(notification => `
+      <div class="notification-item ${notification.read ? 'read' : 'unread'}" data-id="${notification.id}">
+        <div class="notification-title">📌 ${notification.title}</div>
+        <div class="notification-time">
+          <i class="bi bi-clock"></i> ${notification.time}
+        </div>
+        <a href="${notification.link}" class="view-link">View full notification →</a>
+      </div>
+    `).join('');
+  }
+
+  // Update notification badge count
+  function updateNotificationBadge() {
+    const unreadCount = notifications.filter(n => !n.read).length;
+    const badge = document.getElementById('notificationBadge');
+    if (badge) {
+      if (unreadCount > 0) {
+        badge.textContent = unreadCount;
+        badge.style.display = 'flex';
+      } else {
+        badge.style.display = 'none';
+      }
+    }
+  }
+
+  // Mark single notification as read
+  function markAsRead(notificationId) {
+    const index = notifications.findIndex(n => n.id === notificationId);
+    if (index !== -1 && !notifications[index].read) {
+      notifications[index].read = true;
+      localStorage.setItem('dashboard_notifications', JSON.stringify(notifications));
+      renderNotificationDropdown();
+      updateNotificationBadge();
+    }
+  }
+
+  // Mark all notifications as read
+  function markAllAsRead() {
+    notifications = notifications.map(n => ({ ...n, read: true }));
+    localStorage.setItem('dashboard_notifications', JSON.stringify(notifications));
+    renderNotificationDropdown();
+    updateNotificationBadge();
+  }
+
+  // Toggle notification dropdown
+  function toggleNotificationDropdown() {
+    const dropdown = document.getElementById('notificationDropdown');
+    if (dropdown) {
+      dropdown.classList.toggle('show');
+    }
+  }
+
+  // Close dropdown when clicking outside
+  function closeDropdownOnClickOutside(e) {
+    const wrapper = document.querySelector('.notification-wrapper');
+    const dropdown = document.getElementById('notificationDropdown');
+    if (wrapper && !wrapper.contains(e.target) && dropdown && dropdown.classList.contains('show')) {
+      dropdown.classList.remove('show');
+    }
+  }
+
+  // Initialize notification event listeners
+  function initNotificationListeners() {
+    const notificationBtn = document.getElementById('notificationBtn');
+    const markAllBtn = document.getElementById('markAllNotifications');
+    
+    if (notificationBtn) {
+      notificationBtn.removeEventListener('click', toggleNotificationDropdown);
+      notificationBtn.addEventListener('click', toggleNotificationDropdown);
+    }
+    
+    if (markAllBtn) {
+      markAllBtn.removeEventListener('click', markAllAsRead);
+      markAllBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        markAllAsRead();
+      });
+    }
+    
+    document.removeEventListener('click', closeDropdownOnClickOutside);
+    document.addEventListener('click', closeDropdownOnClickOutside);
+
+    // Handle clicking on notification items to mark as read
+    document.removeEventListener('click', handleNotificationItemClick);
+    document.addEventListener('click', handleNotificationItemClick);
+  }
+
+  function handleNotificationItemClick(e) {
+    const notificationItem = e.target.closest('.notification-item');
+    if (notificationItem) {
+      const id = parseInt(notificationItem.dataset.id);
+      markAsRead(id);
+    }
+  }
+
+  // ==============================================
+  // USER PROFILE MANAGEMENT
   // ==============================================
   
   const UserManager = {
@@ -158,9 +272,7 @@
       
       // Update avatar initials
       const avatarInitial = document.getElementById('avatarInitial');
-      const dropdownAvatarInitial = document.getElementById('dropdownAvatarInitial');
       if (avatarInitial) avatarInitial.textContent = initial;
-      if (dropdownAvatarInitial) dropdownAvatarInitial.textContent = initial;
       
       // Update user info in dropdown
       const userName = document.getElementById('dropdownUserName');
@@ -171,27 +283,13 @@
       if (userRole) userRole.textContent = userData.role || 'Student';
       if (userEmail) userEmail.textContent = userData.email || 'Their email@gmail.com';
       
-      // Update notification badge if user has unread notifications
+      // Update notification badge
       this.updateNotificationBadge();
     },
 
-    // Update notification badge (example - you can expand this)
+    // Update notification badge
     updateNotificationBadge: function() {
-      const notificationBadge = document.getElementById('notificationCount');
-      if (notificationBadge) {
-        // Get unread notifications from localStorage or set default
-        let unreadCount = localStorage.getItem('unreadNotifications');
-        if (unreadCount === null) {
-          unreadCount = '3';
-        }
-        notificationBadge.textContent = unreadCount;
-        
-        if (unreadCount === '0' || unreadCount === 0) {
-          notificationBadge.style.display = 'none';
-        } else {
-          notificationBadge.style.display = 'flex';
-        }
-      }
+      updateNotificationBadge();
     },
 
     // Load user data on page load
@@ -205,15 +303,54 @@
     // Logout function
     logout: function() {
       localStorage.removeItem('currentUser');
+      localStorage.removeItem('studentEmail');
+      localStorage.removeItem('studentId');
+      localStorage.removeItem('studentName');
       window.location.href = 'index.html';
     }
   };
 
-  // Initialize user data when DOM is ready
+  // Auto-sync header dropdown with Supabase
+  async function loadHeaderProfile() {
+    const email = localStorage.getItem('studentEmail');
+    if (!email) return;
+
+    // Check if dropdown elements exist on this page
+    const nameEl = document.getElementById('dropdownUserName');
+    const emailEl = document.getElementById('dropdownUserEmail');
+    const avatarEl = document.getElementById('avatarInitial');
+    if (!nameEl || !emailEl || !avatarEl) return;
+
+    // Check if db is defined (Supabase)
+    if (typeof db !== 'undefined' && db) {
+      const { data, error } = await db
+        .from('Student')
+        .select('name, email')
+        .eq('email', email)
+        .single();
+
+      if (!error && data) {
+        const initial = data.name ? data.name.charAt(0).toUpperCase() : 'S';
+        avatarEl.textContent = initial;
+        nameEl.textContent = data.name;
+        emailEl.textContent = data.email;
+      }
+    }
+  }
+
+  // Initialize everything when DOM is ready
   document.addEventListener('DOMContentLoaded', function() {
+    // Load user data
     UserManager.loadUserData();
+    loadHeaderProfile();
     
-    // Set up logout button handler
+    // Load notifications
+    loadNotifications();
+    
+    // Initialize notification event listeners
+    initNotificationListeners();
+    
+    // Set up logout button handler (multiple possible IDs)
     const logoutBtn = document.getElementById('logoutBtn');
     if (logoutBtn) {
       logoutBtn.addEventListener('click', function(e) {
@@ -221,43 +358,15 @@
         UserManager.logout();
       });
     }
+    
+    // Also handle any other logout buttons
+    const logoutBtns = document.querySelectorAll('.logout-btn');
+    logoutBtns.forEach(btn => {
+      btn.addEventListener('click', function(e) {
+        e.preventDefault();
+        UserManager.logout();
+      });
+    });
   });
-  // Auto-sync header dropdown on all pages
-async function loadHeaderProfile() {
-  const email = localStorage.getItem('studentEmail');
-  if (!email) return;
-
-  // Check if dropdown elements exist on this page
-  const nameEl = document.getElementById('dropdownUserName');
-  const emailEl = document.getElementById('dropdownUserEmail');
-  const avatarEl = document.getElementById('avatarInitial');
-  if (!nameEl || !emailEl || !avatarEl) return;
-
-  const { data, error } = await db
-    .from('Student')
-    .select('name, email')
-    .eq('email', email)
-    .single();
-
-  if (error || !data) return;
-
-  const initial = data.name ? data.name.charAt(0).toUpperCase() : 'S';
-  avatarEl.textContent = initial;
-  nameEl.textContent = data.name;
-  emailEl.textContent = data.email;
-}
-
-// Logout on all pages
-const logoutBtn = document.getElementById('logoutBtn');
-if (logoutBtn) {
-  logoutBtn.addEventListener('click', () => {
-    localStorage.removeItem('studentEmail');
-    localStorage.removeItem('studentId');
-    localStorage.removeItem('studentName');
-    window.location.href = 'index.html';
-  });
-}
-
-loadHeaderProfile();
 
 })(); // End of main IIFE

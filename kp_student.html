@@ -7,22 +7,18 @@
   <meta name="description" content="">
   <meta name="keywords" content="">
 
-  <!-- Favicons -->
   <link href="img/favicon.png" rel="icon">
   <link href="apple-touch-icon.png" rel="apple-touch-icon">
 
-  <!-- Fonts -->
   <link href="https://fonts.googleapis.com" rel="preconnect">
   <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&family=Montserrat:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Raleway:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
 
-  <!-- Vendor CSS Files -->
   <link href="vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
   <link href="vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
   <link href="vendor/aos/aos.css" rel="stylesheet">
   <link href="vendor/swiper/swiper-bundle.min.css" rel="stylesheet">
 
-  <!-- Main CSS File -->
   <link href="main.css" rel="stylesheet">
 
 </head>
@@ -35,7 +31,6 @@
       <img src="img/spacelogo.png" alt="UTM Space Logo" style="height: 50px; width: auto; max-height:60px;">
     </a>
 
-    <!-- Navigation Menu -->
     <nav id="navmenu" class="navmenu">
       <ul>
         <li><a href="dashboard.html" class="active">Home</a></li>
@@ -53,21 +48,29 @@
       <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>
     </nav>
 
-    <!-- User Profile and Notification Section - Far Right -->
     <div class="header-actions">
       
-      <!-- Social Links -->
       <div class="header-social-links">
         <a href="https://www.facebook.com/utmspace/" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><i class="bi bi-facebook"></i></a>
         <a href="https://www.instagram.com/spaceutm_official/?hl=en" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><i class="bi bi-instagram"></i></a>
       </div>
 
-      <!-- Notification Button -->
-      <a href="notification.html" class="notification-btn" title="Notifications">
-        <i class="bi bi-bell-fill"></i>
-      </a>
+      <div class="notification-wrapper">
+        <button class="notification-btn" id="notificationBtn" title="Notifications">
+          <i class="bi bi-bell-fill"></i>
+          <span class="notification-badge" id="notificationBadge">2</span>
+        </button>
 
-      <!-- User Profile with Dropdown -->
+        <div class="notification-dropdown" id="notificationDropdown">
+          <div class="notification-dropdown-header">
+            <h4><i class="bi bi-bell-fill"></i> Notifications</h4>
+            <a href="#" class="mark-all-link" id="markAllNotifications">Mark all as read</a>
+          </div>
+          <div class="notification-list" id="notificationList">
+          </div>
+        </div>
+      </div>
+
       <div class="user-profile">
         <div class="user-avatar">
           <div class="avatar-placeholder" id="avatarInitial">S</div>
@@ -103,10 +106,8 @@
     <p class="sub">Comfortable, affordable rooms designed for students & individuals</p>
   </div>
 
-  <!-- PERDANA RESIDENCE ROOMS -->
   <div class="rooms-grid">
     
-    <!-- 1. SINGLE BED AC ROOM -->
     <div class="room-card">
       <div class="card-header">
         <div class="room-type">
@@ -133,7 +134,6 @@
       <a href="formKP_student.html" class="btn-book">Book this room <i class="fas fa-arrow-right"></i></a>
     </div>
 
-    <!-- 2. SINGLE BED FAN ROOM -->
     <div class="room-card">
       <div class="card-header">
         <div class="room-type">
@@ -160,7 +160,6 @@
       <a href="formKP_student.html" class="btn-book">Book this room <i class="fas fa-arrow-right"></i></a>
     </div>
 
-    <!-- 3. TWIN BED FAN ROOM (shared) -->
     <div class="room-card">
       <div class="card-header">
         <div class="room-type">
@@ -232,20 +231,16 @@
   </div>
 </footer>
 
-<!-- Scroll Top -->
 <a href="#" id="scroll-top" class="scroll-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
 
-<!-- Preloader -->
 <div id="preloader"></div>
 
-<!-- Vendor JS Files -->
 <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
 <script src="vendor/php-email-form/validate.js"></script>
 <script src="vendor/aos/aos.js"></script>
 <script src="vendor/swiper/swiper-bundle.min.js"></script>
 <script src="vendor/purecounter/purecounter_vanilla.js"></script>
 
-<!-- Main JS File -->
 <script src="main.js"></script>
 
 <script>
