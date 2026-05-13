@@ -531,8 +531,12 @@
   </div>
 </footer>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase.js"></script>
 <script>
+document.getElementById('reservationForm').addEventListener('submit', async function(e) {
+    });
+
   let selectedPrice = 0;
   let selectedUnit = 'day';
   let selectedRoomName = '';
@@ -547,7 +551,7 @@
     'Single Bed AC Room': 'Private Room with Single Bed, Air-conditioner, Wardrobe, Study Table & Chair',
     'Twin Bed Fan Room': 'Shared Room with 2 Single Beds, Fan, Wardrobe, Study Table & Chair'
   };
-
+  
   // Room type selection 
   document.getElementById('roomType').addEventListener('change', function() {
     const selectedValue = this.value;
@@ -671,42 +675,52 @@
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     let total = selectedUnit === 'day' ? selectedPrice * diffDays : selectedPrice;
     
-    // Create reservation object and save to localStorage
-    const reservation = {
-      reservationId: 'PRD-' + Date.now(),
-      studentName: name,
-      studentId: studentId,
-      email: email,
-      phone: phone,
-      roomType: selectedRoomName,
-      pricePerUnit: selectedPrice,
-      unit: selectedUnit,
-      checkIn: checkIn,
-      checkOut: checkOut,
-      nights: diffDays,
-      totalAmount: total,
-      status: 'Pending Payment',
-      reservationDate: new Date().toISOString()
+    const reservationData = {
+        reservation_id: 'KP' + Date.now(),
+        student_name: name,
+        student_id: studentId,
+        email: email,
+        phone: phone,
+        college: 'KP', // Assuming college is KP for this form
+        room_type: selectedRoomName,
+        check_in: checkIn,
+        check_out: checkOut,
+        total_amount: total,
+        status: 'Pending Payment'
     };
+
+    async function saveToSupabase() {
+      try {
+        const { data, error } = await db
+            .from('reservations')
+            .insert([reservationData]);
+
+        if (error) throw error;
+
+        console.log('Saved in Supabase:', data);
     
-    // Save to localStorage
-    let reservations = JSON.parse(localStorage.getItem('reservations') || '[]');
-    reservations.push(reservation);
-    localStorage.setItem('reservations', JSON.stringify(reservations));
+        // Store current reservation for payment page
+        localStorage.setItem('currentReservation', JSON.stringify(reservationData));
     
-    // Store current reservation for payment page
-    localStorage.setItem('currentReservation', JSON.stringify(reservation));
+        // Disable button and show loading
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Redirecting to Payment...';
     
-    // Disable button and show loading
-    submitBtn.disabled = true;
-    submitBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Redirecting to Payment...';
-    
-    // Redirect to payment page
-    setTimeout(() => {
-      window.location.href = 'payment_student.html';
-    }, 500);
+        // Redirect to payment page
+        setTimeout(() => {
+          window.location.href = 'payment_student.html';
+        }, 500);
+      } catch (err) {
+        console.error('Submit failed:', err.message);
+        alert('Submit failed, please try again: ' + err.message);
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = 'Confirm Reservation';
+      }
+    }
+
+    saveToSupabase();
   });
-  
+
   // Set minimum date for check-in (today)
   const today = new Date().toISOString().split('T')[0];
   document.getElementById('checkIn').min = today;
