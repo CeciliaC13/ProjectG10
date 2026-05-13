@@ -239,7 +239,7 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-` <script src="supabase.js"></script>
+   <script src="supabase.js"></script>
   <script>
     document.getElementById("loginBtn").addEventListener("click", async () => {
       const role = document.getElementById("role").value;
@@ -280,7 +280,7 @@
             return;
         }
 
-      localStorage.setItem('userRole', role);
+     
       localStorage.setItem('currentUser', JSON.stringify({
       id: role === 'admin' ? data.admin_id : data.staff_id,
       name: data.name,
@@ -288,7 +288,9 @@
       email: data.email
       }));
 
-      
+      localStorage.setItem('staffAdminRole', role);
+      localStorage.setItem('staffAdminEmail', data.email);
+      localStorage.setItem('staffAdminId', role === 'admin' ? data.admin_id : data.staff_id);
       window.location.href = 'admin_staff_dashboard.html';
   
     });

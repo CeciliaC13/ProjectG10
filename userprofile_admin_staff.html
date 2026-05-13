@@ -117,10 +117,6 @@
           <div class="info-label">Email:</div>
           <div class="info-value" id="displayEmail">user@utmspace.my</div>
         </div>
-        <div class="info-row">
-          <div class="info-label">Phone Number:</div>
-          <div class="info-value" id="displayPhone">N/A</div>
-        </div>
       </div>
     </div>
 
@@ -208,10 +204,6 @@
             <small class="text-muted">Email cannot be changed.</small>
           </div>
           <div class="mb-3">
-            <label for="editPhone" class="form-label">Phone Number</label>
-            <input type="tel" class="form-control" id="editPhone" placeholder="e.g., 0123456789">
-          </div>
-          <div class="mb-3">
             <label for="editId" class="form-label">Staff/Admin ID</label>
             <input type="text" class="form-control" id="editId" readonly disabled style="background:#f5f5f5; cursor:not-allowed; user-select:none;">
             <small class="text-muted">ID cannot be changed.</small>
@@ -275,7 +267,7 @@
   let currentEmail = '';
 
   async function loadAdminStaffProfile() {
-    currentRole = localStorage.getItem('staffAdminRole') || localStorage.getItem('userRole');
+    currentRole = localStorage.getItem('staffAdminRole') 
     currentEmail = localStorage.getItem('staffAdminEmail');
     const currentId = localStorage.getItem('staffAdminId');
     const savedName = localStorage.getItem('staffAdminName');
@@ -315,7 +307,6 @@
 
     const name = data?.name || data?.full_name || data?.staff_name || data?.admin_name || savedName || currentRole + ' User';
     const email = data?.email || currentEmail || 'user@utmspace.my';
-    const phone = data?.telephone || data?.phone || 'N/A';
     const id = data?.[currentIdColumn] || currentId || 'N/A';
 
     const initial = name ? name.charAt(0).toUpperCase() : currentRole.charAt(0);
@@ -334,11 +325,9 @@
     document.getElementById('displayRole').textContent = currentRole;
     document.getElementById('displayId').textContent = id;
     document.getElementById('displayEmail').textContent = email;
-    document.getElementById('displayPhone').textContent = phone;
-
+   
     document.getElementById('editName').value = name;
     document.getElementById('editEmail').value = email;
-    document.getElementById('editPhone').value = phone === 'N/A' ? '' : phone;
     document.getElementById('editId').value = id;
 
     localStorage.setItem('staffAdminRole', currentRole);
@@ -349,7 +338,6 @@
 
   async function saveProfileChanges() {
     const newName = document.getElementById('editName').value.trim();
-    const newPhone = document.getElementById('editPhone').value.trim();
     const email = document.getElementById('editEmail').value.trim();
 
     if (!newName) {
@@ -357,19 +345,12 @@
       return;
     }
 
-    if (newPhone) {
-      const telDigits = newPhone.replace(/[-\s+]/g, '');
-      if (!/^(60|0)[0-9]{9,10}$/.test(telDigits)) {
-        alert('Please enter a valid Malaysian phone number.');
-        return;
-      }
-    }
+  
 
     const { error } = await db
       .from(currentTable)
       .update({
         name: newName,
-        telephone: newPhone
       })
       .eq('email', email);
 
@@ -382,7 +363,6 @@
     localStorage.setItem('staffAdminName', newName);
 
     document.getElementById('displayName').textContent = newName;
-    document.getElementById('displayPhone').textContent = newPhone || 'N/A';
     document.getElementById('profileName').textContent = newName;
     document.getElementById('dropdownUserName').textContent = newName;
     document.getElementById('avatarInitial').textContent = newName.charAt(0).toUpperCase();
