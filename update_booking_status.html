@@ -4,7 +4,7 @@
 <head>
   <meta charset="utf-8">
   <meta content="width=device-width, initial-scale=1.0" name="viewport">
-  <title>View Approvals - UTMSPACE College Booking</title>
+  <title>Update Booking Status - UTMSPACE College Booking</title>
 
   <link href="img/favicon.png" rel="icon">
   <link href="img/apple-touch-icon.png" rel="apple-touch-icon">
@@ -20,7 +20,7 @@
   <link href="main.css" rel="stylesheet">
 
   <style>
-    .approval-page {
+    .status-page {
       padding: 60px 0;
       background: #f8f9fa;
       min-height: 100vh;
@@ -64,24 +64,6 @@
       background: rgba(255,255,255,0.28);
     }
 
-    .status-page-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      background: #2c5a7a;
-      color: white;
-      border-radius: 12px;
-      padding: 10px 18px;
-      text-decoration: none;
-      font-weight: 600;
-      margin-top: 18px;
-    }
-
-    .status-page-btn:hover {
-      color: white;
-      background: #1a3c5e;
-    }
-
     .filter-box,
     .table-box {
       background: white;
@@ -91,17 +73,17 @@
       margin-bottom: 30px;
     }
 
-    .approval-table {
+    .booking-table {
       width: 100%;
       border-collapse: collapse;
-      min-width: 900px;
+      min-width: 950px;
     }
 
     .table-wrapper {
       overflow-x: auto;
     }
 
-    .approval-table th {
+    .booking-table th {
       background: #6b092a;
       color: white;
       padding: 14px;
@@ -109,7 +91,7 @@
       text-align: center;
     }
 
-    .approval-table td {
+    .booking-table td {
       padding: 14px;
       border-bottom: 1px solid #eee;
       text-align: center;
@@ -117,7 +99,7 @@
       vertical-align: middle;
     }
 
-    .approval-table tr:hover {
+    .booking-table tr:hover {
       background: #fafafa;
     }
 
@@ -149,19 +131,33 @@
       color: #374151;
     }
 
-    .view-btn {
+    .update-btn {
       background: #2c5a7a;
       color: white;
       border: none;
       border-radius: 10px;
-      padding: 7px 14px;
+      padding: 7px 12px;
       font-size: 13px;
       font-weight: 600;
-      margin: 2px;
     }
 
-    .view-btn:hover {
-      background: #1a3c5e;
+    .message-box {
+      display: none;
+      padding: 12px;
+      border-radius: 12px;
+      margin-bottom: 18px;
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .message-box.show {
+      display: block;
+    }
+
+    .message-success {
+      background: #dcfce7;
+      color: #166534;
+      border: 1px solid #bbf7d0;
     }
   </style>
 </head>
@@ -179,8 +175,7 @@
       <ul>
         <li><a href="admin_staff_dashboard.html">Home</a></li>
         <li><a href="room_availability.html">Room Availability</a></li>
-        <li><a href="view_approvals.html" class="active">Approvals</a></li>
-        <li><a href="update_booking_status.html">Update Status</a></li>
+        <li><a href="view_approvals.html">Approvals</a></li>
         <li><a href="view_issue.html">Issue</a></li>
         <li><a href="contact.html">Contact</a></li>
       </ul>
@@ -226,26 +221,22 @@
 
 <main class="main">
 
-  <section class="approval-page">
+  <section class="status-page">
     <div class="container">
 
       <div class="page-header-box">
         <a href="admin_staff_dashboard.html" class="back-link-btn">
           <i class="bi bi-arrow-left"></i> Back to Dashboard
         </a>
-        <h1>View Approvals</h1>
-        <p>Staff and Admin can view student room booking applications and check booking details.</p>
-
-        <a href="update_booking_status.html" class="status-page-btn">
-          <i class="bi bi-arrow-repeat"></i> Go to Update Booking Status
-        </a>
+        <h1>Update Booking Status</h1>
+        <p>Staff and Admin can update booking status such as pending, approved, rejected, or cancelled.</p>
       </div>
 
       <div class="filter-box">
         <div class="row gy-3">
           <div class="col-md-6">
             <label class="form-label fw-semibold">Filter by Status</label>
-            <select class="form-select" id="statusFilter" onchange="filterApprovals()">
+            <select class="form-select" id="statusFilter" onchange="renderBookings()">
               <option value="All">All Status</option>
               <option value="Pending">Pending</option>
               <option value="Approved">Approved</option>
@@ -256,7 +247,7 @@
 
           <div class="col-md-6">
             <label class="form-label fw-semibold">Filter by College</label>
-            <select class="form-select" id="collegeFilter" onchange="filterApprovals()">
+            <select class="form-select" id="collegeFilter" onchange="renderBookings()">
               <option value="All">All Colleges</option>
               <option value="Perdana Residence Block U7">Perdana Residence Block U7</option>
               <option value="Kolej 9">Kolej 9</option>
@@ -267,10 +258,12 @@
       </div>
 
       <div class="table-box">
-        <h3 class="mb-4">Student Booking Applications</h3>
+        <h3 class="mb-4">Booking Status Records</h3>
+
+        <div class="message-box" id="messageBox"></div>
 
         <div class="table-wrapper">
-          <table class="approval-table">
+          <table class="booking-table">
             <thead>
               <tr>
                 <th>No.</th>
@@ -279,13 +272,13 @@
                 <th>Student Name</th>
                 <th>College</th>
                 <th>Room Type</th>
-                <th>Apply Date</th>
-                <th>Status</th>
+                <th>Current Status</th>
+                <th>Change Status</th>
                 <th>Action</th>
               </tr>
             </thead>
 
-            <tbody id="approvalTableBody"></tbody>
+            <tbody id="bookingTableBody"></tbody>
           </table>
         </div>
       </div>
@@ -350,22 +343,6 @@
 
 <div id="preloader"></div>
 
-<div class="modal fade" id="bookingModal" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title"><i class="bi bi-file-earmark-text"></i> Booking Details</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body" id="bookingDetails"></div>
-      <div class="modal-footer">
-        <a href="update_booking_status.html" class="btn btn-primary">Update Status</a>
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-      </div>
-    </div>
-  </div>
-</div>
-
 <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
 <script src="vendor/php-email-form/validate.js"></script>
 <script src="vendor/aos/aos.js"></script>
@@ -377,14 +354,13 @@
 <script src="main.js"></script>
 
 <script>
-  let approvals = JSON.parse(localStorage.getItem('bookingApprovals')) || [
+  let bookings = JSON.parse(localStorage.getItem('bookingApprovals')) || [
     {
       bookingId: 'B001',
       studentId: 'A24DW0011',
       studentName: 'Aina Natasha',
       college: 'Kolej 9',
       roomType: 'Single Room',
-      applyDate: '2026-05-10',
       status: 'Pending'
     },
     {
@@ -393,7 +369,6 @@
       studentName: 'Daniel Lim',
       college: 'Kolej 10',
       roomType: 'Double / Twin Sharing',
-      applyDate: '2026-05-11',
       status: 'Approved'
     },
     {
@@ -402,10 +377,13 @@
       studentName: 'Kavitha Raj',
       college: 'Perdana Residence Block U7',
       roomType: 'Single Bed AC',
-      applyDate: '2026-05-12',
-      status: 'Pending'
+      status: 'Rejected'
     }
   ];
+
+  function saveBookings() {
+    localStorage.setItem('bookingApprovals', JSON.stringify(bookings));
+  }
 
   function getStatusClass(status) {
     if (status === 'Approved') return 'status-approved';
@@ -414,12 +392,23 @@
     return 'status-pending';
   }
 
-  function renderApprovals() {
-    const tbody = document.getElementById('approvalTableBody');
+  function showMessage(text) {
+    const box = document.getElementById('messageBox');
+    box.className = 'message-box show message-success';
+    box.textContent = text;
+
+    setTimeout(function() {
+      box.className = 'message-box';
+      box.textContent = '';
+    }, 2500);
+  }
+
+  function renderBookings() {
+    const tbody = document.getElementById('bookingTableBody');
     const statusFilter = document.getElementById('statusFilter').value;
     const collegeFilter = document.getElementById('collegeFilter').value;
 
-    const filtered = approvals.filter(function(item) {
+    const filtered = bookings.filter(function(item) {
       const statusMatch = statusFilter === 'All' || item.status === statusFilter;
       const collegeMatch = collegeFilter === 'All' || item.college === collegeFilter;
       return statusMatch && collegeMatch;
@@ -428,14 +417,14 @@
     if (filtered.length === 0) {
       tbody.innerHTML = `
         <tr>
-          <td colspan="9">No booking applications found.</td>
+          <td colspan="9">No booking records found.</td>
         </tr>
       `;
       return;
     }
 
     tbody.innerHTML = filtered.map(function(item, index) {
-      const realIndex = approvals.indexOf(item);
+      const realIndex = bookings.indexOf(item);
       const bookingId = item.bookingId || 'B00' + (realIndex + 1);
 
       return `
@@ -446,35 +435,34 @@
           <td>${item.studentName}</td>
           <td>${item.college}</td>
           <td>${item.roomType}</td>
-          <td>${item.applyDate || '-'}</td>
           <td><span class="status-badge ${getStatusClass(item.status)}">${item.status}</span></td>
           <td>
-            <button class="view-btn" onclick="viewBooking(${realIndex})">View</button>
+            <select class="form-select form-select-sm" id="statusSelect${realIndex}">
+              <option value="Pending" ${item.status === 'Pending' ? 'selected' : ''}>Pending</option>
+              <option value="Approved" ${item.status === 'Approved' ? 'selected' : ''}>Approved</option>
+              <option value="Rejected" ${item.status === 'Rejected' ? 'selected' : ''}>Rejected</option>
+              <option value="Cancelled" ${item.status === 'Cancelled' ? 'selected' : ''}>Cancelled</option>
+            </select>
+          </td>
+          <td>
+            <button class="update-btn" onclick="updateBookingStatus(${realIndex})">Update</button>
           </td>
         </tr>
       `;
     }).join('');
   }
 
-  function filterApprovals() {
-    renderApprovals();
-  }
+  function updateBookingStatus(index) {
+    const newStatus = document.getElementById('statusSelect' + index).value;
+    bookings[index].status = newStatus;
 
-  function viewBooking(index) {
-    const item = approvals[index];
-    const bookingId = item.bookingId || 'B00' + (index + 1);
+    if (!bookings[index].bookingId) {
+      bookings[index].bookingId = 'B00' + (index + 1);
+    }
 
-    document.getElementById('bookingDetails').innerHTML = `
-      <p><strong>Booking ID:</strong> ${bookingId}</p>
-      <p><strong>Student ID:</strong> ${item.studentId}</p>
-      <p><strong>Student Name:</strong> ${item.studentName}</p>
-      <p><strong>College:</strong> ${item.college}</p>
-      <p><strong>Room Type:</strong> ${item.roomType}</p>
-      <p><strong>Apply Date:</strong> ${item.applyDate || '-'}</p>
-      <p><strong>Status:</strong> ${item.status}</p>
-    `;
-
-    new bootstrap.Modal(document.getElementById('bookingModal')).show();
+    saveBookings();
+    renderBookings();
+    showMessage('Booking status updated to ' + newStatus + '.');
   }
 
   async function loadAdminStaffHeader() {
@@ -508,9 +496,10 @@
     window.location.href = 'admin_staff_login.html';
   });
 
-  renderApprovals();
+  renderBookings();
   loadAdminStaffHeader();
 </script>
 
 </body>
+
 </html>
