@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-  <title>Room Reservation | UTM Space - Pradana Residence UV</title>
+  <title>Room Reservation | UTM Space - Pradana Residence U7</title>
   
   <link href="https://fonts.googleapis.com" rel="preconnect">
   <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
@@ -16,8 +16,8 @@
 
   <link href="main.css" rel="stylesheet">
   
-  <style>
-    * {
+  <style> 
+  * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
@@ -29,35 +29,6 @@
       min-height: 100vh;
     }
 
-    /* Header Styles */
-    .header {
-      background: linear-gradient(135deg, #1a3c5e 0%, #2c5a7a 100%);
-      padding: 15px 0;
-      position: sticky;
-      top: 0;
-      z-index: 1000;
-      box-shadow: 0 2px 20px rgba(0,0,0,0.1);
-    }
-
-    .logo img {
-      height: 50px;
-      width: auto;
-      max-height: 60px;
-    }
-
-    .container {
-      max-width: 800px;
-      margin: 0 auto;
-      padding: 0 20px;
-    }
-
-    .header .container {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-
-    /* Main Content */
     .reservation-main {
       padding: 40px 0;
     }
@@ -329,6 +300,7 @@
   </style>
 </head>
 
+
 <body class="index-page">
 <header id="header" class="logo d-flex align-items-center" style="margin-right: auto;">
   <div class="container position-relative d-flex align-items-center">
@@ -337,39 +309,44 @@
       <img src="img/spacelogo.png" alt="UTM Space Logo" style="height: 50px; width: auto; max-height:60px;">
     </a>
 
-    <!-- Navigation Menu -->
     <nav id="navmenu" class="navmenu">
       <ul>
         <li><a href="dashboard.html" class="active">Home</a></li>
         <li><a href="booking_history.html">History</a></li>
         <li class="dropdown"><a href="#"><span>Pages</span> <i class="bi bi-chevron-down toggle-dropdown"></i></a>
           <ul>
-            <li><a href="about.html">About</a></li>
             <li><a href="booking_history.html">History</a></li>
             <li><a href="search-results.html">Search Results</a></li>
           </ul>
         </li>
-        <li><a href="report.html">Report</a></li>
+        <li><a href="reportform_student.html">Report</a></li>
         <li><a href="contact.html">Contact</a></li>
       </ul>
       <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>
     </nav>
 
-    <!-- User Profile and Notification Section - Far Right -->
     <div class="header-actions">
       
-      <!-- Social Links -->
       <div class="header-social-links">
         <a href="https://www.facebook.com/utmspace/" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><i class="bi bi-facebook"></i></a>
         <a href="https://www.instagram.com/spaceutm_official/?hl=en" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><i class="bi bi-instagram"></i></a>
       </div>
 
-      <!-- Notification Button -->
-      <a href="notification.html" class="notification-btn" title="Notifications">
-        <i class="bi bi-bell-fill"></i>
-      </a>
+      <div class="notification-wrapper">
+        <button class="notification-btn" id="notificationBtn" title="Notifications">
+          <i class="bi bi-bell-fill"></i>
+        </button>
 
-      <!-- User Profile with Dropdown -->
+        <div class="notification-dropdown" id="notificationDropdown">
+          <div class="notification-dropdown-header">
+            <h4><i class="bi bi-bell-fill"></i> Notifications</h4>
+            <a href="#" class="mark-all-link" id="markAllNotifications">Mark all as read</a>
+          </div>
+          <div class="notification-list" id="notificationList">
+          </div>
+        </div>
+      </div>
+
       <div class="user-profile">
         <div class="user-avatar">
           <div class="avatar-placeholder" id="avatarInitial">S</div>
@@ -384,13 +361,11 @@
           </div>
           <ul class="dropdown-menu-list">
             <li><a href="userprofile_student.html"><i class="bi bi-person-circle"></i> Profile</a></li>
-            <li><a href="#" id="logoutBtn"><i class="bi bi-box-arrow-right"></i> Logout</a></li>
+            <li><a href="index.html" id="logoutBtn"><i class="bi bi-box-arrow-right"></i> Logout</a></li>
           </ul>
         </div>
       </div>
-
     </div>
-
   </div>
 </header>
 
@@ -401,7 +376,6 @@
       <p>Book your comfortable stay at UTM's premier student accommodation</p>
     </div>
 
-    <!-- Error Alert Only -->
     <div class="alert alert-error" id="errorAlert">
       <i class="bi bi-exclamation-triangle-fill"></i> <span>Please fill in all required fields and select a room.</span>
     </div>
@@ -412,7 +386,6 @@
         Room Reservation Form
       </h2>
 
-      <!-- Check-in/out Info Box -->
       <div class="info-box">
         <h4><i class="bi bi-clock-history"></i> Check-In / Check-Out Policy</h4>
         <p><i class="bi bi-door-open"></i> <strong>Check-In:</strong> After 3:00pm (Early check-in RM10.00/hour - subject to availability)</p>
@@ -530,6 +503,9 @@
     </div>
   </div>
 </footer>
+
+<a href="#" id="scroll-top" class="scroll-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
+<script src="main.js"></script>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="supabase.js"></script>

@@ -1094,24 +1094,25 @@ h6 {
 }
 
 /*--------------------------------------------------------------
-# Scroll Top Button
+# Scroll Top Button - MADE BIGGER
 --------------------------------------------------------------*/
 .scroll-top {
   position: fixed;
   visibility: hidden;
   opacity: 0;
-  right: 15px;
+  right: 25px;
   bottom: -15px;
   z-index: 99999;
   background-color: var(--accent-color);
-  width: 44px;
-  height: 44px;
-  border-radius: 50px;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
   transition: all 0.4s;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
 }
 
 .scroll-top i {
-  font-size: 24px;
+  font-size: 28px;
   color: var(--contrast-color);
   line-height: 0;
 }
@@ -1119,12 +1120,14 @@ h6 {
 .scroll-top:hover {
   background-color: color-mix(in srgb, var(--accent-color), transparent 20%);
   color: var(--contrast-color);
+  transform: scale(1.05);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
 }
 
 .scroll-top.active {
   visibility: visible;
   opacity: 1;
-  bottom: 15px;
+  bottom: 25px;
 }
 
 /*--------------------------------------------------------------
