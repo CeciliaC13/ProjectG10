@@ -8,12 +8,10 @@
   <meta name="description" content="">
   <meta name="keywords" content="">
 
-  <!-- Fonts -->
   <link href="https://fonts.googleapis.com" rel="preconnect">
   <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&family=Montserrat:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
 
-  <!-- Bootstrap Icons -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
 
   <style>
@@ -25,7 +23,7 @@
 
     body {
       font-family: 'Roboto', sans-serif;
-      background:#5c001f;
+      background: #5c001f;
       min-height: 100vh;
       display: flex;
       align-items: center;
@@ -33,7 +31,6 @@
       padding: 20px;
     }
 
-    /* Container */
     .forgot-container {
       max-width: 500px;
       width: 100%;
@@ -55,7 +52,6 @@
       }
     }
 
-    /* Header */
     .forgot-header {
       background: linear-gradient(135deg, #1a3c5e 0%, #2c5a7a 100%);
       padding: 40px 30px;
@@ -75,12 +71,10 @@
       font-size: 14px;
     }
 
-    /* Form Section */
     .forgot-form {
       padding: 35px;
     }
 
-    /* Steps Indicator */
     .steps {
       display: flex;
       justify-content: space-between;
@@ -164,11 +158,12 @@
       align-items: center;
     }
 
-    .input-wrapper i {
+    .input-wrapper i:first-child {
       position: absolute;
       left: 15px;
       color: #aaa;
       font-size: 18px;
+      z-index: 1;
     }
 
     .form-control {
@@ -191,7 +186,53 @@
       border-color: #e74c3c;
     }
 
-    /* Password Hint */
+    .password-wrapper {
+      position: relative;
+      width: 100%;
+    }
+
+    .password-wrapper i.left-icon {
+      position: absolute;
+      left: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #aaa;
+      font-size: 18px;
+      z-index: 1;
+    }
+
+    .password-wrapper input {
+      width: 100%;
+      padding: 14px 50px 14px 45px;
+      font-size: 15px;
+      border: 1.5px solid #e0e0e0;
+      border-radius: 12px;
+      transition: all 0.3s ease;
+      font-family: 'Roboto', sans-serif;
+    }
+
+    .password-wrapper input:focus {
+      outline: none;
+      border-color: #2c5a7a;
+      box-shadow: 0 0 0 3px rgba(44, 90, 122, 0.1);
+    }
+
+    .toggle-password {
+      position: absolute;
+      right: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      cursor: pointer;
+      color: #aaa;
+      font-size: 18px;
+      transition: color 0.3s ease;
+      z-index: 2;
+    }
+
+    .toggle-password:hover {
+      color: #2c5a7a;
+    }
+
     .password-hint {
       font-size: 11px;
       color: #888;
@@ -201,7 +242,6 @@
       gap: 5px;
     }
 
-    /* Reset Button */
     .reset-btn {
       width: 100%;
       background: linear-gradient(135deg, #1a3c5e 0%, #2c5a7a 100%);
@@ -234,7 +274,6 @@
       transform: translateX(5px);
     }
 
-    /* Back to Login Link */
     .back-link {
       text-align: center;
       margin-top: 25px;
@@ -252,10 +291,9 @@
     }
 
     .back-link a:hover {
-      color:  #900021;
+      color: #900021;
     }
 
-    /* Alert Messages */
     .alert {
       padding: 14px;
       border-radius: 12px;
@@ -292,7 +330,6 @@
       display: none;
     }
 
-    /* Success Card */
     .success-card {
       text-align: center;
       padding: 20px;
@@ -344,6 +381,11 @@
         font-size: 14px;
       }
       
+      .password-wrapper input {
+        padding: 12px 50px 12px 42px;
+        font-size: 14px;
+      }
+      
       .step-number {
         width: 32px;
         height: 32px;
@@ -386,7 +428,6 @@
         </div>
       </div>
 
-      <!-- Email verification -->
       <div id="step1">
         <div class="alert alert-info">
           <i class="bi bi-info-circle-fill"></i>
@@ -394,7 +435,7 @@
         </div>
         
         <div class="form-group">
-          <label>Email Address </label>
+          <label>Email Address</label>
           <div class="input-wrapper">
             <i class="bi bi-envelope"></i>
             <input type="text" class="form-control" id="userIdentifier" placeholder="Enter your email address">
@@ -406,7 +447,6 @@
         </button>
       </div>
 
-      <!-- Verification code for new pass-->
       <div id="step2" class="hidden">
         <div class="alert alert-info">
           <i class="bi bi-shield-lock-fill"></i>
@@ -423,9 +463,10 @@
 
         <div class="form-group">
           <label>New Password</label>
-          <div class="input-wrapper">
-            <i class="bi bi-lock"></i>
-            <input type="password" class="form-control" id="newPassword" placeholder="Create a new password">
+          <div class="password-wrapper">
+            <i class="bi bi-lock left-icon"></i>
+            <input type="password" id="newPassword" placeholder="Create a new password">
+            <i class="bi bi-eye-slash toggle-password" id="toggleNewPassword"></i>
           </div>
           <div class="password-hint">
             <i class="bi bi-info-circle"></i>
@@ -435,9 +476,10 @@
 
         <div class="form-group">
           <label>Confirm New Password</label>
-          <div class="input-wrapper">
-            <i class="bi bi-lock-fill"></i>
-            <input type="password" class="form-control" id="confirmNewPassword" placeholder="Confirm your new password">
+          <div class="password-wrapper">
+            <i class="bi bi-lock-fill left-icon"></i>
+            <input type="password" id="confirmNewPassword" placeholder="Confirm your new password">
+            <i class="bi bi-eye-slash toggle-password" id="toggleConfirmPassword"></i>
           </div>
         </div>
 
@@ -483,6 +525,21 @@
     let userEmail = '';
     let generatedOTP = '';
 
+    // Toggle password visibility function
+    function setupPasswordToggle(toggleId, inputId) {
+      const toggleBtn = document.getElementById(toggleId);
+      const passwordInput = document.getElementById(inputId);
+      
+      if (toggleBtn && passwordInput) {
+        toggleBtn.addEventListener('click', function() {
+          const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+          passwordInput.setAttribute('type', type);
+          this.classList.toggle('bi-eye');
+          this.classList.toggle('bi-eye-slash');
+        });
+      }
+    }
+
     function generateOTP(){
       return Math.floor(100000 + Math.random() * 900000).toString();
     }
@@ -518,6 +575,9 @@
         indicator.querySelector('.step-number').innerHTML = '<i class="bi bi-check"></i>';
       } else if (n === step) {
         indicator.classList.add('active');
+        indicator.querySelector('.step-number').innerHTML = n;
+      } else {
+        indicator.querySelector('.step-number').innerHTML = n;
       }
     });
   }
@@ -553,13 +613,11 @@
 
     userEmail = student.email;
 
-    // Generate OTP and store with expiry
     generatedOTP = generateOTP();
     const expiry = Date.now() + 10 * 60 * 1000; // 10 minutes
     sessionStorage.setItem('resetOTP', generatedOTP);
     sessionStorage.setItem('resetOTPExpiry', expiry);
 
-    // Send OTP via EmailJS
     try {
       await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
         to_email: userEmail,
@@ -568,6 +626,10 @@
 
       setStep(2);
       showMessage('success', `Verification code sent to ${userEmail}`);
+      
+      setupPasswordToggle('toggleNewPassword', 'newPassword');
+      setupPasswordToggle('toggleConfirmPassword', 'confirmNewPassword');
+      
     } catch (err) {
       console.log('EmailJS error:', err);
       showMessage('error', 'Failed to send email. Please try again.');
@@ -610,20 +672,19 @@
       return;
     }
 
-    // Check OTP expiry
     const expiry = sessionStorage.getItem('resetOTPExpiry');
     if (Date.now() > parseInt(expiry)) {
       showMessage('error', 'Code has expired. Please request a new one.');
       return;
     }
 
-    // Check OTP match
     const storedOTP = sessionStorage.getItem('resetOTP');
     if (code !== storedOTP) {
       showMessage('error', 'Invalid code. Please try again.');
       return;
     }
-     const passwordRegex = /^(?=.*[a-zA-Z])(?=.*[0-9])(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]).{8,}$/;
+    
+    const passwordRegex = /^(?=.*[a-zA-Z])(?=.*[0-9])(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]).{8,}$/;
     if (!passwordRegex.test(newPassword)) {
       showMessage('error', 'Password must be at least 8 characters with letters, numbers & symbols (e.g. Adam@1234).');
       return;
@@ -632,7 +693,6 @@
     resetPasswordBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Resetting...';
     resetPasswordBtn.disabled = true;
 
-    // Update password in Student table
     const { error: updateError } = await db
       .from('Student')
       .update({ password: newPassword })
@@ -645,7 +705,6 @@
       return;
     }
 
-    // Clear session
     sessionStorage.removeItem('resetOTP');
     sessionStorage.removeItem('resetOTPExpiry');
 

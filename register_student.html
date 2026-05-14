@@ -107,11 +107,60 @@
       align-items: center;
     }
 
-    .input-wrapper i {
+    .input-wrapper i.left-icon {
       position: absolute;
       left: 15px;
       color: #aaa;
       font-size: 18px;
+      z-index: 1;
+    }
+
+    /* Password wrapper with eye icon */
+    .password-wrapper {
+      position: relative;
+      width: 100%;
+    }
+
+    .password-wrapper i.left-icon {
+      position: absolute;
+      left: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #aaa;
+      font-size: 18px;
+      z-index: 1;
+    }
+
+    .password-wrapper input {
+      width: 100%;
+      padding: 12px 50px 12px 45px;
+      font-size: 14px;
+      border: 1.5px solid #e0e0e0;
+      border-radius: 12px;
+      transition: all 0.3s ease;
+      font-family: 'Roboto', sans-serif;
+    }
+
+    .password-wrapper input:focus {
+      outline: none;
+      border-color: #2c5a7a;
+      box-shadow: 0 0 0 3px rgba(44, 90, 122, 0.1);
+    }
+
+    .toggle-password {
+      position: absolute;
+      right: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      cursor: pointer;
+      color: #aaa;
+      font-size: 18px;
+      transition: color 0.3s ease;
+      z-index: 2;
+    }
+
+    .toggle-password:hover {
+      color: #2c5a7a;
     }
 
     .form-control {
@@ -328,6 +377,11 @@
         font-size: 13px;
       }
       
+      .password-wrapper input {
+        padding: 10px 50px 10px 40px;
+        font-size: 13px;
+      }
+      
       .row {
         flex-direction: column;
         gap: 0;
@@ -357,7 +411,7 @@
       <div class="form-group">
         <label>Full Name <span class="required">*</span></label>
         <div class="input-wrapper">
-          <i class="bi bi-person"></i>
+          <i class="bi bi-person left-icon"></i>
           <input type="text" class="form-control" id="name" placeholder="Enter your full name">
         </div>
       </div>
@@ -366,7 +420,7 @@
         <div class="form-group">
           <label>Student ID <span class="required">*</span></label>
           <div class="input-wrapper">
-            <i class="bi bi-card-text"></i>
+            <i class="bi bi-card-text left-icon"></i>
             <input type="text" class="form-control" id="studentId" placeholder="e.g., A24DW0001">
           </div>
         </div>
@@ -376,7 +430,7 @@
         <div class="form-group">
           <label>Email Address <span class="required">*</span></label>
           <div class="input-wrapper">
-            <i class="bi bi-envelope"></i>
+            <i class="bi bi-envelope left-icon"></i>
             <input type="email" class="form-control" id="email" placeholder="you@example.com">
           </div>
         </div>
@@ -386,12 +440,12 @@
         <div class="form-group">
           <label>Telephone Number <span class="required">*</span></label>
           <div class="input-wrapper">
-            <i class="bi bi-telephone"></i>
+            <i class="bi bi-telephone left-icon"></i>
             <input type="tel" class="form-control" id="telephone" placeholder="e.g., 0123456789">
           </div>
           <div class="password-hint">
             <i class="bi bi-info-circle"></i>
-            <span>Malaysian numbers only  (e.g., 0123456789)</span>
+            <span>Malaysian numbers only (e.g., 0123456789)</span>
           </div>
         </div>
       </div>
@@ -399,20 +453,22 @@
       <div class="row">
         <div class="form-group">
           <label>Password <span class="required">*</span></label>
-          <div class="input-wrapper">
-            <i class="bi bi-lock"></i>
-            <input type="password" class="form-control" id="password" placeholder="Create a password">
+          <div class="password-wrapper">
+            <i class="bi bi-lock left-icon"></i>
+            <input type="password" id="password" placeholder="Create a password">
+            <i class="bi bi-eye-slash toggle-password" id="togglePassword"></i>
           </div>
           <div class="password-hint">
             <i class="bi bi-info-circle"></i>
-            <span>Min. 8 characters with letters & numbers</span>
+            <span>Min. 8 characters with letters, numbers & symbols (e.g. Adam@1234)</span>
           </div>
         </div>
         <div class="form-group">
           <label>Confirm Password <span class="required">*</span></label>
-          <div class="input-wrapper">
-            <i class="bi bi-lock-fill"></i>
-            <input type="password" class="form-control" id="confirmPassword" placeholder="Confirm your password">
+          <div class="password-wrapper">
+            <i class="bi bi-lock-fill left-icon"></i>
+            <input type="password" id="confirmPassword" placeholder="Confirm your password">
+            <i class="bi bi-eye-slash toggle-password" id="toggleConfirmPassword"></i>
           </div>
         </div>
       </div>
@@ -437,147 +493,161 @@
     </div>
   </div>
 
-   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase.js"></script>
-<script>
-  document.getElementById('signupBtn').addEventListener('click', async () => {
-    const studentId = document.getElementById('studentId').value.trim();
-    const name = document.getElementById('name').value.trim();
-    const email = document.getElementById('email').value.trim();
-    const password = document.getElementById('password').value.trim();
-    const confirmPassword = document.getElementById('confirmPassword').value.trim();
-    const agreeTerms = document.getElementById('agreeTerms').checked;
-    let telephone = document.getElementById('telephone').value.trim();
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase.js"></script>
+  <script>
+    // Toggle password visibility for Password field
+    const togglePassword = document.getElementById('togglePassword');
+    const passwordInput = document.getElementById('password');
 
-    const errorAlert = document.getElementById('errorMessage');
-    const successAlert = document.getElementById('successMessage'); // ✅ fixed name
-    const signupBtn = document.getElementById('signupBtn');
-
-    errorAlert.classList.remove('show');
-    successAlert.classList.remove('show');
-
-   
-    if (!studentId || !name || !email || !telephone || !password || !confirmPassword) {
-      errorAlert.textContent = 'Please fill in all fields.';
-      errorAlert.classList.add('show');
-      return;
-    }
-    if (!/^[Aa][0-9A-Za-z]+$/.test(studentId)) {
-      errorAlert.textContent = 'Student ID must start with the letter A (e.g., A24DW0001).';
-      errorAlert.classList.add('show');
-      return;
-    }
-    
-    const telDigits = telephone.replace(/[-\s]/g, '');
-    if (!/^0[0-9]{9,10}$/.test(telDigits)) {
-      errorAlert.textContent = 'Please enter a valid Malaysian phone number (e.g., 0123456789).';
-      errorAlert.classList.add('show');
-      return;
-    }
-
-    // Auto-convert to +60 after validation passes
-    if (telephone.startsWith('0')) {
-      telephone = '+60' + telephone.substring(1);
-    }
-   
-    const passwordRegex = /^(?=.*[a-zA-Z])(?=.*[0-9])(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]).{8,}$/;
-    if (!passwordRegex.test(password)) {
-      errorAlert.textContent = 'Password must be at least 8 characters with letters, numbers & symbols (e.g. Adam@1234).';
-      errorAlert.classList.add('show');
-      return;
-    }
-
-    
-    if (password !== confirmPassword) {
-      errorAlert.textContent = 'Passwords do not match.';
-      errorAlert.classList.add('show');
-      return;
-    }
-
-   
-    if (!email.endsWith('@graduate.utm.my') && !email.endsWith('@utm.my')) {
-      errorAlert.textContent = 'Please use your UTM email address (@graduate.utm.my or @utm.my).';
-      errorAlert.classList.add('show');
-      return;
-    }
-
-   
-    if (!agreeTerms) {
-      errorAlert.textContent = 'Please agree to the Terms of Service.';
-      errorAlert.classList.add('show');
-      return;
-    }
-
-  
-    const { data: existing } = await db
-      .from('Student')
-      .select('student_id')
-      .or(`student_id.eq.${studentId},email.eq.${email}`);
-
-    if (existing && existing.length > 0) {
-      errorAlert.textContent = 'Student ID or email already registered.';
-      errorAlert.classList.add('show');
-      return;
-    }
-
-    signupBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Creating account...';
-    signupBtn.disabled = true;
-
-   
-    const { error: dbError } = await db
-      .from('Student')
-      .insert({
-        student_id: studentId,
-        name: name,
-        email: email,
-        telephone: telephone,
-        password: password,
-        is_verified: false
-      });
-
-    console.log('Supabase error:', dbError);
-
-    if (dbError) {
-      errorAlert.textContent = 'Sign Up failed. Please try again.';
-      errorAlert.classList.add('show');
-      signupBtn.innerHTML = 'Create Account <i class="bi bi-arrow-right"></i>';
-      signupBtn.disabled = false;
-      return;
-    }
-
-   
-    const { error: magicError } = await db.auth.signInWithOtp({
-      email: email,
-      options: {
-        shouldCreateUser: true,
-        emailRedirectTo: 'http://127.0.0.1:5500/index.html'
-      }
+    togglePassword.addEventListener('click', function() {
+      const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+      passwordInput.setAttribute('type', type);
+      this.classList.toggle('bi-eye');
+      this.classList.toggle('bi-eye-slash');
     });
 
-    if (magicError) {
-      errorAlert.textContent = 'Failed to send verification email. Please try again.';
-      errorAlert.classList.add('show');
-      signupBtn.innerHTML = 'Create Account <i class="bi bi-arrow-right"></i>';
-      signupBtn.disabled = false;
-      return;
-    }
+    // Toggle password visibility for Confirm Password field
+    const toggleConfirmPassword = document.getElementById('toggleConfirmPassword');
+    const confirmPasswordInput = document.getElementById('confirmPassword');
 
-   
-    let countdown = 5;
-    successAlert.textContent = `✅ Account created! Check your email and click the link to verify. Redirecting in ${countdown}s...`;
-    successAlert.classList.add('show');
-    signupBtn.innerHTML = '<i class="bi bi-check-lg"></i> Check Your Email!';
+    toggleConfirmPassword.addEventListener('click', function() {
+      const type = confirmPasswordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+      confirmPasswordInput.setAttribute('type', type);
+      this.classList.toggle('bi-eye');
+      this.classList.toggle('bi-eye-slash');
+    });
 
-    const timer = setInterval(() => {
-      countdown--;
-      successAlert.textContent = `✅ Account created! Check your email and click the link to verify. Redirecting in ${countdown}s...`;
-      if (countdown === 0) {
-        clearInterval(timer);
-        window.location.href = 'index.html';
+    document.getElementById('signupBtn').addEventListener('click', async () => {
+      const studentId = document.getElementById('studentId').value.trim();
+      const name = document.getElementById('name').value.trim();
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value.trim();
+      const confirmPassword = document.getElementById('confirmPassword').value.trim();
+      const agreeTerms = document.getElementById('agreeTerms').checked;
+      let telephone = document.getElementById('telephone').value.trim();
+
+      const errorAlert = document.getElementById('errorMessage');
+      const successAlert = document.getElementById('successMessage');
+      const signupBtn = document.getElementById('signupBtn');
+
+      errorAlert.classList.remove('show');
+      successAlert.classList.remove('show');
+
+      if (!studentId || !name || !email || !telephone || !password || !confirmPassword) {
+        errorAlert.textContent = 'Please fill in all fields.';
+        errorAlert.classList.add('show');
+        return;
       }
-    }, 1000);
-  });
-</script>
+      if (!/^[Aa][0-9A-Za-z]+$/.test(studentId)) {
+        errorAlert.textContent = 'Student ID must start with the letter A (e.g., A24DW0001).';
+        errorAlert.classList.add('show');
+        return;
+      }
+      
+      const telDigits = telephone.replace(/[-\s]/g, '');
+      if (!/^0[0-9]{9,10}$/.test(telDigits)) {
+        errorAlert.textContent = 'Please enter a valid Malaysian phone number (e.g., 0123456789).';
+        errorAlert.classList.add('show');
+        return;
+      }
+
+      // Auto-convert to +60 after validation passes
+      if (telephone.startsWith('0')) {
+        telephone = '+60' + telephone.substring(1);
+      }
+     
+      const passwordRegex = /^(?=.*[a-zA-Z])(?=.*[0-9])(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]).{8,}$/;
+      if (!passwordRegex.test(password)) {
+        errorAlert.textContent = 'Password must be at least 8 characters with letters, numbers & symbols (e.g. Adam@1234).';
+        errorAlert.classList.add('show');
+        return;
+      }
+
+      if (password !== confirmPassword) {
+        errorAlert.textContent = 'Passwords do not match.';
+        errorAlert.classList.add('show');
+        return;
+      }
+
+      if (!email.endsWith('@graduate.utm.my') && !email.endsWith('@utm.my')) {
+        errorAlert.textContent = 'Please use your UTM email address (@graduate.utm.my or @utm.my).';
+        errorAlert.classList.add('show');
+        return;
+      }
+
+      if (!agreeTerms) {
+        errorAlert.textContent = 'Please agree to the Terms of Service.';
+        errorAlert.classList.add('show');
+        return;
+      }
+
+      const { data: existing } = await db
+        .from('Student')
+        .select('student_id')
+        .or(`student_id.eq.${studentId},email.eq.${email}`);
+
+      if (existing && existing.length > 0) {
+        errorAlert.textContent = 'Student ID or email already registered.';
+        errorAlert.classList.add('show');
+        return;
+      }
+
+      signupBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Creating account...';
+      signupBtn.disabled = true;
+
+      const { error: dbError } = await db
+        .from('Student')
+        .insert({
+          student_id: studentId,
+          name: name,
+          email: email,
+          telephone: telephone,
+          password: password,
+          is_verified: false
+        });
+
+      console.log('Supabase error:', dbError);
+
+      if (dbError) {
+        errorAlert.textContent = 'Sign Up failed. Please try again.';
+        errorAlert.classList.add('show');
+        signupBtn.innerHTML = 'Create Account <i class="bi bi-arrow-right"></i>';
+        signupBtn.disabled = false;
+        return;
+      }
+
+      const { error: magicError } = await db.auth.signInWithOtp({
+        email: email,
+        options: {
+          shouldCreateUser: true,
+          emailRedirectTo: 'http://127.0.0.1:5500/index.html'
+        }
+      });
+
+      if (magicError) {
+        errorAlert.textContent = 'Failed to send verification email. Please try again.';
+        errorAlert.classList.add('show');
+        signupBtn.innerHTML = 'Create Account <i class="bi bi-arrow-right"></i>';
+        signupBtn.disabled = false;
+        return;
+      }
+
+      let countdown = 5;
+      successAlert.textContent = `✅ Account created! Check your email and click the link to verify. Redirecting in ${countdown}s...`;
+      successAlert.classList.add('show');
+      signupBtn.innerHTML = '<i class="bi bi-check-lg"></i> Check Your Email!';
+
+      const timer = setInterval(() => {
+        countdown--;
+        successAlert.textContent = `✅ Account created! Check your email and click the link to verify. Redirecting in ${countdown}s...`;
+        if (countdown === 0) {
+          clearInterval(timer);
+          window.location.href = 'index.html';
+        }
+      }, 1000);
+    });
+  </script>
 </body>
 
 </html>
