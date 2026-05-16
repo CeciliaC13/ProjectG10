@@ -293,19 +293,16 @@
 
         <div class="col-lg-5">
           <div class="form-box">
-            <h3>Room Availability Form</h3>
+            <h3 id="rm-formTitle">Room Availability Form</h3>
 
             <div class="message-box" id="messageBox"></div>
 
-            <input type="hidden" id="editIndex">
+            <input type="hidden" id="editRoomId">
 
             <div class="mb-3">
               <label class="form-label">College</label>
               <select class="form-select" id="college">
                 <option value="">Select College</option>
-                <option value="Perdana Residence Block U7">Perdana Residence Block U7</option>
-                <option value="Kolej 9">Kolej 9</option>
-                <option value="Kolej 10">Kolej 10</option>
               </select>
             </div>
 
@@ -313,10 +310,6 @@
               <label class="form-label">Room Type</label>
               <select class="form-select" id="roomType">
                 <option value="">Select Room Type</option>
-                <option value="Single Bed AC">Single Bed AC</option>
-                <option value="Single Bed Fan">Single Bed Fan</option>
-                <option value="Single Room">Single Room</option>
-                <option value="Double / Twin Sharing">Double / Twin Sharing</option>
               </select>
             </div>
 
@@ -340,7 +333,7 @@
               </select>
             </div>
 
-            <button class="save-btn" onclick="saveRoom()">Save Room</button>
+            <button class="save-btn" id="saveBtn" onclick="saveRoom()">Save Room</button>
             <button class="clear-btn" onclick="clearForm()">Clear</button>
           </div>
         </div>
@@ -355,6 +348,7 @@
                   <tr>
                     <th>No.</th>
                     <th>College</th>
+                    <th>Room ID</th>
                     <th>Room Type</th>
                     <th>Total</th>
                     <th>Available</th>
@@ -443,29 +437,13 @@
 <script src="main.js"></script>
 
 <script>
-  let rooms = [
-    {
-      college: 'Perdana Residence Block U7',
-      roomType: 'Single Bed AC',
-      totalRooms: 20,
-      availableRooms: 12,
-      status: 'Available'
-    },
-    {
-      college: 'Kolej 9',
-      roomType: 'Single Room',
-      totalRooms: 30,
-      availableRooms: 5,
-      status: 'Limited'
-    },
-    {
-      college: 'Kolej 10',
-      roomType: 'Double / Twin Sharing',
-      totalRooms: 40,
-      availableRooms: 0,
-      status: 'Full'
-    }
-  ];
+  let rooms = [];
+
+  function deriveStatus(total, available){
+    if(available <= 0)      return 'Full';
+    if(available / total <= 0.3)  return 'Limited';
+    return 'Available';
+  }
 
   function getStatusClass(status) {
     if (status === 'Available') return 'status-available';
@@ -478,42 +456,106 @@
     box.className = 'message-box show ' + (type === 'success' ? 'message-success' : 'message-error');
     box.textContent = text;
 
-    setTimeout(function() {
+    setTimeout(() => {
       box.className = 'message-box';
       box.textContent = '';
-    }, 2500);
+    }, 3500);
   }
+
+  async function loadCollegeOptions(){
+     const { data, error } = await db.from('College').select('id, College_name').order('College_name');
+    if (error) { console.error(error); return; }
+    const select = document.getElementById('college');
+    select.innerHTML = '<option value="">Select College</option>';
+    data.forEach(c => {
+      select.innerHTML += `<option value="${c.id}">${c.College_name}</option>`;
+    });
+  }
+  async function loadRoomTypeOptions() {
+  const { data, error } = await db
+    .from('Room')
+    .select('Room_type');
+  if (error) { console.error(error); return; }
+
+  // Remove duplicates
+  const unique = [...new Set(data.map(r => r.Room_type))].sort();
+
+  const select = document.getElementById('roomType');
+  select.innerHTML = '<option value="">Select Room Type</option>';
+  unique.forEach(type => {
+    select.innerHTML += `<option value="${type}">${type}</option>`;
+  });
+}
 
   function renderRooms() {
-    const tbody = document.getElementById('roomTableBody');
+  const tbody = document.getElementById('roomTableBody');
+  if (!rooms || rooms.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="8" class="loading-text">No room records found.</td></tr>`;
+    return;
+  }
+  tbody.innerHTML = rooms.map((r, i) => {
+    const total     = r.Room?.Room_total     ?? 0;
+    const available = r.Room?.Room_available ?? 0;
+    const status    = deriveStatus(total, available);
+    return `
+      <tr>
+        <td>${i + 1}</td>
+        <td>${r.College_name ?? '—'}</td>
+        <td><strong>${r.Room_id ?? '—'}</strong></td>
+        <td>${r.Room?.Room_type ?? '—'}</td>
+        <td>${total}</td>
+        <td>${available}</td>
+        <td><span class="status-badge ${getStatusClass(status)}">${status}</span></td>
+        <td>
+          <button class="edit-btn"   data-college-id="${r.id}" data-room-id="${r.Room_id}">
+            <i class="bi bi-pencil-fill"></i> Edit
+          </button>
+          <button class="delete-btn" data-college-id="${r.id}" data-room-id="${r.Room_id}">
+            <i class="bi bi-trash-fill"></i> Delete
+          </button>
+        </td>
+      </tr>`;
+  }).join('');
 
-    tbody.innerHTML = rooms.map(function(room, index) {
-      return `
-        <tr>
-          <td>${index + 1}</td>
-          <td>${room.college}</td>
-          <td>${room.roomType}</td>
-          <td>${room.totalRooms}</td>
-          <td>${room.availableRooms}</td>
-          <td><span class="status-badge ${getStatusClass(room.status)}">${room.status}</span></td>
-          <td>
-            <button class="edit-btn" onclick="editRoom(${index})">Edit</button>
-            <button class="delete-btn" onclick="deleteRoom(${index})">Delete</button>
-          </td>
-        </tr>
-      `;
-    }).join('');
+  
+  tbody.querySelectorAll('.edit-btn').forEach(btn => {
+    console.log('Button data:', btn.dataset.collegeId, btn.dataset.roomId);
+    btn.addEventListener('click', () => editRoom(btn.dataset.collegeId, btn.dataset.roomId));
+  });
+  tbody.querySelectorAll('.delete-btn').forEach(btn => {
+    btn.addEventListener('click', () => deleteRoom(btn.dataset.collegeId, btn.dataset.roomId));
+  });
+}
+
+  async function loadRooms() {
+    try{
+      const { data, error } = await db 
+        .from('College')
+        .select('id, College_name, Quota, Available_rooms, Room_id, Room(Room_type, Room_total, Room_available)')
+        .order('College_name', { ascending: true });
+
+        if (error) throw error;
+          console.log('First room row:', JSON.stringify(data[0])); 
+        rooms = data;
+        renderRooms();
+    }catch (err){
+      console.error('Load error:', err);
+      document.getElementById('roomTableBody').innerHTML =
+         `<tr><td colspan="7" class="loading-text" style="color:#991b1b;">
+           Failed to load rooms: ${err.message}
+         </td></tr>`;
+    }
+    
   }
 
-  function saveRoom() {
-    const editIndex = document.getElementById('editIndex').value;
-    const college = document.getElementById('college').value;
+  async function saveRoom() {
+    const editCollegeId = document.getElementById('editRoomId').value;
+    const collegeId = document.getElementById('college').value;
     const roomType = document.getElementById('roomType').value;
     const totalRooms = document.getElementById('totalRooms').value;
     const availableRooms = document.getElementById('availableRooms').value;
-    const status = document.getElementById('status').value;
 
-    if (!college || !roomType || totalRooms === '' || availableRooms === '' || !status) {
+    if (!collegeId || !roomType || isNaN(totalRooms) || isNaN(availableRooms)) {
       showMessage('error', 'Please fill in all fields.');
       return;
     }
@@ -523,59 +565,147 @@
       return;
     }
 
-    const roomData = {
-      college: college,
-      roomType: roomType,
-      totalRooms: Number(totalRooms),
-      availableRooms: Number(availableRooms),
-      status: status
-    };
+    const btn = document.getElementById('saveBtn');
+    btn.disabled = true;
+    btn.textContent = 'Saving..';
 
-    if (editIndex === '') {
-      rooms.push(roomData);
-      showMessage('success', 'Room record added successfully.');
-    } else {
-      rooms[editIndex] = roomData;
-      showMessage('success', 'Room record updated successfully.');
+    try{
+      if(editRoomId === ''){
+        const { data: newRoomData, error: roomErr } = await db 
+        .from('Room')
+        .insert([{
+            Room_type: roomType,
+            Room_total: totalRooms,
+            Room_available: availableRooms
+        }])
+          .select('Room_id')
+          .limit(1)
+         if (roomErr) throw roomErr;
+
+         const newRoomId = newRoomData[0].Room_id;
+
+         const { error: colErr } = await db
+        .from('College')
+        .update({
+          Room_id:         newRoomId,
+          Quota:           totalRooms,
+          Available_rooms: availableRooms
+        })
+        .eq('id', collegeId);
+        if (colErr) throw colErr;
+
+        showMessage('success', 'Room added successfully.');
+
+      } else {
+       
+        const { data: colRows, error: fetchErr } = await db
+          .from('College')
+          .select('Room_id')
+          .eq('id', editCollegeId)
+          .limit(1);
+        if (fetchErr) throw fetchErr;
+
+        const linkedRoomId = colRows[0]?.Room_id;
+        if (linkedRoomId) {
+        const { error: roomErr } = await db
+          .from('Room')
+          .update({
+            Room_type:      roomType,
+            Room_total:     totalRooms,
+            Room_available: availableRooms
+          })
+          .eq('Room_id', linkedRoomId);
+        if (roomErr) throw roomErr;
+      }
+       
+       
+        const { error: colErr } = await db
+          .from('College')
+          .update({
+            Quota:           totalRooms,
+            Available_rooms: availableRooms
+          })
+          .eq('id', editCollegeId);
+        if (colErr) throw colErr;
+
+        showMessage('success', 'Room updated successfully.');
+      }
+      clearForm();
+      await loadRooms();
+
+    } catch (err) {
+      console.error('Save error:', err);
+      showMessage('error', 'Error saving room: ' + err.message);
+    }finally {
+      btn.disabled = false;
+      btn.innerHTML = '<i class="bi bi-floppy-fill me-1"></i> Save Room';
     }
-
-    renderRooms();
-    clearForm();
   }
 
-  function editRoom(index) {
-    const room = rooms[index];
+  async function editRoom(collegeId, roomId) {
+     console.log('editRoom called — collegeId:', collegeId, '| roomId:', roomId);
+    try {
+      const { data, error } = await db
+        .from('College')
+        .select('id, College_name, Room_id, Room(Room_type, Room_total, Room_available)')
+        .eq('id', collegeId)
+        .limit(1);
 
-    document.getElementById('editIndex').value = index;
-    document.getElementById('college').value = room.college;
-    document.getElementById('roomType').value = room.roomType;
-    document.getElementById('totalRooms').value = room.totalRooms;
-    document.getElementById('availableRooms').value = room.availableRooms;
-    document.getElementById('status').value = room.status;
+      console.log('query result:', JSON.stringify(data));
+      console.log('error:', error);
 
-    window.scrollTo({
-      top: 0,
-      behavior: 'smooth'
-    });
+      if (error) throw error;
+      if (!data || data.length === 0) { showMessage('error', 'Room record not found.'); return; }
+      const record = data[0];
+
+      const rec = data[0];
+
+      document.getElementById('editRoomId').value      = rec.id;
+      document.getElementById('college').value         = rec.id;
+      document.getElementById('roomType').value        = rec.Room?.Room_type      ?? '';
+      document.getElementById('totalRooms').value      = rec.Room?.Room_total     ?? '';
+      document.getElementById('availableRooms').value  = rec.Room?.Room_available ?? '';
+      document.getElementById('rm-formTitle').textContent = 'Edit Room Availability';
+
+
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } catch (err) {
+      showMessage('error', 'Could not load room: ' + err.message);
+    }
   }
 
-  function deleteRoom(index) {
-    const confirmDelete = confirm('Are you sure you want to delete this room record?');
+  async function deleteRoom(collegeId, roomId) {
+    if (!confirm(`Delete this room record? This cannot be undone.`)) return;
+    try {
+      
+      const { error: unlinkErr } = await db
+        .from('College')
+        .update({ Room_id: null, Quota: 0, Available_rooms: 0 })
+        .eq('id', collegeId);
+      if (unlinkErr) throw unlinkErr;
 
-    if (confirmDelete) {
-      rooms.splice(index, 1);
-      renderRooms();
-      showMessage('success', 'Room record deleted successfully.');
+     
+      const { error: roomErr } = await db
+        .from('Room')
+        .delete()
+        .eq('Room_id', roomId);
+      if (roomErr) throw roomErr;
+
+      showMessage('success', 'Room deleted successfully.');
+      await loadRooms();
+    } catch (err) {
+      showMessage('error', 'Delete failed: ' + err.message);
     }
   }
 
   function clearForm() {
-    document.getElementById('editIndex').value = '';
+    document.getElementById('editRoomId').value = '';
     document.getElementById('college').value = '';
     document.getElementById('roomType').value = '';
     document.getElementById('totalRooms').value = '';
     document.getElementById('availableRooms').value = '';
     document.getElementById('status').value = '';
+    document.getElementById('rm-formTitle').textContent = 'Room Availability Form';
   }
 
   async function loadAdminStaffHeader() {
@@ -609,7 +739,9 @@
     window.location.href = 'admin_staff_login.html';
   });
 
-  renderRooms();
+  loadCollegeOptions();
+  loadRoomTypeOptions();
+  loadRooms();
   loadAdminStaffHeader();
 </script>
 

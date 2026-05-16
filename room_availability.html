@@ -385,7 +385,7 @@
             </tr>
           </thead>
 
-          <tbody>
+          <tbody id="roomTableBody">
             <tr>
               <td>1</td>
               <td>Perdana Residence Block U7</td>
@@ -490,25 +490,157 @@
 <script src="main.js"></script>
 
 <script>
-  function filterRooms() {
-    const collegeFilter = document.getElementById('collegeFilter').value;
-    const statusFilter = document.getElementById('statusFilter').value;
-    const rooms = document.querySelectorAll('.room-item');
+  let allRooms = [];
 
-    rooms.forEach(function(room) {
-      const college = room.getAttribute('data-college');
-      const status = room.getAttribute('data-status');
+  function getStatus(total, available){
+    if(available === 0) return 'Full';
+    if(available / total <= 0.2) return 'Limited';
+    return 'Available';
+  }
 
-      const collegeMatch = collegeFilter === 'All' || college === collegeFilter;
-      const statusMatch = statusFilter === 'All' || status === statusFilter;
+  function getStatusClass(status){
+    if(status === 'Full')return 'status-full';
+    if(status === 'Limited') return 'status-limited';
+    return 'status-available';
+  }
 
-      if (collegeMatch && statusMatch) {
-        room.style.display = 'block';
-      } else {
-        room.style.display = 'none';
-      }
+  function populateCollegeFilter(rooms){
+    const select = document.getElementById('collegeFilter');
+    const college = [...new Set(rooms.map(r => r.College_name))];
+    select.innerHTML = '<option value="All">All College</option>';
+    college.forEach(name => {
+      select.innerHTML += `<option value="${name}">${name}</option>`;
     });
   }
+
+  function renderCards(rooms){
+    const container = document.getElementById('roomCardContainer');
+    if(!rooms.length){
+      container.innerHTML = '<div class="col-12"><p class="text-center text-muted">No rooms found.</p></div>';
+      return;
+    }
+
+    container.innerHTML = rooms.map(room => {
+      const occupied = room.Quota - room.Available_rooms;
+      const status = getStatus(room.Quota, room.Available_rooms);
+      const statusClass = getStatusClass(status);
+
+      return `
+        <div class="col-lg-4 col-md-6 room-item" data-college="${room.College_name}" data-status="${status}">
+        <div class="room-card">
+          <div class="room-card-header">
+            <h3>${room.College_name}</h3>
+          </div>
+          <div class="room-card-body">
+            <div class="room-info-row">
+              <span class="room-label">Room Type</span>
+              <span class="room-value">${room.Room ? room.Room.Room_type : 'N/A'}</span>
+            </div>
+            <div class="room-info-row">
+              <span class="room-label">Total Rooms</span>
+              <span class="room-value">${room.Quota}</span>
+            </div>
+            <div class="room-info-row">
+              <span class="room-label">Available Rooms</span>
+              <span class="room-value">${room.Available_rooms}</span>
+            </div>
+            <div class="room-info-row">
+              <span class="room-label">Occupied Rooms</span>
+              <span class="room-value">${occupied}</span>
+            </div>
+            <div class="room-info-row">
+              <span class="room-label">Status</span>
+              <span class="status-badge ${statusClass}">${status}</span>
+            </div>
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  function renderTable(rooms){
+    const tbody = document.getElementById('roomTableBody');
+    if(!rooms.length){
+      tbody.innerHTML = `<tr><td colspan="7" class="text-center text-muted">No data available.</td></tr>`;
+      return;
+    }
+    tbody.innerHTML = rooms.map((room, i)=> {
+      const occupied = room.Quota - room.Available_rooms;
+      const status = getStatus(room.Quota, room.Available_rooms);
+      const statusClass = getStatusClass(status);
+
+      return `
+      <tr>
+        <td>${i + 1}</td>
+        <td>${room.College_name}</td>
+        <td>${room.Room?.Room_type || 'N/A'}</td>
+        <td>${room.Quota}</td>
+        <td>${room.Available_rooms}</td>
+        <td>${occupied}</td>
+        <td><span class="status-badge ${statusClass}">${status}</span></td>
+      </tr`;
+    }).join('');
+  }
+
+  function filterRooms() {
+  const collegeFilter = document.getElementById('collegeFilter').value;
+  const statusFilter = document.getElementById('statusFilter').value;
+
+  const filtered = allRooms.filter(room => {
+    const status = getStatus(room.Quota, room.Available_rooms);
+    const collegeMatch = collegeFilter === 'All' || room.College_name === collegeFilter;
+    const statusMatch = statusFilter === 'All' || status === statusFilter;
+    return collegeMatch && statusMatch;
+  });
+
+  renderCards(filtered);
+  renderTable(filtered);
+}
+
+async function loadRoomData() {
+  try {
+    const { data, error } = await db
+      .from('College')
+      .select(`
+        id, 
+        College_name, 
+        Quota, 
+        Available_rooms, 
+        Room_id, 
+        Room!fk_room(Room_type)
+        `)
+      .order('College_name', { ascending: true });
+
+    if (error) throw error;
+
+    console.log('Supabase data:', data);
+
+    allRooms = data || [];
+
+    console.log('Full data:', JSON.stringify(data, null, 2));
+
+    populateCollegeFilter(allRooms);
+    renderCards(allRooms);
+    renderTable(allRooms);
+
+  } catch (err) {
+    console.error('Error fetching College data:', err);
+
+    document.getElementById('roomCardContainer').innerHTML = `
+      <div class="col-12">
+        <div class="error-msg">
+          <i class="bi bi-exclamation-triangle me-2"></i>
+          Failed to load room data. Please try again later.<br>
+          <small class="fw-normal mt-1 d-block">${err.message || ''}</small>
+        </div>
+      </div>`;
+
+    document.getElementById('roomTableBody').innerHTML = `
+      <tr><td colspan="6" class="text-center text-danger">
+        <i class="bi bi-exclamation-triangle me-2"></i>Failed to load table data.
+      </td></tr>`;
+  }
+}
 
   async function loadAdminStaffHeader() {
     const role = localStorage.getItem('staffAdminRole') || localStorage.getItem('userRole');
@@ -542,6 +674,8 @@
   });
 
   loadAdminStaffHeader();
+  loadRoomData();
+
 </script>
 
 </body>
