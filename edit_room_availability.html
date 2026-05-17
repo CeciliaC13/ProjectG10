@@ -297,7 +297,7 @@
 
             <div class="message-box" id="messageBox"></div>
 
-            <input type="hidden" id="editRoomId">
+            <input type="hidden" id="editRecordId">
 
             <div class="mb-3">
               <label class="form-label">College</label>
@@ -348,7 +348,6 @@
                   <tr>
                     <th>No.</th>
                     <th>College</th>
-                    <th>Room ID</th>
                     <th>Room Type</th>
                     <th>Total</th>
                     <th>Available</th>
@@ -474,94 +473,98 @@
   async function loadRoomTypeOptions() {
   const { data, error } = await db
     .from('Room')
-    .select('Room_type');
+    .select('Room_id, Room_type')
+    .order('Room_type');
   if (error) { console.error(error); return; }
-
-  // Remove duplicates
-  const unique = [...new Set(data.map(r => r.Room_type))].sort();
-
   const select = document.getElementById('roomType');
   select.innerHTML = '<option value="">Select Room Type</option>';
-  unique.forEach(type => {
-    select.innerHTML += `<option value="${type}">${type}</option>`;
+  data.forEach(r => {
+    select.innerHTML += `<option value="${r.Room_id}">${r.Room_type}</option>`;
   });
 }
-
   function renderRooms() {
   const tbody = document.getElementById('roomTableBody');
   if (!rooms || rooms.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="8" class="loading-text">No room records found.</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="7" class="loading-text">No room records found.</td></tr>`;
     return;
   }
+
   tbody.innerHTML = rooms.map((r, i) => {
-    const total     = r.Room?.Room_total     ?? 0;
-    const available = r.Room?.Room_available ?? 0;
+    const total     = r.Room_total     ?? 0;
+    const available = r.Room_available ?? 0;
     const status    = deriveStatus(total, available);
+
     return `
       <tr>
         <td>${i + 1}</td>
-        <td>${r.College_name ?? '—'}</td>
-        <td><strong>${r.Room_id ?? '—'}</strong></td>
-        <td>${r.Room?.Room_type ?? '—'}</td>
+        <td>${r.collegeName}</td>
+        <td>${r.roomTypeName}</td>
         <td>${total}</td>
         <td>${available}</td>
         <td><span class="status-badge ${getStatusClass(status)}">${status}</span></td>
         <td>
-          <button class="edit-btn"   data-college-id="${r.id}" data-room-id="${r.Room_id}">
+          <button class="edit-btn"   data-record-id="${r.id}">
             <i class="bi bi-pencil-fill"></i> Edit
           </button>
-          <button class="delete-btn" data-college-id="${r.id}" data-room-id="${r.Room_id}">
+          <button class="delete-btn" data-record-id="${r.id}">
             <i class="bi bi-trash-fill"></i> Delete
           </button>
         </td>
       </tr>`;
   }).join('');
 
-  
   tbody.querySelectorAll('.edit-btn').forEach(btn => {
-    console.log('Button data:', btn.dataset.collegeId, btn.dataset.roomId);
-    btn.addEventListener('click', () => editRoom(btn.dataset.collegeId, btn.dataset.roomId));
+    btn.addEventListener('click', () => editRoom(btn.dataset.recordId));
   });
   tbody.querySelectorAll('.delete-btn').forEach(btn => {
-    btn.addEventListener('click', () => deleteRoom(btn.dataset.collegeId, btn.dataset.roomId));
+    btn.addEventListener('click', () => deleteRoom(btn.dataset.recordId));
   });
 }
 
   async function loadRooms() {
-    try{
-      const { data, error } = await db 
-        .from('College')
-        .select('id, College_name, Quota, Available_rooms, Room_id, Room(Room_type, Room_total, Room_available)')
-        .order('College_name', { ascending: true });
-
-        if (error) throw error;
-          console.log('First room row:', JSON.stringify(data[0])); 
-        rooms = data;
-        renderRooms();
-    }catch (err){
-      console.error('Load error:', err);
-      document.getElementById('roomTableBody').innerHTML =
-         `<tr><td colspan="7" class="loading-text" style="color:#991b1b;">
-           Failed to load rooms: ${err.message}
-         </td></tr>`;
-    }
+  try {
     
+    const { data: crData, error: crErr } = await db
+      .from('College_Room')
+      .select('id, College_id, Room_id, Room_total, Room_available')
+      .order('College_id', { ascending: true });
+    if (crErr) throw crErr;
+
+    const { data: colleges } = await db.from('College').select('id, College_name');
+    const { data: roomTypes } = await db.from('Room').select('Room_id, Room_type');
+
+    const collegeMap  = {};
+    const roomTypeMap = {};
+    colleges.forEach(c  => collegeMap[c.id]        = c.College_name);
+    roomTypes.forEach(r => roomTypeMap[r.Room_id]  = r.Room_type);
+
+    rooms = crData.map(r => ({
+      ...r,
+      collegeName: collegeMap[r.College_id]  ?? '—',
+      roomTypeName: roomTypeMap[r.Room_id]   ?? '—'
+    }));
+
+    renderRooms();
+  } catch (err) {
+    console.error('Load error:', err);
+    document.getElementById('roomTableBody').innerHTML =
+      `<tr><td colspan="7" style="color:#991b1b;">Failed to load rooms: ${err.message}</td></tr>`;
   }
+}
 
   async function saveRoom() {
-    const editCollegeId = document.getElementById('editRoomId').value;
-    const collegeId = document.getElementById('college').value;
-    const roomType = document.getElementById('roomType').value;
-    const totalRooms = document.getElementById('totalRooms').value;
-    const availableRooms = document.getElementById('availableRooms').value;
-
-    if (!collegeId || !roomType || isNaN(totalRooms) || isNaN(availableRooms)) {
+    const editRecordId   = document.getElementById('editRecordId').value;  
+    const collegeId      = document.getElementById('college').value;        
+    const roomId         = document.getElementById('roomType').value;       
+    const totalRooms     = parseInt(document.getElementById('totalRooms').value);
+    const availableRooms = parseInt(document.getElementById('availableRooms').value);
+ 
+    if (!collegeId || !roomId || isNaN(totalRooms) || isNaN(availableRooms)) {
       showMessage('error', 'Please fill in all fields.');
       return;
     }
-
-    if (Number(availableRooms) > Number(totalRooms)) {
-      showMessage('error', 'Available rooms cannot be more than total rooms.');
+    if (availableRooms > totalRooms) {
+      showMessage('error', 'Available rooms cannot exceed total rooms.');
       return;
     }
 
@@ -569,173 +572,119 @@
     btn.disabled = true;
     btn.textContent = 'Saving..';
 
-    try{
-      if(editRoomId === ''){
-        const { data: newRoomData, error: roomErr } = await db 
-        .from('Room')
-        .insert([{
-            Room_type: roomType,
-            Room_total: totalRooms,
+    try {
+      if (editRecordId === '') {
+        // INSERT
+        const { error } = await db
+          .from('College_Room')
+          .insert([{
+            College_id:     collegeId,
+            Room_id:        roomId,
+            Room_total:     totalRooms,
             Room_available: availableRooms
-        }])
-          .select('Room_id')
-          .limit(1)
-         if (roomErr) throw roomErr;
-
-         const newRoomId = newRoomData[0].Room_id;
-
-         const { error: colErr } = await db
-        .from('College')
-        .update({
-          Room_id:         newRoomId,
-          Quota:           totalRooms,
-          Available_rooms: availableRooms
-        })
-        .eq('id', collegeId);
-        if (colErr) throw colErr;
-
-        showMessage('success', 'Room added successfully.');
-
+          }])
+          .select();
+        if (error) throw error;
+        showMessage('success', 'Room record added successfully.');
+ 
       } else {
-       
-        const { data: colRows, error: fetchErr } = await db
-          .from('College')
-          .select('Room_id')
-          .eq('id', editCollegeId)
-          .limit(1);
-        if (fetchErr) throw fetchErr;
-
-        const linkedRoomId = colRows[0]?.Room_id;
-        if (linkedRoomId) {
-        const { error: roomErr } = await db
-          .from('Room')
+        // UPDATE
+        const { error } = await db
+          .from('College_Room')
           .update({
-            Room_type:      roomType,
+            College_id:     collegeId,
+            Room_id:        roomId,
             Room_total:     totalRooms,
             Room_available: availableRooms
           })
-          .eq('Room_id', linkedRoomId);
-        if (roomErr) throw roomErr;
+          .eq('id', editRecordId)
+          .select();
+        if (error) throw error;
+        showMessage('success', 'Room record updated successfully.');
       }
-       
-       
-        const { error: colErr } = await db
-          .from('College')
-          .update({
-            Quota:           totalRooms,
-            Available_rooms: availableRooms
-          })
-          .eq('id', editCollegeId);
-        if (colErr) throw colErr;
-
-        showMessage('success', 'Room updated successfully.');
-      }
+ 
       clearForm();
       await loadRooms();
-
+ 
     } catch (err) {
       console.error('Save error:', err);
       showMessage('error', 'Error saving room: ' + err.message);
-    }finally {
+    } finally {
       btn.disabled = false;
       btn.innerHTML = '<i class="bi bi-floppy-fill me-1"></i> Save Room';
     }
   }
 
-  async function editRoom(collegeId, roomId) {
-     console.log('editRoom called — collegeId:', collegeId, '| roomId:', roomId);
+  async function editRoom(recordId) {
     try {
       const { data, error } = await db
-        .from('College')
-        .select('id, College_name, Room_id, Room(Room_type, Room_total, Room_available)')
-        .eq('id', collegeId)
+        .from('College_Room')
+        .select('id, College_id, Room_id, Room_total, Room_available')
+        .eq('id', recordId)
         .limit(1);
-
-      console.log('query result:', JSON.stringify(data));
-      console.log('error:', error);
-
+ 
       if (error) throw error;
-      if (!data || data.length === 0) { showMessage('error', 'Room record not found.'); return; }
-      const record = data[0];
-
+      if (!data || data.length === 0) { showMessage('error', 'Record not found.'); return; }
+ 
       const rec = data[0];
 
-      document.getElementById('editRoomId').value      = rec.id;
-      document.getElementById('college').value         = rec.id;
-      document.getElementById('roomType').value        = rec.Room?.Room_type      ?? '';
-      document.getElementById('totalRooms').value      = rec.Room?.Room_total     ?? '';
-      document.getElementById('availableRooms').value  = rec.Room?.Room_available ?? '';
+      await loadRoomTypeOptions();
+
+    
+      document.getElementById('editRecordId').value    = rec.id;
+      document.getElementById('college').value         = rec.College_id;  
+      document.getElementById('roomType').value        = rec.Room_id;    
+      document.getElementById('totalRooms').value      = rec.Room_total;
+      document.getElementById('availableRooms').value  = rec.Room_available;
       document.getElementById('rm-formTitle').textContent = 'Edit Room Availability';
-
-
+      
+     
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } catch (err) {
-      showMessage('error', 'Could not load room: ' + err.message);
+      showMessage('error', 'Could not load record: ' + err.message);
     }
   }
 
-  async function deleteRoom(collegeId, roomId) {
-    if (!confirm(`Delete this room record? This cannot be undone.`)) return;
+   async function deleteRoom(recordId) {
+    if (!confirm('Delete this room record? This cannot be undone.')) return;
     try {
-      
-      const { error: unlinkErr } = await db
-        .from('College')
-        .update({ Room_id: null, Quota: 0, Available_rooms: 0 })
-        .eq('id', collegeId);
-      if (unlinkErr) throw unlinkErr;
-
-     
-      const { error: roomErr } = await db
-        .from('Room')
+      const { error } = await db
+        .from('College_Room')
         .delete()
-        .eq('Room_id', roomId);
-      if (roomErr) throw roomErr;
-
-      showMessage('success', 'Room deleted successfully.');
+        .eq('id', recordId);
+      if (error) throw error;
+      showMessage('success', 'Room record deleted successfully.');
       await loadRooms();
     } catch (err) {
       showMessage('error', 'Delete failed: ' + err.message);
     }
   }
 
-  function clearForm() {
-    document.getElementById('editRoomId').value = '';
-    document.getElementById('college').value = '';
-    document.getElementById('roomType').value = '';
-    document.getElementById('totalRooms').value = '';
-    document.getElementById('availableRooms').value = '';
-    document.getElementById('status').value = '';
+ function clearForm() {
+    document.getElementById('editRecordId').value    = '';
+    document.getElementById('college').value         = '';
+    document.getElementById('roomType').value        = '';
+    document.getElementById('totalRooms').value      = '';
+    document.getElementById('availableRooms').value  = '';
     document.getElementById('rm-formTitle').textContent = 'Room Availability Form';
   }
 
   async function loadAdminStaffHeader() {
-    const role = localStorage.getItem('staffAdminRole') || localStorage.getItem('userRole');
+    const role  = localStorage.getItem('staffAdminRole') || localStorage.getItem('userRole');
     const email = localStorage.getItem('staffAdminEmail');
-    const name = localStorage.getItem('staffAdminName');
-
-    if (!role && !email) {
-      window.location.href = 'admin_staff_login.html';
-      return;
-    }
-
-    const roleText = role === 'admin' || role === 'Admin' ? 'Admin' : 'Staff';
-
-    document.getElementById('dropdownUserRole').textContent = roleText;
-    document.getElementById('dropdownUserName').textContent = name || roleText + ' User';
+    const name  = localStorage.getItem('staffAdminName');
+    if (!role && !email) { window.location.href = 'admin_staff_login.html'; return; }
+    const roleText = (role === 'admin' || role === 'Admin') ? 'Admin' : 'Staff';
+    document.getElementById('dropdownUserRole').textContent  = roleText;
+    document.getElementById('dropdownUserName').textContent  = name || roleText + ' User';
     document.getElementById('dropdownUserEmail').textContent = email || 'user@utmspace.my';
-    document.getElementById('avatarInitial').textContent = roleText.charAt(0);
+    document.getElementById('avatarInitial').textContent     = roleText.charAt(0);
   }
-
+ 
   document.getElementById('logoutBtn').addEventListener('click', function(e) {
     e.preventDefault();
-
-    localStorage.removeItem('staffAdminRole');
-    localStorage.removeItem('staffAdminEmail');
-    localStorage.removeItem('staffAdminName');
-    localStorage.removeItem('staffAdminId');
-    localStorage.removeItem('userRole');
-    localStorage.removeItem('currentUser');
-
+    ['staffAdminRole','staffAdminEmail','staffAdminName','staffAdminId','userRole','currentUser']
+      .forEach(k => localStorage.removeItem(k));
     window.location.href = 'admin_staff_login.html';
   });
 
