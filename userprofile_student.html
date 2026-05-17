@@ -115,6 +115,12 @@
           <div class="info-label">Matric No.:</div>
           <div class="info-value" id="displayMatric">A20CS1234</div>
         </div>
+        <div class="info-row">
+          <div class="info-label">Gender:</div>
+          <div class="info-value" id="displayGender">
+            <span id="genderIcon"></span> <span id="genderText">-</span>
+          </div>
+        </div>
       </div>
 
       <div class="info-card">
@@ -193,8 +199,6 @@
 <a href="#" id="scroll-top" class="scroll-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
 <div id="preloader"></div>
 
-
-<!-- Edit Profile Modal -->
 <div class="modal fade" id="editProfileModal" tabindex="-1" aria-labelledby="editProfileModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
@@ -222,6 +226,11 @@
             <input type="text" class="form-control" id="editMatric" readonly disabled style="background:#f5f5f5; cursor:not-allowed; user-select:none;">
             <small class="text-muted">Matric number cannot be changed.</small>
           </div>
+          <div class="mb-3">
+            <label for="editGender" class="form-label">Gender</label>
+            <input type="text" class="form-control" id="editGender" readonly disabled style="background:#f5f5f5; cursor:not-allowed; user-select:none;">
+            <small class="text-muted">Gender cannot be changed.</small>
+          </div>
         </form>
       </div>
       <div class="modal-footer">
@@ -232,7 +241,6 @@
   </div>
 </div>
 
-<!-- Change Password Modal -->
 <div class="modal fade" id="changePasswordModal" tabindex="-1" aria-labelledby="changePasswordModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
@@ -280,10 +288,25 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="supabase.js"></script>
 <script>
+  function updateGenderDisplay(gender) {
+    const genderIcon = document.getElementById('genderIcon');
+    const genderText = document.getElementById('genderText');
+    
+    if (gender === 'Male') {
+      genderIcon.innerHTML = '<i class="bi bi-gender-male" style="color: #2c5a7a;"></i>';
+      genderText.textContent = 'Male';
+    } else if (gender === 'Female') {
+      genderIcon.innerHTML = '<i class="bi bi-gender-female" style="color: #e74c3c;"></i>';
+      genderText.textContent = 'Female';
+    } else {
+      genderIcon.innerHTML = '<i class="bi bi-gender-ambiguous"></i>';
+      genderText.textContent = 'Not specified';
+    }
+  }
+
   async function loadStudentProfile() {
     const email = localStorage.getItem('studentEmail');
     
-    // DEBUG - check what's stored
     console.log('Email from localStorage:', email);
     console.log('StudentId from localStorage:', localStorage.getItem('studentId'));
     console.log('Name from localStorage:', localStorage.getItem('studentName'));
@@ -321,14 +344,30 @@
     document.getElementById('displayEmail').textContent = data.email;
     document.getElementById('displayPhone').textContent = data.telephone || 'N/A';
 
+    // Display Gender
+    const gender = data.gender || 'Not specified';
+    updateGenderDisplay(gender);
+    
+    // Update profile badge with gender
+    const profileGenderBadge = document.getElementById('profileGender');
+    if (gender === 'Male') {
+      profileGenderBadge.innerHTML = '<i class="bi bi-gender-male"></i> Male Student';
+      profileGenderBadge.style.background = '#2c5a7a';
+    } else if (gender === 'Female') {
+      profileGenderBadge.innerHTML = '<i class="bi bi-gender-female"></i> Female Student';
+      profileGenderBadge.style.background = '#e74c3c';
+    } else {
+      profileGenderBadge.innerHTML = '<i class="bi bi-gender-ambiguous"></i> Undergraduate Student';
+      profileGenderBadge.style.background = 'rgba(255,255,255,0.2)';
+    }
     
     document.getElementById('editName').value = data.name;
     document.getElementById('editEmail').value = data.email;
     document.getElementById('editPhone').value = data.telephone || '';
     document.getElementById('editMatric').value = data.student_id;
+    document.getElementById('editGender').value = gender === 'Male' ? '👨 Male' : (gender === 'Female' ? '👩 Female' : 'Not specified');
   }
 
-  
   async function saveProfileChanges() {
     const email = localStorage.getItem('studentEmail');
     const newName = document.getElementById('editName').value.trim();
@@ -355,7 +394,6 @@
         return;
     }
 
-    // Update displayed values
     document.getElementById('displayName').textContent = newName;
     document.getElementById('displayPhone').textContent = newPhone;
     document.getElementById('profileName').textContent = newName;
@@ -440,12 +478,14 @@
     document.getElementById('confirmPassword').value = '';
     
     new bootstrap.Modal(document.getElementById('changePasswordModal')).show();
-}
-document.getElementById('changePasswordModal').addEventListener('hidden.bs.modal', function () {
+  }
+  
+  document.getElementById('changePasswordModal').addEventListener('hidden.bs.modal', function () {
     document.getElementById('currentPassword').value = '';
     document.getElementById('newPassword').value = '';
     document.getElementById('confirmPassword').value = '';
-});
+  });
+  
   // ── Load on page ready ──
   loadStudentProfile();
 </script>
