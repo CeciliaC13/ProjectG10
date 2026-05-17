@@ -179,6 +179,71 @@
       color: #166534;
       border: 1px solid #bbf7d0;
     }
+    /* Styling for Pending Payment Status */
+.status-badge.status-pending-payment {
+    background-color: #f39c12;
+    color: #fff;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.85em;
+    font-weight: bold;
+}
+
+/* Row shading change for Overdue Records */
+tr.row-overdue {
+    background-color: rgba(231, 76, 60, 0.08) !important;
+}
+
+/* Animated warning element under student names */
+.payment-warning {
+    color: #e74c3c;
+    font-size: 0.8rem;
+    font-weight: 600;
+    margin-top: 4px;
+    animation: pulseWarning 1.5s infinite alternate;
+}
+
+@keyframes pulseWarning {
+    0% { opacity: 0.6; }
+    100% { opacity: 1; }
+}
+
+/* Receipt Button Styling */
+.btn-info {
+    background-color: #17a2b8;
+    color: #fff;
+    border: none;
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.btn-info:hover {
+    background-color: #138496;
+}
+
+/* Locked Badge for Unpaid Staff View */
+.badge.bg-secondary {
+    background-color: #6c757d;
+    color: #fff;
+    padding: 5px 8px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    display: inline-block;
+}
+
+/* Disabled styling overlay adjustments */
+select:disabled, button:disabled {
+    cursor: not-allowed;
+    opacity: 0.65;
+}
+
+/* Icon spaces if using Bootstrap Icons */
+.bi {
+    margin-right: 4px;
+}
   </style>
 </head>
 
@@ -295,6 +360,7 @@
                 <th>Room Type</th>
                 <th>Current Status</th>
                 <th>Change Status</th>
+                <th>Receipt</th>
                 <th>Action</th>
               </tr>
             </thead>
@@ -374,133 +440,240 @@
 <script src="supabase.js"></script>
 
 <script>
-
-window.loadNotifications = window.loadNotifications || function() { 
-      console.log("Notifications disabled for this page."); 
-  };
+  // Silence global layout errors from main.js
   window.notifications = window.notifications || [];
-
-async function loadAdminStaffHeader() {
-
-    const role = localStorage.getItem('staffAdminRole') || localStorage.getItem('userRole');
-
-    const email = localStorage.getItem('staffAdminEmail');
-
-    const name = localStorage.getItem('staffAdminName');
-
-
-
-    if (!role && !email) {
-
-      window.location.href = 'admin_staff_login.html';
-
-      return;
-
-    }
-
-    const roleText = role === 'admin' || role === 'Admin' ? 'Admin' : 'Staff';
-
-    document.getElementById('dropdownUserRole').textContent = roleText;
-
-    document.getElementById('dropdownUserName').textContent = name || roleText + ' User';
-
-    document.getElementById('dropdownUserEmail').textContent = email || 'user@utmspace.my';
-
-    document.getElementById('avatarInitial').textContent = roleText.charAt(0);
-
-  }
-
-  document.getElementById('logoutBtn').addEventListener('click', function(e) {
-
-    e.preventDefault();
-
-localStorage.removeItem('staffAdminRole');
-
-    localStorage.removeItem('staffAdminEmail');
-
-    localStorage.removeItem('staffAdminName');
-
-    localStorage.removeItem('staffAdminId');
-
-    localStorage.removeItem('userRole');
-
-    localStorage.removeItem('currentUser');
-
-    window.location.href = 'admin_staff_login.html';
-
-  });
+  window.loadNotifications = window.loadNotifications || function() {};
 
   let bookings = [];
-function renderBookings() {
-      const tbody = document.getElementById('bookingTableBody');
-      if (!bookings || bookings.length === 0) {
-          tbody.innerHTML = '<tr><td colspan="9">No data found in database.</td></tr>';
-          return;
-      }}
-    // 1. FETCH BOOKINGS FROM DATABASE
-async function fetchBookings() {
-      try {
-          // Ensure supabase.js is loaded and defines 'supabaseClient'
-          const { data, error } = await db
-              .from('reservations')
-              .select('*');
+  // Get current user role: 'admin' or 'staff' (lowercase adjustment for safety)
+  const currentUserRole = (localStorage.getItem('staffAdminRole') || 'staff').toLowerCase();
 
-          if (error) throw error;
-          
-          bookings = data; // Fill the global array with database rows
-          renderBookings(); // Now trigger the UI update
-      } catch (err) {
-          console.error('Data failed to load:', err.message);
+  // 1. FETCH DATA FROM SUPABASE
+  async function fetchBookings() {
+    try {
+      if (typeof db === 'undefined') {
+        throw new Error("db is missing. Check your script config imports.");
       }
+
+      const { data, error } = await db
+        .from('reservations')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      
+      bookings = data.map(function(item) {
+        return {
+          id: item.id,
+          bookingId: item.reservation_id,
+          studentId: item.student_id,
+          studentName: item.student_name,
+          college: item.college,
+          roomType: item.room_type,
+          status: item.status || 'Pending Payment', 
+          createdAt: item.created_at,
+          receiptUrl: item.receipt_url || null // Assuming receipt link or image URL is stored here
+        };
+      });
+
+      renderBookings();
+    } catch (err) {
+      console.error('Error fetching data:', err.message);
+    }
   }
 
-  // 2. UPDATE STATUS IN DATABASE
-async function updateBookingStatus(index) {
+  // 2. RENDER THE DYNAMIC ROLE-BASED TABLE
+  function renderBookings() {
+    const tbody = document.getElementById('bookingTableBody');
+    const statusFilter = document.getElementById('statusFilter').value;
+    const collegeFilter = document.getElementById('collegeFilter').value;
+
+    const filtered = bookings.filter(function(item) {
+      const statusMatch = statusFilter === 'All' || item.status === statusFilter;
+      const collegeMatch = collegeFilter === 'All' || item.college === collegeFilter;
+      return statusMatch && collegeMatch;
+    });
+
+    if (filtered.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="10">No booking records found.</td></tr>`;
+      return;
+    }
+
+    const now = new Date();
+    const isAdmin = (currentUserRole === 'admin');
+
+    tbody.innerHTML = filtered.map(function(item, index) {
+      const realIndex = bookings.indexOf(item);
+      const displayId = item.bookingId || 'N/A';
+      
+      // Calculate age of booking record
+      const createdDate = new Date(item.createdAt);
+      const daysDiff = Math.ceil(Math.abs(now - createdDate) / (1000 * 60 * 60 * 24));
+      
+      const isPendingPayment = (item.status === 'Pending Payment');
+      const isOverdue = (isPendingPayment && daysDiff >= 7);
+
+      // --- DYNAMIC SELECT DROPDOWN GENERATION ---
+      let selectOptions = '';
+      let isDropdownDisabled = false;
+
+      if (isAdmin) {
+        // Admin always has full power
+        selectOptions = `
+          <option value="Pending Payment" ${item.status === 'Pending Payment' ? 'selected' : ''}>Pending Payment</option>
+          <option value="Pending" ${item.status === 'Pending' ? 'selected' : ''}>Pending</option>
+          <option value="Approved" ${item.status === 'Approved' ? 'selected' : ''}>Approved</option>
+          <option value="Rejected" ${item.status === 'Rejected' ? 'selected' : ''}>Rejected</option>
+          <option value="Cancelled" ${item.status === 'Cancelled' ? 'selected' : ''}>Cancelled</option>
+        `;
+      } else {
+        // Staff Rule Restrictions
+        if (isPendingPayment) {
+          // Staff cannot change anything while payment is missing
+          isDropdownDisabled = true;
+          selectOptions = `<option value="Pending Payment" selected>Pending Payment</option>`;
+        } else {
+          // If student has paid (Status: Pending, Approved, etc.), Staff can act
+          selectOptions = `
+            <option value="Pending" ${item.status === 'Pending' ? 'selected' : ''}>Pending</option>
+            <option value="Approved" ${item.status === 'Approved' ? 'selected' : ''}>Approved</option>
+            <option value="Rejected" ${item.status === 'Rejected' ? 'selected' : ''}>Rejected</option>
+            <option value="Cancelled" ${item.status === 'Cancelled' ? 'selected' : ''}>Cancelled</option>
+          `;
+        }
+      }
+
+      // --- ACTION BUTTON CONTROL (Delete & Receipt) ---
+      let deleteButtonHtml = '';
+      if (isAdmin) {
+        // Admin can always delete
+        deleteButtonHtml = `<button class="delete-btn" onclick="deleteBooking(${realIndex})">Delete</button>`;
+      } else {
+        // Staff can ONLY delete if status is Pending Payment AND 7 days have passed
+        if (isPendingPayment && isOverdue) {
+          deleteButtonHtml = `<button class="delete-btn" onclick="deleteBooking(${realIndex})">Delete (Overdue)</button>`;
+        } else {
+          deleteButtonHtml = `<button class="delete-btn" disabled title="Only available for 7+ days overdue payments">Delete</button>`;
+        }
+      }
+
+      // Receipt validation accessibility view rule
+      let receiptButtonHtml = '';
+      if (isAdmin || !isPendingPayment) {
+        // Admin can always view, Staff can view once status isn't "Pending Payment" anymore
+        if (item.receiptUrl) {
+          receiptButtonHtml = `<button class="btn btn-sm btn-info" onclick="viewReceipt('${item.receiptUrl}')"><i class="bi bi-file-earmark-image"></i> View Receipt</button>`;
+        } else {
+          receiptButtonHtml = `<span class="text-muted">No uploaded file</span>`;
+        }
+      } else {
+        // Staff trying to look at receipt when unpaid
+        receiptButtonHtml = `<span class="badge bg-secondary"><i class="bi bi-lock-fill"></i> Locked (Unpaid)</span>`;
+      }
+
+      // Display Warning Message if overdue
+      const warningBadge = isOverdue 
+        ? `<div class="payment-warning"><i class="bi bi-exclamation-triangle-fill"></i> Unpaid for ${daysDiff} days!</div>` 
+        : '';
+
+      return `
+        <tr class="${isOverdue ? 'row-overdue' : ''}">
+          <td>${index + 1}</td>
+          <td>${displayId}</td>
+          <td>${item.studentId || 'N/A'}</td>
+          <td>
+            <strong>${item.studentName || 'N/A'}</strong>
+            ${warningBadge}
+          </td>
+          <td>${item.college || 'N/A'}</td>
+          <td>${item.roomType || 'N/A'}</td>
+          <td><span class="status-badge ${getStatusClass(item.status)}">${item.status}</span></td>
+          <td>
+            <select class="form-select form-select-sm" id="statusSelect${realIndex}" ${isDropdownDisabled ? 'disabled' : ''}>
+              ${selectOptions}
+            </select>
+          </td>
+          <td>${receiptButtonHtml}</td>
+          <td>
+            <button class="update-btn" ${isDropdownDisabled ? 'disabled' : ''} onclick="updateBookingStatus(${realIndex}, event)">Update</button>
+            ${deleteButtonHtml}
+          </td>
+        </tr>
+      `;
+    }).join('');
+  }
+
+  // View Receipt Handler Window
+  function viewReceipt(url) {
+    window.open(url, '_blank', 'width=600,height=800');
+  }
+
+  // Style helper class
+  function getStatusClass(status) {
+    if (status === 'Approved') return 'status-approved';
+    if (status === 'Rejected') return 'status-rejected';
+    if (status === 'Cancelled') return 'status-cancelled';
+    if (status === 'Pending Payment') return 'status-pending-payment';
+    return 'status-pending'; // Matches student successful payment transition default
+  }
+
+  // 3. DATABASE UPDATE ACTION
+  async function updateBookingStatus(index, event) {
     const item = bookings[index];
-    const newStatus = document.getElementById('statusSelect' + index).value;
+    const selectElement = document.getElementById('statusSelect' + index);
+    if (!selectElement) return;
+    const newStatus = selectElement.value;
 
     try {
-        const { error } = await db
-            .from('reservations')
-            .update({ status: newStatus })
-            .eq('reservation_id', item.bookingId); // Match the ID
+      const btn = event.target;
+      btn.disabled = true;
+      btn.innerHTML = "Saving...";
 
-        if (error) throw error;
+      const { error } = await db
+        .from('reservations')
+        .update({ status: newStatus })
+        .eq('reservation_id', item.bookingId);
 
-        // Update local state and refresh UI
-        bookings[index].status = newStatus;
-        renderBookings();
-        showMessage('Booking status updated to ' + newStatus + '.');
+      if (error) throw error;
+
+      bookings[index].status = newStatus;
+      renderBookings();
+      showMessage('Status updated successfully!');
     } catch (err) {
-        alert('Update failed: ' + err.message);
+      alert('Update process dropped: ' + err.message);
+      fetchBookings();
     }
-}
+  }
 
- // 3. DELETE FROM DATABASE
-async function deleteBooking(index) {
+  // 4. DATABASE DELETE ACTION
+  async function deleteBooking(index) {
     const item = bookings[index];
-    if (!confirm('Are you sure you want to delete this booking?')) return;
+    if (!confirm('Are you absolutely sure you want to delete this booking tracking entry?')) return;
 
     try {
-        const { error } = await db
-            .from('reservations')
-            .delete()
-            .eq('reservation_id', item.bookingId);
+      const { error } = await db
+        .from('reservations')
+        .delete()
+        .eq('reservation_id', item.bookingId);
 
-        if (error) throw error;
+      if (error) throw error;
 
-        bookings.splice(index, 1);
-        renderBookings();
-        showMessage('Booking deleted successfully.');
+      bookings.splice(index, 1);
+      renderBookings();
+      showMessage('Record removed successfully.');
     } catch (err) {
-        alert('Delete failed: ' + err.message);
+      alert('Failed to drop record: ' + err.message);
     }
-}
+  }
 
-// Initial Load: Replace renderBookings() with fetchBookings()
-fetchBookings();
-loadAdminStaffHeader();
+  function showMessage(text) {
+    const box = document.getElementById('messageBox');
+    if (!box) return;
+    box.className = 'message-box show message-success';
+    box.textContent = text;
+    setTimeout(() => { box.className = 'message-box'; }, 2500);
+  }
+
+  // Auto initialize loop sequence calls
+  fetchBookings();
 </script>
-
-</body>
-</html>
