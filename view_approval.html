@@ -371,111 +371,131 @@
 <script src="vendor/aos/aos.js"></script>
 <script src="vendor/swiper/swiper-bundle.min.js"></script>
 <script src="vendor/purecounter/purecounter_vanilla.js"></script>
-
+>
+<script src="main.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="supabase.js"></script>
-<script src="main.js"></script>
 
 <script>
-  let approvals = JSON.parse(localStorage.getItem('bookingApprovals')) || [
-    {
-      bookingId: 'B001',
-      studentId: 'A24DW0011',
-      studentName: 'Aina Natasha',
-      college: 'Kolej 9',
-      roomType: 'Single Room',
-      applyDate: '2026-05-10',
-      status: 'Pending'
-    },
-    {
-      bookingId: 'B002',
-      studentId: 'A24DW0022',
-      studentName: 'Daniel Lim',
-      college: 'Kolej 10',
-      roomType: 'Double / Twin Sharing',
-      applyDate: '2026-05-11',
-      status: 'Approved'
-    },
-    {
-      bookingId: 'B003',
-      studentId: 'A24DW0033',
-      studentName: 'Kavitha Raj',
-      college: 'Perdana Residence Block U7',
-      roomType: 'Single Bed AC',
-      applyDate: '2026-05-12',
-      status: 'Pending'
-    }
-  ];
-
-  function getStatusClass(status) {
-    if (status === 'Approved') return 'status-approved';
-    if (status === 'Rejected') return 'status-rejected';
-    if (status === 'Cancelled') return 'status-cancelled';
+  window.notifications = window.notifications || [];
+  window.loadNotifications = window.loadNotifications || function() {};
+  let approvals = [];
+   function getStatusClass(status) {
+    const lowerStatus = (status || '').toLowerCase();
+    if (lowerStatus === 'approved') return 'status-approved';
+    if (lowerStatus === 'rejected') return 'status-rejected';
+    if (lowerStatus === 'cancelled') return 'status-cancelled';
     return 'status-pending';
   }
 
-  function renderApprovals() {
-    const tbody = document.getElementById('approvalTableBody');
-    const statusFilter = document.getElementById('statusFilter').value;
-    const collegeFilter = document.getElementById('collegeFilter').value;
+  async function fetchReservations() {
+  try {
+    let { data, error } = await db
+      .from('reservations')
+      .select('*')
+      .order('created_at', { ascending: false });
 
-    const filtered = approvals.filter(function(item) {
-      const statusMatch = statusFilter === 'All' || item.status === statusFilter;
-      const collegeMatch = collegeFilter === 'All' || item.college === collegeFilter;
-      return statusMatch && collegeMatch;
+    if (error) throw error;
+
+    approvals = (data || []).map(function(item) {
+      return {
+        id: item.id,
+        bookingId: item.reservation_id, 
+        studentId: item.student_id,     
+        studentName: item.student_name, 
+        college: item.college,
+        roomType: item.room_type,
+        status: item.status || 'Pending Payment', 
+        createdAt: item.created_at,   
+        receiptUrl: item.receipt_url || null 
+      };
     });
 
-    if (filtered.length === 0) {
-      tbody.innerHTML = `
-        <tr>
-          <td colspan="9">No booking applications found.</td>
-        </tr>
-      `;
-      return;
-    }
+    renderApprovals();
+  } catch (err) {
+    console.error('Error fetching from database:', err.message);
+    alert('Failed to load reservations.');
+  }
+}
 
-    tbody.innerHTML = filtered.map(function(item, index) {
-      const realIndex = approvals.indexOf(item);
-      const bookingId = item.bookingId || 'B00' + (realIndex + 1);
+  function renderApprovals() {
+  const tbody = document.getElementById('approvalTableBody');
+  const statusFilter = document.getElementById('statusFilter').value;
+  const collegeFilter = document.getElementById('collegeFilter').value;
 
-      return `
-        <tr>
-          <td>${index + 1}</td>
-          <td>${bookingId}</td>
-          <td>${item.studentId}</td>
-          <td>${item.studentName}</td>
-          <td>${item.college}</td>
-          <td>${item.roomType}</td>
-          <td>${item.applyDate || '-'}</td>
-          <td><span class="status-badge ${getStatusClass(item.status)}">${item.status}</span></td>
-          <td>
-            <button class="view-btn" onclick="viewBooking(${realIndex})">View</button>
-          </td>
-        </tr>
-      `;
-    }).join('');
+  const filtered = approvals.filter(function(item) {
+    const statusMatch = statusFilter === 'All' || item.status === statusFilter;
+    const collegeMatch = collegeFilter === 'All' || item.college === collegeFilter;
+    return statusMatch && collegeMatch;
+  });
+
+  if (filtered.length === 0) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="9">No booking applications found.</td>
+      </tr>
+    `;
+    return;
   }
 
+  tbody.innerHTML = filtered.map(function(item, index) {
+    const realIndex = approvals.indexOf(item);
+
+    const bookingId = item.bookingId || 'B00' + (realIndex + 1);
+    const studentId = item.studentId || '-';
+    const studentName = item.studentName || '-';
+    const college = item.college || '-';
+    const roomType = item.roomType || '-';
+    
+    // Formatting the timestamp string down to just YYYY-MM-DD
+    const applyDate = item.createdAt ? item.createdAt.substring(0, 10) : '-';
+    const status = item.status;
+
+    return `
+      <tr>
+        <td>${index + 1}</td>
+        <td>${bookingId}</td>
+        <td>${studentId}</td>
+        <td>${studentName}</td>
+        <td>${college}</td>
+        <td>${roomType}</td>
+        <td>${applyDate}</td>
+        <td><span class="status-badge ${getStatusClass(status)}">${status}</span></td>
+        <td>
+          <button class="view-btn" onclick="viewBooking(${realIndex})">View</button>
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
   function filterApprovals() {
     renderApprovals();
   }
 
   function viewBooking(index) {
-    const item = approvals[index];
-    const bookingId = item.bookingId || 'B00' + (index + 1);
+  const item = approvals[index];
+  
+  const bookingId = item.bookingId || 'B00' + (index + 1);
+  const studentId = item.studentId || '-';
+  const studentName = item.studentName || '-';
+  const college = item.college || '-';
+  const roomType = item.roomType || '-';
+  const applyDate = item.createdAt ? item.createdAt.substring(0, 10) : '-';
+  const status = item.status;
 
-    document.getElementById('bookingDetails').innerHTML = `
-      <p><strong>Booking ID:</strong> ${bookingId}</p>
-      <p><strong>Student ID:</strong> ${item.studentId}</p>
-      <p><strong>Student Name:</strong> ${item.studentName}</p>
-      <p><strong>College:</strong> ${item.college}</p>
-      <p><strong>Room Type:</strong> ${item.roomType}</p>
-      <p><strong>Apply Date:</strong> ${item.applyDate || '-'}</p>
-      <p><strong>Status:</strong> ${item.status}</p>
-    `;
+  document.getElementById('bookingDetails').innerHTML = `
+    <p><strong>Booking ID:</strong> ${bookingId}</p>
+    <p><strong>Student ID:</strong> ${studentId}</p>
+    <p><strong>Student Name:</strong> ${studentName}</p>
+    <p><strong>College:</strong> ${college}</p>
+    <p><strong>Room Type:</strong> ${roomType}</p>
+    <p><strong>Apply Date:</strong> ${applyDate}</p>
+    <p><strong>Status:</strong> ${status}</p>
+    ${item.receiptUrl ? `<p><strong>Receipt:</strong> <a href="${item.receiptUrl}" target="_blank">View Receipt</a></p>` : ''}
+  `;
 
-    new bootstrap.Modal(document.getElementById('bookingModal')).show();
-  }
+  new bootstrap.Modal(document.getElementById('bookingModal')).show();
+}
 
   async function loadAdminStaffHeader() {
     const role = localStorage.getItem('staffAdminRole') || localStorage.getItem('userRole');
@@ -507,9 +527,12 @@
 
     window.location.href = 'admin_staff_login.html';
   });
-
-  renderApprovals();
+  function loadNotifications() {
+  // Empty safety placeholder block to satisfy main.js call
+  console.log("Notification engine ready.");
+}
   loadAdminStaffHeader();
+  fetchReservations();
 </script>
 
 </body>

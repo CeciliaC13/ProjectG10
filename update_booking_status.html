@@ -440,15 +440,12 @@ select:disabled, button:disabled {
 <script src="supabase.js"></script>
 
 <script>
-  // Silence global layout errors from main.js
   window.notifications = window.notifications || [];
   window.loadNotifications = window.loadNotifications || function() {};
 
   let bookings = [];
-  // Get current user role: 'admin' or 'staff' (lowercase adjustment for safety)
   const currentUserRole = (localStorage.getItem('staffAdminRole') || 'staff').toLowerCase();
 
-  // 1. FETCH DATA FROM SUPABASE
   async function fetchBookings() {
     try {
       if (typeof db === 'undefined') {
@@ -472,7 +469,7 @@ select:disabled, button:disabled {
           roomType: item.room_type,
           status: item.status || 'Pending Payment', 
           createdAt: item.created_at,
-          receiptUrl: item.receipt_url || null // Assuming receipt link or image URL is stored here
+          receiptUrl: item.receipt_url || null 
         };
       });
 
@@ -482,8 +479,8 @@ select:disabled, button:disabled {
     }
   }
 
-  // 2. RENDER THE DYNAMIC ROLE-BASED TABLE
-  function renderBookings() {
+
+ function renderBookings() {
     const tbody = document.getElementById('bookingTableBody');
     const statusFilter = document.getElementById('statusFilter').value;
     const collegeFilter = document.getElementById('collegeFilter').value;
@@ -506,19 +503,16 @@ select:disabled, button:disabled {
       const realIndex = bookings.indexOf(item);
       const displayId = item.bookingId || 'N/A';
       
-      // Calculate age of booking record
       const createdDate = new Date(item.createdAt);
       const daysDiff = Math.ceil(Math.abs(now - createdDate) / (1000 * 60 * 60 * 24));
       
       const isPendingPayment = (item.status === 'Pending Payment');
       const isOverdue = (isPendingPayment && daysDiff >= 7);
 
-      // --- DYNAMIC SELECT DROPDOWN GENERATION ---
       let selectOptions = '';
       let isDropdownDisabled = false;
 
       if (isAdmin) {
-        // Admin always has full power
         selectOptions = `
           <option value="Pending Payment" ${item.status === 'Pending Payment' ? 'selected' : ''}>Pending Payment</option>
           <option value="Pending" ${item.status === 'Pending' ? 'selected' : ''}>Pending</option>
@@ -527,13 +521,10 @@ select:disabled, button:disabled {
           <option value="Cancelled" ${item.status === 'Cancelled' ? 'selected' : ''}>Cancelled</option>
         `;
       } else {
-        // Staff Rule Restrictions
         if (isPendingPayment) {
-          // Staff cannot change anything while payment is missing
           isDropdownDisabled = true;
           selectOptions = `<option value="Pending Payment" selected>Pending Payment</option>`;
         } else {
-          // If student has paid (Status: Pending, Approved, etc.), Staff can act
           selectOptions = `
             <option value="Pending" ${item.status === 'Pending' ? 'selected' : ''}>Pending</option>
             <option value="Approved" ${item.status === 'Approved' ? 'selected' : ''}>Approved</option>
@@ -543,35 +534,19 @@ select:disabled, button:disabled {
         }
       }
 
-      // --- ACTION BUTTON CONTROL (Delete & Receipt) ---
-      let deleteButtonHtml = '';
-      if (isAdmin) {
-        // Admin can always delete
-        deleteButtonHtml = `<button class="delete-btn" onclick="deleteBooking(${realIndex})">Delete</button>`;
-      } else {
-        // Staff can ONLY delete if status is Pending Payment AND 7 days have passed
-        if (isPendingPayment && isOverdue) {
-          deleteButtonHtml = `<button class="delete-btn" onclick="deleteBooking(${realIndex})">Delete (Overdue)</button>`;
-        } else {
-          deleteButtonHtml = `<button class="delete-btn" disabled title="Only available for 7+ days overdue payments">Delete</button>`;
-        }
-      }
+      let deleteButtonHtml = `<button class="delete-btn" onclick="deleteBooking(${realIndex})">Delete</button>`;
 
-      // Receipt validation accessibility view rule
       let receiptButtonHtml = '';
       if (isAdmin || !isPendingPayment) {
-        // Admin can always view, Staff can view once status isn't "Pending Payment" anymore
         if (item.receiptUrl) {
           receiptButtonHtml = `<button class="btn btn-sm btn-info" onclick="viewReceipt('${item.receiptUrl}')"><i class="bi bi-file-earmark-image"></i> View Receipt</button>`;
         } else {
           receiptButtonHtml = `<span class="text-muted">No uploaded file</span>`;
         }
       } else {
-        // Staff trying to look at receipt when unpaid
         receiptButtonHtml = `<span class="badge bg-secondary"><i class="bi bi-lock-fill"></i> Locked (Unpaid)</span>`;
       }
 
-      // Display Warning Message if overdue
       const warningBadge = isOverdue 
         ? `<div class="payment-warning"><i class="bi bi-exclamation-triangle-fill"></i> Unpaid for ${daysDiff} days!</div>` 
         : '';
@@ -601,23 +576,21 @@ select:disabled, button:disabled {
         </tr>
       `;
     }).join('');
-  }
+}
 
-  // View Receipt Handler Window
   function viewReceipt(url) {
     window.open(url, '_blank', 'width=600,height=800');
   }
 
-  // Style helper class
   function getStatusClass(status) {
     if (status === 'Approved') return 'status-approved';
     if (status === 'Rejected') return 'status-rejected';
     if (status === 'Cancelled') return 'status-cancelled';
     if (status === 'Pending Payment') return 'status-pending-payment';
-    return 'status-pending'; // Matches student successful payment transition default
+    return 'status-pending';
   }
 
-  // 3. DATABASE UPDATE ACTION
+
   async function updateBookingStatus(index, event) {
     const item = bookings[index];
     const selectElement = document.getElementById('statusSelect' + index);
@@ -645,7 +618,6 @@ select:disabled, button:disabled {
     }
   }
 
-  // 4. DATABASE DELETE ACTION
   async function deleteBooking(index) {
     const item = bookings[index];
     if (!confirm('Are you absolutely sure you want to delete this booking tracking entry?')) return;
@@ -674,6 +646,5 @@ select:disabled, button:disabled {
     setTimeout(() => { box.className = 'message-box'; }, 2500);
   }
 
-  // Auto initialize loop sequence calls
   fetchBookings();
 </script>
