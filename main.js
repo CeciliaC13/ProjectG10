@@ -7,6 +7,7 @@
 */
 
 (function() {
+  let notificationsData = [];
   "use strict";
 
   /**
@@ -96,15 +97,22 @@
   /**
    * Animation on scroll function and init
    */
-  function aosInit() {
+  
+
+window.addEventListener('load', () => {
+  if (typeof AOS !== 'undefined') {
     AOS.init({
-      duration: 600,
+      duration: 1000,
       easing: 'ease-in-out',
       once: true,
       mirror: false
     });
+    console.log("AOS successfully initialized!");
+  } else {
+    console.warn("AOS script library not detected on this page.");
   }
-  window.addEventListener('load', aosInit);
+});
+  
 
   /**
    * Init swiper sliders
@@ -141,7 +149,7 @@
     const container = document.getElementById('notificationList');
     if (!container) return;
     
-    if (notifications.length === 0) {
+    if (notificationsData.length === 0) {
       container.innerHTML = `
         <div class="notification-empty">
           <i class="bi bi-bell-slash"></i>
@@ -151,7 +159,7 @@
       return;
     }
 
-    container.innerHTML = notifications.map(notification => `
+    container.innerHTML = notificationsData.map(notification => `
       <div class="notification-item ${notification.read ? 'read' : 'unread'}" data-id="${notification.id}">
         <div class="notification-title">📌 ${notification.title}</div>
         <div class="notification-time">
@@ -163,8 +171,11 @@
   }
 
   // Update notification badge count
+  updateNotificationBadge(notificationsData);
+
   function updateNotificationBadge() {
-    const unreadCount = notifications.filter(n => !n.read).length;
+    const unreadCount = notificationsData.filter(n => !n.read).length;
+    console.log("Unread notifications count:", unreadCount);
     const badge = document.getElementById('notificationBadge');
     if (badge) {
       if (unreadCount > 0) {
@@ -178,10 +189,10 @@
 
   // Mark single notification as read
   function markAsRead(notificationId) {
-    const index = notifications.findIndex(n => n.id === notificationId);
-    if (index !== -1 && !notifications[index].read) {
-      notifications[index].read = true;
-      localStorage.setItem('dashboard_notifications', JSON.stringify(notifications));
+    const index = notificationsData.findIndex(n => n.id === notificationId);
+    if (index !== -1 && !notificationsData[index].read) {
+      notificationsData[index].read = true;
+      localStorage.setItem('dashboard_notifications', JSON.stringify(notificationsData));
       renderNotificationDropdown();
       updateNotificationBadge();
     }
@@ -189,8 +200,8 @@
 
   // Mark all notifications as read
   function markAllAsRead() {
-    notifications = notifications.map(n => ({ ...n, read: true }));
-    localStorage.setItem('dashboard_notifications', JSON.stringify(notifications));
+    notificationsData = notificationsData.map(n => ({ ...n, read: true }));
+    localStorage.setItem('dashboard_notifications', JSON.stringify(notificationsData));
     renderNotificationDropdown();
     updateNotificationBadge();
   }
@@ -345,7 +356,7 @@
     loadHeaderProfile();
     
     // Load notifications
-    loadNotifications();
+    loadNotificationData();
     
     // Initialize notification event listeners
     initNotificationListeners();
@@ -369,4 +380,14 @@
     });
   });
 
+  //  RIGHT: Added "async" here
+  async function loadNotificationData() {
+    
+    const { data, error } = await db.from('notifications').select('*');
+    
+    if (!error && data) {
+        notificationsData = data;
+        updateNotificationBadge();
+    }
+}
 })(); // End of main IIFE

@@ -343,6 +343,21 @@
         margin-left: 0;
       }
     }
+
+  #roomNumber, #checkIn, #checkOut {
+    border: none;
+    border-bottom: 1px solid #ccc; 
+    border-radius: 0; 
+    padding: 8px 0;
+    background: transparent;
+    outline: none; 
+    width: 100%;
+    }
+
+  #roomNumber:focus, #checkIn:focus, #checkOut:focus {
+    border-bottom: 2px solid #800020; 
+    outline: none;
+}
   </style>
 </head>
 
@@ -434,20 +449,20 @@
               <div class="info-value" id="studentId">-</div>
             </div>
             <div class="info-item">
-              <label><i class="bi bi-door-closed"></i> Room Number</label>
-              <div class="info-value" id="roomNumber">-</div>
+              <label><i class="bi bi-door-closed"></i> Room Number<span class="required">*</span></label>
+              <input type="text" class="info-value" id="roomNumber" placeholder="Enter room number" required>
             </div>
             <div class="info-item">
               <label><i class="bi bi-telephone"></i> Contact Number</label>
               <div class="info-value" id="contactNumber">-</div>
             </div>
             <div class="info-item">
-              <label><i class="bi bi-calendar-check"></i> Check-in Date</label>
-              <div class="info-value" id="checkInDate">-</div>
+              <label><i class="bi bi-calendar-check"></i> Check-in Date<span class="required">*</span></label>
+              <input type="date" class="info-value" id="checkIn" required>
             </div>
             <div class="info-item">
-              <label><i class="bi bi-calendar-x"></i> Check-out Date</label>
-              <div class="info-value" id="checkOutDate">-</div>
+              <label><i class="bi bi-calendar-x"></i> Check-out Date<span class="required">*</span></label>
+              <input type="date" class="info-value" id="checkOut" required>
             </div>
           </div>
         </div>
@@ -457,9 +472,10 @@
         </div>
         <div class="info-section" style="background: #fff8e7;">
           <p style="margin-bottom: 15px; font-size: 14px;">
-            I, <strong><span id="declarationName">_________</span></strong>, agree to be responsible for any damage caused 
-            to the room or hostel property during my stay from <strong><span id="declarationCheckIn">_________</span></strong> 
-            until <strong><span id="declarationCheckOut">_________</span></strong>.
+            I, <strong><span id="declarationName">_________</span></strong>, 
+            agree to be responsible for any damage caused to the room or hostel property 
+            during my stay from <strong><span id="declarationCheckInText">_________</span></strong> 
+            until <strong><span id="declarationCheckOutText">_________</span></strong>.
           </p>
           <p style="font-size: 14px;">
             I also agree to follow all hostel/reservation regulations and safety rules.
@@ -630,14 +646,14 @@
 <a href="#" id="scroll-top" class="scroll-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
 <div id="preloader"></div>
 
+<script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="main.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="supabase.js"></script>
-<script src="main.js"></script>
 
 <script>
-  let studentData = {};
-  let currentReservation = null;
+ let studentData = {};
 
   async function loadStudentData() {
     const email = localStorage.getItem('studentEmail');
@@ -647,7 +663,6 @@
       return;
     }
 
-    // Load student info
     const { data: student, error: studentError } = await db
       .from('Student')
       .select('*')
@@ -677,16 +692,11 @@
       .limit(1);
 
     if (!resError && reservation && reservation.length > 0) {
-      currentReservation = reservation[0];
-      document.getElementById('roomNumber').textContent = currentReservation.room_number || currentReservation.room_type || 'To be assigned';
-      document.getElementById('checkInDate').textContent = currentReservation.check_in || 'Not set';
-      document.getElementById('checkOutDate').textContent = currentReservation.check_out || 'Not set';
-      document.getElementById('declarationCheckIn').textContent = currentReservation.check_in || 'Not set';
-      document.getElementById('declarationCheckOut').textContent = currentReservation.check_out || 'Not set';
-    } else {
-      document.getElementById('roomNumber').textContent = 'Please complete room booking first';
-      document.getElementById('checkInDate').textContent = 'Complete booking to see dates';
-      document.getElementById('checkOutDate').textContent = 'Complete booking to see dates';
+      const currentReservation = reservation[0];
+
+      document.getElementById('roomNumber').value = currentReservation.room_number || '';
+      document.getElementById('checkIn').value = currentReservation.check_in || '';
+      document.getElementById('checkOut').value = currentReservation.check_out || '';
     }
 
     const today = new Date();
@@ -715,7 +725,6 @@
     }
   });
 
-  // Back button
   document.getElementById('backBtn').addEventListener('click', function() {
     window.location.href = 'dashboard.html';
   });
@@ -728,11 +737,35 @@
     errorAlert.classList.remove('show');
     successAlert.classList.remove('show');
     
-    const isAcknowledged = document.getElementById('acknowledgementCheck').checked;
+    const isAcknowledged = document.getElementById('acknowledgementCheck')?.checked;
     if (!isAcknowledged) {
-      errorAlert.textContent = 'Please acknowledge that all information provided is true and accurate.';
-      errorAlert.classList.add('show');
-      setTimeout(() => errorAlert.classList.remove('show'), 3000);
+      showError('Please acknowledge that all information provided is true and accurate.');
+      return;
+    }
+
+    console.log('Room Field:', document.getElementById('roomNumber'));
+    console.log('Check-In Field:', document.getElementById('checkIn'));
+    console.log('Check-Out Field:', document.getElementById('checkOut'));
+    console.log('Other Appliance Field:', document.getElementById('otherAppliance'));
+
+    const roomNumber = document.getElementById('roomNumber')?.value.trim();
+    const checkInDate = document.getElementById('checkIn')?.value;
+    const checkOutDate = document.getElementById('checkOut')?.value;
+
+    if (!studentData.student_id || !studentData.name) {
+      alert("Student profile data is missing. Please refresh the page.");
+      return;
+    } 
+    if (!roomNumber) {
+      alert("Please key in your Room Number.");
+      return;
+    }
+    if (!checkInDate) { 
+      alert("Please select a Check-In Date.");
+      return;
+    }
+    if (!checkOutDate) { 
+      alert("Please select a Check-Out Date.");
       return;
     }
     
@@ -747,19 +780,23 @@
       }
     });
     
-    if (otherCheckbox.checked && otherInput.value.trim()) {
+    if (otherCheckbox && otherCheckbox.checked && otherInput.value.trim()) {
       selectedAppliances.push(`Other: ${otherInput.value.trim()}`);
     }
     
-    // Create declaration object
+    if (selectedAppliances.length === 0) {
+      alert("Please tick at least one appliance before submitting.");
+      return;
+    }
+    
     const declarationData = {
       declaration_id: 'DEC-' + Date.now(),
-      student_name: studentData.name,
       student_id: studentData.student_id,
-      contact_number: studentData.telephone,
-      room_number: currentReservation?.room_number || currentReservation?.room_type || 'Not assigned',
-      check_in_date: currentReservation?.check_in || null,
-      check_out_date: currentReservation?.check_out || null,
+      student_name: studentData.name, 
+      contact_number: studentData.telephone || studentData.contact_number || 'No Contact Number', 
+      room_number: roomNumber, 
+      check_in_date: checkInDate, 
+      check_out_date: checkOutDate, 
       appliances: selectedAppliances,
       declaration_date: new Date().toISOString(),
       status: 'Submitted'
@@ -768,24 +805,90 @@
     submitBtn.disabled = true;
     submitBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Submitting...';
     
-    // Save to localStorage (since no Supabase table yet)
-    let declarations = JSON.parse(localStorage.getItem('applianceDeclarations') || '[]');
-    declarations.push(declarationData);
-    localStorage.setItem('applianceDeclarations', JSON.stringify(declarations));
-    
-    // Show success
+    const { data, error } = await db
+      .from('appliance')
+      .insert([declarationData]);
+
+    if (error) {
+      console.error("Supabase Error Details:", error);
+      showError('Database error: ' + error.message + ' (' + (error.details || '') + ')');
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = '<i class="bi bi-check-circle"></i> Submit';
+      return;
+    }
+
     successAlert.innerHTML = '<i class="bi bi-check-circle-fill"></i> Appliance declaration submitted successfully!';
     successAlert.classList.add('show');
-    
     submitBtn.innerHTML = '<i class="bi bi-check-circle"></i> Declaration Submitted';
     
     setTimeout(() => {
       window.location.href = 'dashboard.html';
     }, 2000);
-  });
+
+    function showError(message) {
+      errorAlert.textContent = message;
+      errorAlert.classList.add('show');
+      setTimeout(() => errorAlert.classList.remove('show'), 4000);
+    }
+    if (!checkInDate) { 
+      alert("Please select a Check-In Date.");
+      return;
+    }
+    if (!checkOutDate) { 
+      alert("Please select a Check-Out Date.");
+      return;
+    }
+
+    // ─── NEW DATE VALIDATION CHECK ────────────────────────────────────────
+    // Convert date strings into JavaScript Date objects for comparison
+    const checkIn = new Date(checkInDate);
+    const checkOut = new Date(checkOutDate);
+
+    if (checkOut <= checkIn) {
+      alert("Check-Out Date cannot be earlier than or equal to the Check-In Date.");
+      return; // Stops submission
+    }
+    // ──────────────────────────────────────────────────────────────────────
+});
+
+    function formatDateToDisplay(dateString) {
+      if (!dateString) return '_________';
+      const [year, month, day] = dateString.split('-');
+      return `${day}/${month}/${year}`;
+    }
+
+    document.getElementById('checkIn').addEventListener('input', function() {
+      const selectedDate = this.value;
+      const textSpan = document.getElementById('declarationCheckInText');
+      if (textSpan) {
+        textSpan.textContent = selectedDate ? formatDateToDisplay(selectedDate) : '_________';
+      }
+    });
+
+    document.getElementById('checkOut').addEventListener('input', function() {
+      const selectedDate = this.value;
+      const textSpan = document.getElementById('declarationCheckOutText');
+      if (textSpan) {
+        textSpan.textContent = selectedDate ? formatDateToDisplay(selectedDate) : '_________';
+      }
+    });
   
   loadStudentData();
   
+  document.getElementById('checkIn').addEventListener('change', function() {
+    const checkInValue = this.value;
+    const checkOutInput = document.getElementById('checkOut');
+    
+    if (checkInValue) {
+
+      checkOutInput.min = checkInValue;
+      
+      if (checkOutInput.value && new Date(checkOutInput.value) <= new Date(checkInValue)) {
+        checkOutInput.value = '';
+      }
+    }
+  });
+
   document.getElementById('logoutBtn').addEventListener('click', function() {
     localStorage.removeItem('studentEmail');
     localStorage.removeItem('studentId');

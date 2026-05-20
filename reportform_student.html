@@ -393,142 +393,188 @@
 <script src="supabase.js"></script>
 <script src="main.js"></script>
 <script>
-  // Back button
-  document.getElementById('backBtn').addEventListener('click', function() {
-    window.location.href = 'dashboard.html';
-  });
+// Back button
+document.getElementById('backBtn').addEventListener('click', function() {
+  window.location.href = 'dashboard.html';
+});
 
-  // Auto-fill student info
-  async function loadStudentInfo() {
-    const email = localStorage.getItem('studentEmail');
-    if (email) {
-      document.getElementById('email').value = email;
+// Auto-fill student info from localStorage instantly, fallback to Supabase
+async function loadStudentInfo() {
+  const email = localStorage.getItem('studentEmail');
+  const cachedName = localStorage.getItem('studentName');
+  const cachedId = localStorage.getItem('studentId');
+
+  // 1. Instantly fill from localStorage if available
+  if (email) document.getElementById('email').value = email;
+  if (cachedName) document.getElementById('fullName').value = cachedName;
+  if (cachedId) document.getElementById('matricNo').value = cachedId;
+
+  // 2. If any data is missing from cache, fetch it from Supabase
+  if (email && (!cachedName || !cachedId)) {
+    if (typeof db !== 'undefined' && db) {
+      const { data, error } = await db
+        .from('Student')
+        .select('name, student_id, phone')
+        .eq('email', email)
+        .single();
       
-      if (typeof db !== 'undefined' && db) {
-        const { data, error } = await db
-          .from('Student')
-          .select('name, student_id, phone')
-          .eq('email', email)
-          .single();
-        
-        if (!error && data) {
-          if (data.name) document.getElementById('fullName').value = data.name;
-          if (data.student_id) document.getElementById('matricNo').value = data.student_id;
-          if (data.phone) document.getElementById('phone').value = data.phone;
+      if (!error && data) {
+        if (data.name) {
+          document.getElementById('fullName').value = data.name;
+          localStorage.setItem('studentName', data.name); // Save to cache
+        }
+        if (data.student_id) {
+          document.getElementById('matricNo').value = data.student_id;
+          localStorage.setItem('studentId', data.student_id); // Save to cache
+        }
+        if (data.phone) {
+          document.getElementById('phone').value = data.phone;
         }
       }
     }
   }
+}
 
-  // Form submission
-  document.getElementById('reportForm').addEventListener('submit', function(e) {
-    e.preventDefault();
-    
-    const fullName = document.getElementById('fullName').value.trim();
-    const matricNo = document.getElementById('matricNo').value.trim();
-    const phone = document.getElementById('phone').value.trim();
-    const email = document.getElementById('email').value.trim();
-    const kolej = document.getElementById('kolej').value;
-    const roomNumber = document.getElementById('roomNumber').value.trim();
-    const issueCategory = document.getElementById('issueCategory').value;
-    const priority = document.getElementById('priority').value;
-    const description = document.getElementById('description').value.trim();
-    
-    const errorAlert = document.getElementById('errorAlert');
-    const successAlert = document.getElementById('successAlert');
-    const submitBtn = document.getElementById('submitBtn');
-    
-    errorAlert.classList.remove('show');
-    successAlert.classList.remove('show');
-    
-    // Validation
-    if (!fullName || !matricNo || !phone || !email || !kolej || !roomNumber || !issueCategory || !priority || !description) {
-      errorAlert.textContent = 'Please fill in all required fields.';
-      errorAlert.classList.add('show');
-      setTimeout(() => errorAlert.classList.remove('show'), 3000);
-      return;
-    }
-    
-    if (!email.endsWith('@utm.my') && !email.endsWith('@graduate.utm.my')) {
-      errorAlert.textContent = 'Please use a valid UTM email address.';
-      errorAlert.classList.add('show');
-      setTimeout(() => errorAlert.classList.remove('show'), 3000);
-      return;
-    }
-    
-    // Create report
-    const report = {
-      reportId: 'RPT-' + Date.now(),
-      date: new Date().toLocaleString(),
-      fullName, matricNo, phone, email,
-      kolej, roomNumber, issueCategory, priority, description,
-      status: 'Pending'
-    };
-    
-    // Save to localStorage
-    let reports = JSON.parse(localStorage.getItem('studentReports') || '[]');
-    reports.push(report);
-    localStorage.setItem('studentReports', JSON.stringify(reports));
-    
-    // Show success
-    submitBtn.disabled = true;
-    submitBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Submitting...';
-    
-    successAlert.textContent = '✅ Report submitted! Reference ID: ' + report.reportId;
-    successAlert.classList.add('show');
-    
-    document.getElementById('reportForm').reset();
-    loadStudentInfo();
-    
-    setTimeout(() => {
-      submitBtn.disabled = false;
-      submitBtn.innerHTML = '<i class="bi bi-send-fill"></i> Submit Report';
-    }, 2000);
-    
-    setTimeout(() => {
-      successAlert.classList.remove('show');
-    }, 5000);
-  });
+// Form submission (Connected to Supabase)
+document.getElementById('reportForm').addEventListener('submit', async function(e) {
+  e.preventDefault();
   
-  loadStudentInfo();
+  const fullName = document.getElementById('fullName').value.trim();
+  const matricNo = document.getElementById('matricNo').value.trim();
+  const phone = document.getElementById('phone').value.trim();
+  const email = document.getElementById('email').value.trim();
+  const kolej = document.getElementById('kolej').value;
+  const roomNumber = document.getElementById('roomNumber').value.trim();
+  const issueCategory = document.getElementById('issueCategory').value;
+  const priority = document.getElementById('priority').value;
+  const description = document.getElementById('description').value.trim();
+  
+  const errorAlert = document.getElementById('errorAlert');
+  const successAlert = document.getElementById('successAlert');
+  const submitBtn = document.getElementById('submitBtn');
+  
+  errorAlert.classList.remove('show');
+  successAlert.classList.remove('show');
+  
+  // Validation
+  if (!fullName || !matricNo || !phone || !email || !kolej || !roomNumber || !issueCategory || !priority || !description) {
+    showValidationError('Please fill in all required fields.');
+    return;
+  }
+  
+  if (!email.endsWith('@utm.my') && !email.endsWith('@graduate.utm.my')) {
+    showValidationError('Please use a valid UTM email address.');
+    return;
+  }
+  
+  // Disable button and change state
+  submitBtn.disabled = true;
+  submitBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Submitting...';
 
-  // Load header profile
-  async function loadHeaderProfile() {
-    const email = localStorage.getItem('studentEmail');
-    if (!email) return;
+  // Ensure database instance exists
+  if (typeof db === 'undefined' || !db) {
+    showValidationError('Database connection error. Please try again later.');
+    resetButton(submitBtn);
+    return;
+  }
 
-    if (typeof db !== 'undefined' && db) {
-      const { data, error } = await db
-        .from('Student')
-        .select('name, email')
-        .eq('email', email)
-        .single();
+  const generatedReportId = 'RPT-' + Date.now();
 
-      if (!error && data) {
-        const initial = data.name ? data.name.charAt(0).toUpperCase() : 'S';
-        const avatarInitial = document.getElementById('avatarInitial');
-        const dropdownUserName = document.getElementById('dropdownUserName');
-        const dropdownUserEmail = document.getElementById('dropdownUserEmail');
-        
-        if (avatarInitial) avatarInitial.textContent = initial;
-        if (dropdownUserName) dropdownUserName.textContent = data.name;
-        if (dropdownUserEmail) dropdownUserEmail.textContent = data.email;
+  // Send data to Supabase 'Reports' table
+  const { error: dbError } = await db
+    .from('Reports') // Ensure this matches your target table name exactly
+    .insert([
+      {
+        report_id: generatedReportId,
+        full_name: fullName,
+        matric_no: matricNo,
+        phone: phone,
+        email: email,
+        kolej: kolej,
+        room_number: roomNumber,
+        issue_category: issueCategory,
+        priority: priority,
+        description: description,
+        status: 'Pending' // Explicit string fallback or let DB handle default
       }
+    ]);
+
+  if (dbError) {
+    console.error('Supabase Insertion Error:', dbError.message);
+    showValidationError('Failed to save report: ' + dbError.message);
+    resetButton(submitBtn);
+    return;
+  }
+  
+  // Show success state if record saves cleanly
+  successAlert.textContent = '✅ Report submitted! Reference ID: ' + generatedReportId;
+  successAlert.classList.add('show');
+  
+  document.getElementById('reportForm').reset();
+  loadStudentInfo();
+  
+  resetButton(submitBtn);
+  
+  setTimeout(() => {
+    successAlert.classList.remove('show');
+  }, 5000);
+});
+
+// Helper function to handle error messaging safely
+function showValidationError(message) {
+  const errorAlert = document.getElementById('errorAlert');
+  errorAlert.textContent = message;
+  errorAlert.classList.add('show');
+  setTimeout(() => errorAlert.classList.remove('show'), 4000);
+}
+
+// Helper function to restore original UI state to submit button
+function resetButton(btn) {
+  setTimeout(() => {
+    btn.disabled = false;
+    btn.innerHTML = '<i class="bi bi-send-fill"></i> Submit Report';
+  }, 1000);
+}
+
+loadStudentInfo();
+
+// Load header profile
+async function loadHeaderProfile() {
+  const email = localStorage.getItem('studentEmail');
+  if (!email) return;
+
+  if (typeof db !== 'undefined' && db) {
+    const { data, error } = await db
+      .from('Student')
+      .select('name, email')
+      .eq('email', email)
+      .single();
+
+    if (!error && data) {
+      const initial = data.name ? data.name.charAt(0).toUpperCase() : 'S';
+      const avatarInitial = document.getElementById('avatarInitial');
+      const dropdownUserName = document.getElementById('dropdownUserName');
+      const dropdownUserEmail = document.getElementById('dropdownUserEmail');
+      
+      if (avatarInitial) avatarInitial.textContent = initial;
+      if (dropdownUserName) dropdownUserName.textContent = data.name;
+      if (dropdownUserEmail) dropdownUserEmail.textContent = data.email;
     }
   }
+}
 
-  loadHeaderProfile();
+loadHeaderProfile();
 
-  // Logout
-  const logoutBtn = document.getElementById('logoutBtn');
-  if (logoutBtn) {
-    logoutBtn.addEventListener('click', () => {
-      localStorage.removeItem('studentEmail');
-      localStorage.removeItem('studentId');
-      localStorage.removeItem('studentName');
-      window.location.href = 'index.html';
-    });
-  }
+// Logout
+const logoutBtn = document.getElementById('logoutBtn');
+if (logoutBtn) {
+  logoutBtn.addEventListener('click', () => {
+    localStorage.removeItem('studentEmail');
+    localStorage.removeItem('studentId');
+    localStorage.removeItem('studentName');
+    window.location.href = 'index.html';
+  });
+}
 </script>
 </body>
 </html>
