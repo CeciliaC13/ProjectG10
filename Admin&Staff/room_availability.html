@@ -201,9 +201,10 @@
 
     <nav id="navmenu" class="navmenu">
       <ul>
-        <li><a href="admin_staff_dashboard.html">Home</a></li>
-        <li><a href="room_availability.html" class="active">Room Availability</a></li>
-        <li><a href="view_approvals.html">Approvals</a></li>
+       <li><a href="admin_staff_dashboard.html">Home</a></li>
+        <li><a href="room_availability.html">Room Availability</a></li>
+        <li><a href="view_approval.html" class="active">Approvals</a></li>
+        <li><a href="update_booking_status.html">Update Status</a></li>
         <li><a href="view_issue.html">Issue</a></li>
         <li><a href="contact.html">Contact</a></li>
       </ul>
@@ -504,45 +505,46 @@
     return 'status-available';
   }
 
-  function populateCollegeFilter(rooms){
-    const select = document.getElementById('collegeFilter');
-    const college = [...new Set(rooms.map(r => r.College_name))];
-    select.innerHTML = '<option value="All">All College</option>';
-    college.forEach(name => {
-      select.innerHTML += `<option value="${name}">${name}</option>`;
-    });
+  function populateCollegeFilter(rooms) {
+  const select = document.getElementById('collegeFilter');
+  const colleges = [...new Set(rooms.map(r => r.College?.College_name).filter(Boolean))];
+  select.innerHTML = '<option value="All">All Colleges</option>';
+  colleges.forEach(name => {
+    select.innerHTML += `<option value="${name}">${name}</option>`;
+  });
+}
+
+ function renderCards(rooms) {
+  const container = document.getElementById('roomCardContainer');
+  if (!rooms.length) {
+    container.innerHTML = '<div class="col-12"><p class="text-center text-muted">No rooms found.</p></div>';
+    return;
   }
 
-  function renderCards(rooms){
-    const container = document.getElementById('roomCardContainer');
-    if(!rooms.length){
-      container.innerHTML = '<div class="col-12"><p class="text-center text-muted">No rooms found.</p></div>';
-      return;
-    }
+  container.innerHTML = rooms.map(room => {
+    const occupied = room.Room_total - room.Room_available;
+    const status = getStatus(room.Room_total, room.Room_available);
+    const statusClass = getStatusClass(status);
+    const collegeName = room.College?.College_name || 'N/A';
 
-    container.innerHTML = rooms.map(room => {
-      const occupied = room.Quota - room.Available_rooms;
-      const status = getStatus(room.Quota, room.Available_rooms);
-      const statusClass = getStatusClass(status);
-
-      return `
-        <div class="col-lg-4 col-md-6 room-item" data-college="${room.College_name}" data-status="${status}">
+    return `
+      <div class="col-lg-4 col-md-6 room-item" data-college="${collegeName}" data-status="${status}">
         <div class="room-card">
           <div class="room-card-header">
-            <h3>${room.College_name}</h3>
+            <h3>${collegeName}</h3>
           </div>
           <div class="room-card-body">
             <div class="room-info-row">
               <span class="room-label">Room Type</span>
-              <span class="room-value">${room.Room ? room.Room.Room_type : 'N/A'}</span>
+              <span class="room-value">${room.Room?.Room_type || 'N/A'}</span>
             </div>
             <div class="room-info-row">
               <span class="room-label">Total Rooms</span>
-              <span class="room-value">${room.Quota}</span>
+              <span class="room-value">${room.Room_total}</span>
             </div>
             <div class="room-info-row">
               <span class="room-label">Available Rooms</span>
-              <span class="room-value">${room.Available_rooms}</span>
+              <span class="room-value">${room.Room_available}</span>
             </div>
             <div class="room-info-row">
               <span class="room-label">Occupied Rooms</span>
@@ -555,40 +557,41 @@
           </div>
         </div>
       </div>`;
-    }).join('');
+  }).join('');
+}
+
+  function renderTable(rooms) {
+  const tbody = document.getElementById('roomTableBody');
+  if (!rooms.length) {
+    tbody.innerHTML = `<tr><td colspan="7" class="text-center text-muted">No data available.</td></tr>`;
+    return;
   }
+  tbody.innerHTML = rooms.map((room, i) => {
+    const occupied = room.Room_total - room.Room_available;
+    const status = getStatus(room.Room_total, room.Room_available);
+    const statusClass = getStatusClass(status);
 
-  function renderTable(rooms){
-    const tbody = document.getElementById('roomTableBody');
-    if(!rooms.length){
-      tbody.innerHTML = `<tr><td colspan="7" class="text-center text-muted">No data available.</td></tr>`;
-      return;
-    }
-    tbody.innerHTML = rooms.map((room, i)=> {
-      const occupied = room.Quota - room.Available_rooms;
-      const status = getStatus(room.Quota, room.Available_rooms);
-      const statusClass = getStatusClass(status);
+    return `
+    <tr>
+      <td>${i + 1}</td>
+      <td>${room.College?.College_name || 'N/A'}</td>
+      <td>${room.Room?.Room_type || 'N/A'}</td>
+      <td>${room.Room_total}</td>
+      <td>${room.Room_available}</td>
+      <td>${occupied}</td>
+      <td><span class="status-badge ${statusClass}">${status}</span></td>
+    </tr>`;
+  }).join('');
+}
 
-      return `
-      <tr>
-        <td>${i + 1}</td>
-        <td>${room.College_name}</td>
-        <td>${room.Room?.Room_type || 'N/A'}</td>
-        <td>${room.Quota}</td>
-        <td>${room.Available_rooms}</td>
-        <td>${occupied}</td>
-        <td><span class="status-badge ${statusClass}">${status}</span></td>
-      </tr`;
-    }).join('');
-  }
-
-  function filterRooms() {
+ function filterRooms() {
   const collegeFilter = document.getElementById('collegeFilter').value;
   const statusFilter = document.getElementById('statusFilter').value;
 
   const filtered = allRooms.filter(room => {
-    const status = getStatus(room.Quota, room.Available_rooms);
-    const collegeMatch = collegeFilter === 'All' || room.College_name === collegeFilter;
+    const collegeName = room.College?.College_name || '';
+    const status = getStatus(room.Room_total, room.Room_available);
+    const collegeMatch = collegeFilter === 'All' || collegeName === collegeFilter;
     const statusMatch = statusFilter === 'All' || status === statusFilter;
     return collegeMatch && statusMatch;
   });
@@ -599,17 +602,16 @@
 
 async function loadRoomData() {
   try {
-    const { data, error } = await db
-      .from('College')
-      .select(`
-        id, 
-        College_name, 
-        Quota, 
-        Available_rooms, 
-        Room_id, 
-        Room!fk_room(Room_type)
-        `)
-      .order('College_name', { ascending: true });
+   const { data, error } = await db
+  .from('College_Room')
+  .select(`
+    id,
+    Room_total,
+    Room_available,
+    College(id, College_name),
+    Room(Room_id, Room_type)
+  `)
+  .order('College_id', { ascending: true });
 
     if (error) throw error;
 
