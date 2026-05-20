@@ -811,7 +811,6 @@
 
     if (error) {
       console.error("Supabase Error Details:", error);
-      showError('Database error: ' + error.message + ' (' + (error.details || '') + ')');
       submitBtn.disabled = false;
       submitBtn.innerHTML = '<i class="bi bi-check-circle"></i> Submit';
       return;
