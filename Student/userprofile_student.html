@@ -14,20 +14,22 @@
   
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   
-  <link href="/main.css" rel="stylesheet">
+  <!-- FIXED: main.css path - go up one level from Student folder -->
+  <link href="../main.css" rel="stylesheet">
 </head>
 
 <body class="index-page">
 <header id="header" class="logo d-flex align-items-center" style="margin-right: auto;">
   <div class="container position-relative d-flex align-items-center">
 
-    <a href="index.html" class="logo d-flex align-items-center">
-      <img src="/img/spacelogo.png" alt="UTM Space Logo" style="height: 50px; width: auto; max-height:60px;">
+    <!-- FIXED: Logo image path -->
+    <a href="dashboard.html" class="logo d-flex align-items-center">
+      <img src="../img/spacelogo.png" alt="UTM Space Logo" style="height: 50px; width: auto; max-height:60px;">
     </a>
 
     <nav id="navmenu" class="navmenu">
       <ul>
-        <li><a href="dashboard.html" class="active">Home</a></li>
+        <li><a href="dashboard.html">Home</a></li>
         <li><a href="booking_history.html">History</a></li>
         <li><a href="applianceform_student.html">Appliance Form</a></li>
         <li><a href="reportform_student.html">Report</a></li>
@@ -72,6 +74,7 @@
           </div>
           <ul class="dropdown-menu-list">
             <li><a href="userprofile_student.html"><i class="bi bi-person-circle"></i> Profile</a></li>
+            <!-- FIXED: Logout link to index.html (which is in Student folder, not root) -->
             <li><a href="index.html" id="logoutBtn"><i class="bi bi-box-arrow-right"></i> Logout</a></li>
           </ul>
         </div>
@@ -81,6 +84,7 @@
 
   </div>
 </header>
+
 <main class="profile-page-main">
   <div class="profile-container">
 
@@ -153,7 +157,7 @@
     <div class="row gy-5">
       <div class="col-lg-4">
         <div class="footer-brand">
-          <a href="index.html" class="logo d-flex align-items-center mb-3">
+          <a href="dashboard.html" class="logo d-flex align-items-center mb-3">
             <span class="sitename">UTM SPACE</span>
           </a>
           <p class="tagline">Transforming the way colleges book, manage, and connect — with modern simplicity.</p>
@@ -194,6 +198,7 @@
 <a href="#" id="scroll-top" class="scroll-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
 <div id="preloader"></div>
 
+<!-- Modals -->
 <div class="modal fade" id="editProfileModal" tabindex="-1" aria-labelledby="editProfileModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
@@ -267,22 +272,24 @@
   </div>
 </div>
 
-<!-- Vendor JS Files -->
+<!-- FIXED: Vendor JS file paths -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script src="/vendor/php-email-form/validate.js"></script>
-<script src="/vendor/aos/aos.js"></script>
-<script src="/vendor/swiper/swiper-bundle.min.js"></script>
-<script src="/vendor/purecounter/purecounter_vanilla.js"></script>
+<script src="../vendor/php-email-form/validate.js"></script>
+<script src="../vendor/aos/aos.js"></script>
+<script src="../vendor/swiper/swiper-bundle.min.js"></script>
+<script src="../vendor/purecounter/purecounter_vanilla.js"></script>
 
-<a href="#" id="scroll-top" class="scroll-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
-<script src="/main.js"></script>
+<!-- FIXED: main.js path -->
+<script src="../main.js"></script>
 
-<script>
-  console.log("Student Profile Page Loaded");
-</script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="/supabase.js"></script>
+<!-- FIXED: supabase.js path -->
+<script src="../supabase.js"></script>
+
 <script>
+  // Make sure db is available from supabase.js
+  console.log("Student Profile Page Loaded");
+
   function updateGenderDisplay(gender) {
     const genderIcon = document.getElementById('genderIcon');
     const genderText = document.getElementById('genderText');
@@ -312,15 +319,32 @@
         return;
     }
 
+    // Check if db is defined from supabase.js
+    if (typeof db === 'undefined') {
+      console.error('Database connection not loaded. Check supabase.js path.');
+      // Fallback: try to load from window
+      if (window.db) {
+        window.db = db;
+      } else {
+        alert('Unable to connect to database. Please refresh the page.');
+        return;
+      }
+    }
+
     const { data, error } = await db
         .from('Student')
         .select('*')
         .eq('email', email)
         .single();
-
     
     console.log('Supabase data:', data);
     console.log('Supabase error:', error);
+
+    if (error || !data) {
+      console.error('Error loading profile:', error);
+      // Still show placeholder data instead of breaking
+      return;
+    }
 
     const initial = data.name ? data.name.charAt(0).toUpperCase() : 'S';
     document.getElementById('avatarInitial').textContent = initial;
@@ -328,14 +352,11 @@
     document.getElementById('dropdownUserName').textContent = data.name;
     document.getElementById('dropdownUserEmail').textContent = data.email;
 
-    
     document.getElementById('profileName').textContent = data.name;
 
-    
     document.getElementById('displayName').textContent = data.name;
     document.getElementById('displayMatric').textContent = data.student_id;
 
-    
     document.getElementById('displayEmail').textContent = data.email;
     document.getElementById('displayPhone').textContent = data.telephone || 'N/A';
 
@@ -368,7 +389,7 @@
     const newName = document.getElementById('editName').value.trim();
     const newPhone = document.getElementById('editPhone').value.trim();
 
-    
+    // Validate Malaysian phone number
     const telDigits = newPhone.replace(/[-\s+]/g, '');
     if (!/^(60|0)[0-9]{9,10}$/.test(telDigits)) {
         alert('Please enter a valid Malaysian phone number (e.g., 0123456789).');
@@ -396,11 +417,13 @@
     document.getElementById('avatarInitial').textContent = newName.charAt(0).toUpperCase();
     document.getElementById('profileAvatar').textContent = newName.charAt(0).toUpperCase();
 
+    // Update localStorage
+    localStorage.setItem('studentName', newName);
+
     bootstrap.Modal.getInstance(document.getElementById('editProfileModal')).hide();
     alert('✅ Profile updated successfully!');
 }
 
-  
   async function changePassword() {
     const email = localStorage.getItem('studentEmail');
     const currentPassword = document.getElementById('currentPassword').value.trim();
@@ -453,25 +476,36 @@
 
     bootstrap.Modal.getInstance(document.getElementById('changePasswordModal')).hide();
     alert('✅ Password changed successfully!');
+    
+    // Clear password fields
+    document.getElementById('currentPassword').value = '';
+    document.getElementById('newPassword').value = '';
+    document.getElementById('confirmPassword').value = '';
   }
 
-  // ── Logout ──
-  document.getElementById('logoutBtn').addEventListener('click', () => {
+  // Scroll to booking history (if on same page, otherwise redirect)
+  function scrollToHistory() {
+    window.location.href = 'booking_history.html';
+  }
+
+  // Logout
+  document.getElementById('logoutBtn').addEventListener('click', (e) => {
+    e.preventDefault();
     localStorage.removeItem('studentEmail');
+    localStorage.removeItem('studentId');
+    localStorage.removeItem('studentName');
     window.location.href = 'index.html';
   });
 
-  // ── Open modals ──
+  // Open modals
   function openEditProfileModal() {
     new bootstrap.Modal(document.getElementById('editProfileModal')).show();
   }
 
   function openChangePasswordModal() {
-    // Clear all fields every time modal opens
     document.getElementById('currentPassword').value = '';
     document.getElementById('newPassword').value = '';
     document.getElementById('confirmPassword').value = '';
-    
     new bootstrap.Modal(document.getElementById('changePasswordModal')).show();
   }
   
@@ -481,8 +515,44 @@
     document.getElementById('confirmPassword').value = '';
   });
   
-  // ── Load on page ready ──
-  loadStudentProfile();
+  // Initialize notification and user dropdown functionality
+  function initDropdowns() {
+    const notifBtn = document.getElementById('notificationBtn');
+    const notifDropdown = document.getElementById('notificationDropdown');
+    if (notifBtn && notifDropdown) {
+      notifBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        notifDropdown.classList.toggle('show');
+      });
+      document.addEventListener('click', function() {
+        notifDropdown?.classList.remove('show');
+      });
+      notifDropdown?.addEventListener('click', function(e) {
+        e.stopPropagation();
+      });
+    }
+
+    const userProfile = document.querySelector('.user-profile');
+    const userDropdown = document.querySelector('.user-dropdown');
+    if (userProfile && userDropdown) {
+      userProfile.addEventListener('click', function(e) {
+        e.stopPropagation();
+        userDropdown.classList.toggle('show');
+      });
+      document.addEventListener('click', function() {
+        userDropdown?.classList.remove('show');
+      });
+      userDropdown?.addEventListener('click', function(e) {
+        e.stopPropagation();
+      });
+    }
+  }
+  
+  // Load on page ready
+  document.addEventListener('DOMContentLoaded', function() {
+    initDropdowns();
+    loadStudentProfile();
+  });
 </script>
   
 </body>
