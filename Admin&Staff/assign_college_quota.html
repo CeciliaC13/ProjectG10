@@ -200,20 +200,16 @@
  
            <div class="col-lg-3">
               <label class="form-label fw-semibold">College</label>
-              <select class="form-select" id="college">
+              <select class="form-select" id="college" onchange="onCollegeChange()">
                 <option value="">Loading colleges...</option>
               </select>
             </div>
  
             <div class="col-lg-3">
-              <label class="form-label fw-semibold">Room ID</label>
-              <input
-                type="text"
-                class="form-control"
-                id="roomId"
-                placeholder="e.g. SR1, DR2"
-              >
-              <div class="form-text">Unique room identifier within the college.</div>
+              <label class="form-label fw-semibold">Room Name</label>
+              <select class="form-select" id="roomId">
+                <option value="">Loading rooms...</option>
+              </select>
             </div>
  
             <div class="col-lg-3">
@@ -253,7 +249,7 @@
                 <tr>
                   <th>No.</th>
                   <th>College</th>
-                  <th>Room ID</th>
+                  <th>Room </th>
                   <th>Total Quota</th>
                   <th>Available</th>
                   <th>Used</th>
@@ -281,6 +277,7 @@
  
   // Dynamically built from DB
   let COLLEGE_NAMES = {};
+  let ROOM_NAMES = {};
  
   // ── Load colleges into dropdown ───────────────────────────
  
@@ -305,6 +302,70 @@
       data.map(row =>
         `<option value="${row.id}" ${row.id === selectedValue ? 'selected' : ''}>${row.College_name}</option>`
       ).join('');
+  }
+ 
+  // ── Load rooms into dropdown ─────────────────────────────
+ 
+  async function loadRoomOptions(collegeId = '', selectedValue = '') {
+    const select = document.getElementById('roomId');
+ 
+    // Always load all rooms first to build ROOM_NAMES map
+    const { data: allRooms, error: roomError } = await db
+      .from('Room')
+      .select('Room_id, Room_type')
+      .order('Room_type', { ascending: true });
+ 
+    if (roomError) {
+      select.innerHTML = '<option value="">Failed to load rooms</option>';
+      return;
+    }
+ 
+    // Build full ROOM_NAMES map: Room_id → Room_type
+    ROOM_NAMES = {};
+    allRooms.forEach(row => { ROOM_NAMES[row.Room_id] = row.Room_type; });
+ 
+    // If no college selected, disable room dropdown
+    if (!collegeId) {
+      select.innerHTML = '<option value="">Select a college first</option>';
+      select.disabled = true;
+      return;
+    }
+ 
+    // Fetch allowed rooms for this college from College_Room_Type
+    const { data: allowed, error: linkError } = await db
+      .from('College_Room_Type')
+      .select('Room_id')
+      .eq('College_id', collegeId);
+ 
+    if (linkError) {
+      select.innerHTML = '<option value="">Failed to load rooms</option>';
+      select.disabled = false;
+      return;
+    }
+ 
+    if (!allowed || allowed.length === 0) {
+      select.innerHTML = '<option value="">No rooms assigned to this college</option>';
+      select.disabled = true;
+      return;
+    }
+ 
+    const allowedIds = allowed.map(r => r.Room_id);
+    const filtered   = allRooms.filter(r => allowedIds.includes(r.Room_id));
+ 
+    select.disabled = false;
+    select.innerHTML = '<option value="">Select Room</option>' +
+      filtered.map(row =>
+        `<option value="${row.Room_id}" ${row.Room_id === selectedValue ? 'selected' : ''}>${row.Room_type}</option>`
+      ).join('');
+  }
+ 
+  // ── College change handler ────────────────────────────────
+ 
+  async function onCollegeChange() {
+    const collegeId = document.getElementById('college').value;
+    // Reset room dropdown then reload filtered options
+    document.getElementById('roomId').value = '';
+    await loadRoomOptions(collegeId);
   }
  
   // ── Helpers ──────────────────────────────────────────────
@@ -343,12 +404,13 @@
       const used      = item.Room_total - item.Room_available;
       const available = item.Room_available;
       const collegeName = COLLEGE_NAMES[item.College_id] || item.College_id;
+      const roomName    = ROOM_NAMES[item.Room_id]    || item.Room_id;
  
       return `
         <tr>
           <td>${index + 1}</td>
           <td>${collegeName}</td>
-          <td><strong>${item.Room_id}</strong></td>
+          <td><strong>${roomName}</strong></td>
           <td>${item.Room_total}</td>
           <td><span class="badge bg-success">${available}</span></td>
           <td><span class="badge bg-secondary">${used}</span></td>
@@ -371,9 +433,11 @@
     tbody.innerHTML = '<tr><td colspan="7" class="text-center py-4 text-muted">Loading...</td></tr>';
  
     // Load college dropdown and table data in parallel
+    // Room dropdown starts disabled until college is selected
     const [quotaResult] = await Promise.all([
       db.from(TABLE).select('*').order('College_id', { ascending: true }),
-      loadCollegeOptions()
+      loadCollegeOptions(),
+      loadRoomOptions()   // no college = disabled state
     ]);
  
     const { data, error } = quotaResult;
@@ -389,9 +453,9 @@
   // ── Save (Add or Update) ──────────────────────────────────
  
   async function saveQuota() {
-    const editId = document.getElementById('editRowId').value;
+    const editId  = document.getElementById('editRowId').value;
     const college = document.getElementById('college').value.trim();
-    const roomId  = document.getElementById('roomId').value.trim().toUpperCase();
+    const roomId  = document.getElementById('roomId').value.trim();
     const total   = document.getElementById('totalQuota').value;
  
     // Validation
@@ -407,13 +471,33 @@
     setSaveLoading(true);
  
     if (editId === '') {
+      // ── Check for duplicate college + room combination ──
+      const { data: existing, error: checkError } = await db
+        .from(TABLE)
+        .select('id')
+        .eq('College_id', college)
+        .eq('Room_id', roomId)
+        .maybeSingle();
+ 
+      if (checkError) {
+        setSaveLoading(false);
+        showMessage('error', 'Error checking duplicate: ' + checkError.message);
+        return;
+      }
+ 
+      if (existing) {
+        setSaveLoading(false);
+        showMessage('error', 'This college and room combination already exists. Please edit the existing record instead.');
+        return;
+      }
+ 
       // ── INSERT: Room_available = Room_total (full capacity at start) ──
       const payload = {
         id:             `${college}-${roomId}-${Date.now()}`,
         College_id:     college,
         Room_id:        roomId,
         Room_total:     Number(total),
-        Room_available: Number(total)   // auto-set to full
+        Room_available: Number(total)
       };
  
       const { error } = await db.from(TABLE).insert(payload);
@@ -453,8 +537,11 @@
     document.getElementById('roomId').value     = data.Room_id;
     document.getElementById('totalQuota').value = data.Room_total;
  
-    // Reload dropdown with the record's college pre-selected
-    await loadCollegeOptions(data.College_id);
+    // Reload dropdowns with the record's values pre-selected
+    await Promise.all([
+      loadCollegeOptions(data.College_id),
+      loadRoomOptions(data.College_id, data.Room_id)
+    ]);
  
     setEditMode(true);
     document.querySelector('.form-box').scrollIntoView({ behavior: 'smooth' });
@@ -481,6 +568,9 @@
     document.getElementById('roomId').value     = '';
     document.getElementById('totalQuota').value = '';
     setEditMode(false);
+    // Reload dropdowns to reset to default
+    loadCollegeOptions();
+    loadRoomOptions();   // no college = disabled state
   }
  
   // ── Init ──────────────────────────────────────────────────
