@@ -317,7 +317,7 @@ window.addEventListener('load', () => {
       localStorage.removeItem('studentEmail');
       localStorage.removeItem('studentId');
       localStorage.removeItem('studentName');
-      window.location.href = 'index.html';
+      window.location.href = '/Student/index.html';
     }
   };
 
