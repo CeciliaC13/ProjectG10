@@ -26,7 +26,7 @@
 <header id="header" class="logo d-flex align-items-center" style="margin-right: auto;">
   <div class="container position-relative d-flex align-items-center">
 
-    <a href="index.html" class="logo d-flex align-items-center">
+    <a href="dashboard.html" class="logo d-flex align-items-center">
       <img src="../img/spacelogo.png" alt="UTM Space Logo" style="height: 50px; width: auto; max-height:60px;">
     </a>
 
@@ -42,7 +42,6 @@
     </nav>
 
     <div class="header-actions">
-      
       <div class="header-social-links">
         <a href="https://www.facebook.com/utmspace/" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><i class="bi bi-facebook"></i></a>
         <a href="https://www.instagram.com/spaceutm_official/?hl=en" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><i class="bi bi-instagram"></i></a>
@@ -52,14 +51,12 @@
         <button class="notification-btn" id="notificationBtn" title="Notifications">
           <i class="bi bi-bell-fill"></i>
         </button>
-
         <div class="notification-dropdown" id="notificationDropdown">
           <div class="notification-dropdown-header">
             <h4><i class="bi bi-bell-fill"></i> Notifications</h4>
             <a href="#" class="mark-all-link" id="markAllNotifications">Mark all as read</a>
           </div>
-          <div class="notification-list" id="notificationList">
-          </div>
+          <div class="notification-list" id="notificationList"></div>
         </div>
       </div>
 
@@ -67,7 +64,7 @@
         <div class="user-avatar">
           <div class="avatar-placeholder" id="avatarInitial">S</div>
         </div>
-        <div class="user-dropdown">
+        <div class="user-dropdown" id="userDropdown">
           <div class="dropdown-header">
             <div class="user-info">
               <div class="user-name" id="dropdownUserName">Student name</div>
@@ -77,13 +74,11 @@
           </div>
           <ul class="dropdown-menu-list">
             <li><a href="userprofile_student.html"><i class="bi bi-person-circle"></i> Profile</a></li>
-            <li><a href="index.html" id="logoutBtn"><i class="bi bi-box-arrow-right"></i> Logout</a></li>
+            <li><a href="../index.html" id="logoutBtn"><i class="bi bi-box-arrow-right"></i> Logout</a></li>
           </ul>
         </div>
       </div>
-
     </div>
-
   </div>
 </header>
 
@@ -223,7 +218,6 @@
 </footer>
 
 <a href="#" id="scroll-top" class="scroll-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
-
 <div id="preloader"></div>
 
 <script src="../vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
@@ -232,6 +226,8 @@
 <script src="../vendor/swiper/swiper-bundle.min.js"></script>
 <script src="../vendor/purecounter/purecounter_vanilla.js"></script>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../supabase.js"></script>
 <script src="../main.js"></script>
 
 <script>

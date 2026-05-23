@@ -2432,15 +2432,15 @@ section,
 }
 
 .action-btn.password-btn:hover {
-  background: #2c5a7a;
+  background: #6b092a;
   color: white;
-  border-color: #2c5a7a;
+  border-color: #6b092a;
 }
 
 .action-btn.history-btn:hover {
-  background: #1a5d8f;
+  background: #6b092a;
   color: white;
-  border-color: #1a5d8f;
+  border-color: #6b092a;
 }
 
 .booking-history-section {
