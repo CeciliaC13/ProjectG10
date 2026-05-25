@@ -1,0 +1,903 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <title>Admin Dashboard | Staff Management</title>
+
+  <link href="../img/favicon.png" rel="icon">
+  <link href="../img/apple-touch-icon.png" rel="apple-touch-icon">
+
+  <link href="https://fonts.googleapis.com" rel="preconnect">
+  <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,600;0,700;0,900&family=Montserrat:wght@100;200;300;400;500;600;700;800;900&family=Raleway:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+  <link href="../vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+  <link href="../vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
+  <link href="../vendor/aos/aos.css" rel="stylesheet">
+  <link href="../vendor/swiper/swiper-bundle.min.css" rel="stylesheet">
+
+  <link href="../main.css" rel="stylesheet">
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Roboto', sans-serif;
+      background: #f1f5f9;
+      color: #0f172a;
+    }
+
+    .dashboard-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+
+    /* Header area */
+    .admin-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin-bottom: 2rem;
+      margin-top: 30px;
+      background: white;
+      padding: 1rem 1.8rem;
+      border-radius: 28px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.03), 0 1px 2px rgba(0,0,0,0.05);
+    }
+
+    .title-section h1 {
+      font-size: 1.8rem;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+      color: #6b092a;
+    }
+
+    .title-section p {
+      font-size: 0.85rem;
+      color: #475569;
+      margin-top: 4px;
+    }
+
+    .add-staff-btn {
+      background: #6b092a;
+      color: white;
+      border: none;
+      padding: 0.75rem 1.5rem;
+      border-radius: 40px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+
+    .add-staff-btn:hover {
+      background: linear-gradient(135deg, #2c5a7a 0%, #1a3c5e 100%);
+      transform: scale(0.98);
+    }
+
+    .add-staff-btn i {
+      font-size: 1rem;
+    }
+
+    /* stats row */
+    .stats-row {
+      display: flex;
+      gap: 1.2rem;
+      flex-wrap: wrap;
+      margin-bottom: 2rem;
+    }
+
+    .stat-card {
+      background: white;
+      padding: 0.8rem 1.5rem;
+      border-radius: 24px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+      flex: 1;
+      min-width: 150px;
+    }
+
+    .stat-card i {
+      font-size: 1.8rem;
+      color: #6b092a;
+    }
+
+    .stat-info h3 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin: 0;
+    }
+
+    .stat-info span {
+      font-size: 0.75rem;
+      color: #475569;
+    }
+
+    /* Staff Table */
+    .table-wrapper {
+      background: white;
+      border-radius: 28px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+      overflow-x: auto;
+      padding: 0 0 0.5rem 0;
+    }
+
+    .staff-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+      min-width: 700px;
+    }
+
+    .staff-table th {
+      text-align: left;
+      padding: 1.2rem 1rem;
+      background: #f8fafc;
+      font-weight: 600;
+      color: #1e293b;
+      border-bottom: 1px solid #e2e8f0;
+    }
+
+    .staff-table td {
+      padding: 1rem 1rem;
+      border-bottom: 1px solid #eef2f6;
+      vertical-align: middle;
+    }
+
+    .staff-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .staff-table tr:hover {
+      background: #fefce8;
+    }
+
+    /* badge roles */
+    .role-badge {
+      background: #e6f0ea;
+      color: #1f5e3f;
+      padding: 0.2rem 0.7rem;
+      border-radius: 50px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      display: inline-block;
+    }
+
+    .role-badge.admin {
+      background: #6b092a;
+      color: white;
+    }
+
+    .role-badge.staff {
+      background: #2c5a7a;
+      color: white;
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .btn-icon {
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      font-size: 0.85rem;
+      padding: 6px 12px;
+      border-radius: 40px;
+      transition: background 0.2s;
+      font-weight: 500;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .btn-edit {
+      color: #6b092a;
+    }
+
+    .btn-edit:hover {
+      background: #eef2ff;
+    }
+
+    .btn-delete {
+      color: #dc2626;
+    }
+
+    .btn-delete:hover {
+      background: #fee2e2;
+    }
+
+    /* Modal */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.5);
+      backdrop-filter: blur(3px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      visibility: hidden;
+      opacity: 0;
+      transition: all 0.2s ease;
+    }
+
+    .modal-overlay.active {
+      visibility: visible;
+      opacity: 1;
+    }
+
+    .modal-card {
+      background: white;
+      max-width: 500px;
+      width: 90%;
+      border-radius: 32px;
+      padding: 1.8rem 2rem;
+      box-shadow: 0 30px 40px rgba(0,0,0,0.2);
+      transform: scale(0.96);
+      transition: transform 0.2s;
+    }
+
+    .active .modal-card {
+      transform: scale(1);
+    }
+
+    .modal-card h2 {
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      color: #6b092a;
+    }
+
+    .modal-card p {
+      font-size: 0.8rem;
+      color: #511529;
+      margin-bottom: 1.5rem;
+    }
+
+    .form-group {
+      margin-bottom: 1.2rem;
+    }
+
+    .form-group label {
+      display: block;
+      font-weight: 500;
+      margin-bottom: 6px;
+      font-size: 0.85rem;
+    }
+
+    .form-group input, .form-group select {
+      width: 100%;
+      padding: 0.7rem 1rem;
+      border: 1px solid #cbd5e1;
+      border-radius: 20px;
+      font-family: inherit;
+      font-size: 0.9rem;
+      transition: 0.2s;
+    }
+
+    .form-group input:focus, .form-group select:focus {
+      outline: none;
+      border-color: #6b092a;
+      box-shadow: 0 0 0 2px rgba(107,9,42,0.2);
+    }
+
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+      margin-top: 1.8rem;
+    }
+
+    .modal-actions button {
+      padding: 0.6rem 1.4rem;
+      border-radius: 40px;
+      border: none;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .btn-cancel {
+      background: #e2e8f0;
+      color: #1e293b;
+    }
+
+    .btn-submit {
+      background: linear-gradient(135deg, #1a3c5e 0%, #2c5a7a 100%);
+      color: white;
+    }
+
+    .btn-submit:hover {
+      background: linear-gradient(135deg, #2c5a7a 0%, #1a3c5e 100%);
+    }
+
+    .toast-message {
+      position: fixed;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #1e293b;
+      color: white;
+      padding: 10px 24px;
+      border-radius: 40px;
+      font-size: 0.85rem;
+      z-index: 1100;
+      opacity: 0;
+      transition: 0.2s;
+      pointer-events: none;
+    }
+
+    .toast-message.show {
+      opacity: 1;
+    }
+
+    .empty-row {
+      text-align: center;
+      padding: 2.5rem;
+      color: #64748b;
+      font-style: italic;
+    }
+
+    /* Password wrapper for modal */
+    .password-wrapper {
+      position: relative;
+      width: 100%;
+    }
+
+    .password-wrapper input {
+      width: 100%;
+      padding: 0.7rem 40px 0.7rem 1rem;
+      border: 1px solid #cbd5e1;
+      border-radius: 20px;
+      font-family: inherit;
+      font-size: 0.9rem;
+    }
+
+    .toggle-password-modal {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      cursor: pointer;
+      color: #aaa;
+      font-size: 16px;
+    }
+
+    .toggle-password-modal:hover {
+      color: #6b092a;
+    }
+
+    @media (max-width: 640px) {
+      .dashboard-container {
+        padding: 0 15px;
+      }
+      .admin-header {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .stat-card {
+        min-width: 100%;
+      }
+    }
+  </style>
+
+</head>
+
+<body>
+
+<header id="header" class="logo d-flex align-items-center" style="margin-right: auto;">
+  <div class="container position-relative d-flex align-items-center">
+
+    <a href="admin_staff_dashboard.html" class="logo d-flex align-items-center">
+      <img src="../img/spacelogo.png" alt="UTM Space Logo" style="height: 50px; width: auto; max-height:60px;">
+    </a>
+
+    <nav id="navmenu" class="navmenu">
+      <ul>
+        <li><a href="admin_staff_dashboard.html">Home</a></li>
+        <li><a href="room_availability.html">Room Availability</a></li>
+        <li><a href="view_approval.html">Approvals</a></li>
+        <li><a href="update_booking_status.html">Update Status</a></li>
+        <li><a href="view_issue.html">Issue</a></li>
+        <li><a href="contact.html">Contact</a></li>
+      </ul>
+      <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>
+    </nav>
+
+    <div class="header-actions">
+
+      <div class="header-social-links">
+        <a href="https://www.facebook.com/utmspace/" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><i class="bi bi-facebook"></i></a>
+        <a href="https://www.instagram.com/spaceutm_official/?hl=en" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><i class="bi bi-instagram"></i></a>
+      </div>
+
+      <div class="notification-wrapper">
+        <button class="notification-btn" id="notificationBtn" title="Notifications">
+          <i class="bi bi-bell-fill"></i>
+        </button>
+        <div class="notification-dropdown" id="notificationDropdown">
+          <div class="notification-dropdown-header">
+            <h4><i class="bi bi-bell-fill"></i> Notifications</h4>
+            <a href="#" class="mark-all-link" id="markAllNotifications">Mark all as read</a>
+          </div>
+          <div class="notification-list" id="notificationList"></div>
+        </div>
+      </div>
+
+      <div class="user-profile">
+        <div class="user-avatar">
+          <div class="avatar-placeholder" id="avatarInitial">A</div>
+        </div>
+
+        <div class="user-dropdown">
+          <div class="dropdown-header">
+            <div class="user-info">
+              <div class="user-name" id="dropdownUserName">Admin / Staff Name</div>
+              <div class="user-role" id="dropdownUserRole">Admin / Staff</div>
+              <div class="user-email" id="dropdownUserEmail">user@utmspace.my</div>
+            </div>
+          </div>
+
+          <ul class="dropdown-menu-list">
+            <li><a href="userprofile_admin_staff.html"><i class="bi bi-person-circle"></i> Profile</a></li>
+            <li><a href="../admin_staff_login.html" id="logoutBtn"><i class="bi bi-box-arrow-right"></i> Logout</a></li>
+          </ul>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+</header>
+
+<div class="dashboard-container">
+  <div class="admin-header">
+    <div class="title-section">
+      <h1><i class="bi bi-people-fill"></i> Staff Management</h1>
+      <p>View, add, edit, and manage team members</p>
+    </div>
+    <button class="add-staff-btn" id="openAddModalBtn"><i class="bi bi-person-plus-fill"></i> Add New Staff</button>
+  </div>
+
+  <div class="stats-row" id="statsRow">
+  </div>
+
+  <div class="table-wrapper">
+    <table class="staff-table" id="staffTable">
+      <thead>
+        <tr>
+          <th>Staff ID</th>
+          <th>Full Name</th>
+          <th>Email</th>
+          <th>Role</th>
+          <th>Phone</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="staffTableBody">
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div id="staffModal" class="modal-overlay">
+  <div class="modal-card">
+    <h2 id="modalTitle">Add New Staff</h2>
+    <p id="modalSubtext">Fill in the details to add a team member.</p>
+    <form id="staffForm">
+      <input type="hidden" id="editStaffId" value="">
+      <div class="form-group">
+        <label><i class="bi bi-id-card"></i> Staff ID *</label>
+        <input type="text" id="staffId" placeholder="e.g., STF-001" required>
+      </div>
+      <div class="form-group">
+        <label><i class="bi bi-person"></i> Full Name *</label>
+        <input type="text" id="fullName" placeholder="Full name" required>
+      </div>
+      <div class="form-group">
+        <label><i class="bi bi-envelope"></i> Email *</label>
+        <input type="email" id="email" placeholder="staff@utmspace.my" required>
+      </div>
+      <div class="form-group">
+        <label><i class="bi bi-briefcase"></i> Role</label>
+        <select id="role">
+          <option value="Admin">Admin</option>
+          <option value="Staff">Staff</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label><i class="bi bi-telephone"></i> Phone</label>
+        <input type="text" id="phone" placeholder="+60 xx-xxxxxxx">
+      </div>
+      <div class="form-group">
+        <label><i class="bi bi-lock"></i> Password</label>
+        <div class="password-wrapper">
+          <input type="password" id="password" placeholder="Enter password">
+          <i class="bi bi-eye-slash toggle-password-modal" id="toggleModalPassword"></i>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn-cancel" id="closeModalBtn">Cancel</button>
+        <button type="submit" class="btn-submit">Save Staff</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div id="toastMsg" class="toast-message"></div>
+
+<footer id="footer" class="footer position-relative light-background">
+  <div class="container">
+    <div class="row gy-5">
+      <div class="col-lg-4">
+        <div class="footer-brand">
+          <a href="../index.html" class="logo d-flex align-items-center mb-3">
+            <span class="sitename">UTM SPACE</span>
+          </a>
+          <p class="tagline">Transforming the way colleges book, manage, and connect — with modern simplicity.</p>
+          <div class="social-links mt-4">
+            <a href="https://www.facebook.com/utmspace/" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><i class="bi bi-facebook"></i></a>
+            <a href="https://www.instagram.com/spaceutm_official/?hl=en" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><i class="bi bi-instagram"></i></a>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-6">
+        <div class="footer-links-grid">
+          <div class="col-6 col-md-4">
+            <h5>Support</h5>
+            <ul class="list-unstyled">
+              <li><a href="#">Contact Us: +607-531 8000</a></li>
+              <li><a href="#">Privacy Policy</a></li>
+              <li><a href="#">Terms of Service</a></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <div class="container">
+      <div class="row">
+        <div class="col-12">
+          <div class="footer-bottom-content">
+            <p class="mb-0">© <strong>UTMSPACE</strong>. All rights reserved.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<a href="#" id="scroll-top" class="scroll-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
+<div id="preloader"></div>
+
+<script src="../vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="../vendor/php-email-form/validate.js"></script>
+<script src="../vendor/aos/aos.js"></script>
+<script src="../vendor/swiper/swiper-bundle.min.js"></script>
+<script src="../vendor/purecounter/purecounter_vanilla.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../supabase.js"></script>
+<script src="../main.js"></script>
+
+<script>
+  // Actual staff data from your database
+  let staffList = [
+    {
+      id: "STF-1001",
+      fullName: "Cecilia",
+      email: "cecilia@utmspace.my",
+      role: "Admin",
+      phone: "+60 12-3456789"
+    },
+    {
+      id: "STF-1002",
+      fullName: "Abbhi",
+      email: "abbhi@utmspace.my",
+      role: "Staff",
+      phone: "+60 12-9876543"
+    },
+    {
+      id: "STF-1003",
+      fullName: "Adam",
+      email: "adam@utmspace.my",
+      role: "Staff",
+      phone: "+60 12-4567890"
+    }
+  ];
+
+  let nextId = 1004;
+
+  function generateStaffId() {
+    return "STF-" + nextId++;
+  }
+
+  function showToast(message, isError = false) {
+    const toast = document.getElementById('toastMsg');
+    toast.textContent = message;
+    toast.style.backgroundColor = isError ? '#b91c1c' : '#1a3c5e';
+    toast.classList.add('show');
+    setTimeout(() => {
+      toast.classList.remove('show');
+      toast.style.backgroundColor = '#1e293b';
+    }, 2500);
+  }
+
+  function renderStaffTable() {
+    const tbody = document.getElementById('staffTableBody');
+    if (!staffList.length) {
+      tbody.innerHTML = `<tr><td colspan="6" class="empty-row"><i class="bi bi-person-slash"></i> No staff members found. Click "Add New Staff" to start.</td></tr>`;
+      document.getElementById('statsRow').innerHTML = `<div class="stat-card"><i class="bi bi-people"></i><div class="stat-info"><h3>0</h3><span>Total staff</span></div></div>`;
+      return;
+    }
+
+    let rows = '';
+    staffList.forEach(staff => {
+      const roleClass = staff.role === 'Admin' ? 'admin' : 'staff';
+      rows += `
+        <tr>
+          <td><strong>${escapeHtml(staff.id)}</strong></td>
+          <td>${escapeHtml(staff.fullName)}</td>
+          <td>${escapeHtml(staff.email)}</td>
+          <td><span class="role-badge ${roleClass}">${escapeHtml(staff.role || 'Staff')}</span></td>
+          <td>${escapeHtml(staff.phone || '—')}</td>
+          <td class="action-buttons">
+            <button class="btn-icon btn-edit" data-id="${staff.id}" title="Edit staff"><i class="bi bi-pencil"></i> Edit</button>
+            <button class="btn-icon btn-delete" data-id="${staff.id}" title="Delete staff"><i class="bi bi-trash"></i> Delete</button>
+          </td>
+        </tr>
+      `;
+    });
+    tbody.innerHTML = rows;
+
+    // Update stats
+    const adminCount = staffList.filter(s => s.role === 'Admin').length;
+    const staffCount = staffList.filter(s => s.role === 'Staff').length;
+    const statsHtml = `
+      <div class="stat-card"><i class="bi bi-people-fill"></i><div class="stat-info"><h3>${staffList.length}</h3><span>Total Staff</span></div></div>
+      <div class="stat-card"><i class="bi bi-shield-check"></i><div class="stat-info"><h3>${adminCount}</h3><span>Admins</span></div></div>
+      <div class="stat-card"><i class="bi bi-person-badge"></i><div class="stat-info"><h3>${staffCount}</h3><span>Staff</span></div></div>
+    `;
+    document.getElementById('statsRow').innerHTML = statsHtml;
+
+    // Attach event listeners
+    document.querySelectorAll('.btn-edit').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const staffId = btn.getAttribute('data-id');
+        openEditModal(staffId);
+      });
+    });
+    document.querySelectorAll('.btn-delete').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const staffId = btn.getAttribute('data-id');
+        deleteStaffById(staffId);
+      });
+    });
+  }
+
+  function escapeHtml(str) {
+    if (!str) return '';
+    return str.replace(/[&<>]/g, function(m) {
+      if (m === '&') return '&amp;';
+      if (m === '<') return '&lt;';
+      if (m === '>') return '&gt;';
+      return m;
+    });
+  }
+
+  function deleteStaffById(staffId) {
+    const staffToDelete = staffList.find(s => s.id === staffId);
+    if (!staffToDelete) return;
+    const confirmDel = confirm(`⚠️ Remove "${staffToDelete.fullName}" (ID: ${staffId}) from the system? This action is permanent.`);
+    if (confirmDel) {
+      staffList = staffList.filter(s => s.id !== staffId);
+      renderStaffTable();
+      showToast(`✅ ${staffToDelete.fullName} has been removed.`, false);
+    }
+  }
+
+  // Modal Logic
+  const modal = document.getElementById('staffModal');
+  const modalTitle = document.getElementById('modalTitle');
+  const modalSubtext = document.getElementById('modalSubtext');
+  const staffForm = document.getElementById('staffForm');
+  const editStaffIdInput = document.getElementById('editStaffId');
+  const staffIdInput = document.getElementById('staffId');
+  const fullNameInput = document.getElementById('fullName');
+  const emailInput = document.getElementById('email');
+  const roleSelect = document.getElementById('role');
+  const phoneInput = document.getElementById('phone');
+  const passwordInput = document.getElementById('password');
+
+  let editMode = false;
+
+  function openAddModal() {
+    editMode = false;
+    modalTitle.innerText = "Add New Staff";
+    modalSubtext.innerText = "Enter staff details (ID will be auto-generated).";
+    staffForm.reset();
+    editStaffIdInput.value = "";
+    staffIdInput.value = generateStaffId();
+    staffIdInput.disabled = true;
+    fullNameInput.value = "";
+    emailInput.value = "";
+    roleSelect.value = "Staff";
+    phoneInput.value = "";
+    passwordInput.value = "";
+    modal.classList.add('active');
+  }
+
+  function openEditModal(staffId) {
+    const staff = staffList.find(s => s.id === staffId);
+    if (!staff) return;
+    editMode = true;
+    modalTitle.innerText = "Edit Staff Information";
+    modalSubtext.innerText = "Update details and save changes.";
+    editStaffIdInput.value = staff.id;
+    staffIdInput.value = staff.id;
+    staffIdInput.disabled = true;
+    fullNameInput.value = staff.fullName;
+    emailInput.value = staff.email;
+    roleSelect.value = staff.role || "Staff";
+    phoneInput.value = staff.phone || "";
+    passwordInput.value = "";
+    modal.classList.add('active');
+  }
+
+  function closeModal() {
+    modal.classList.remove('active');
+    editMode = false;
+    staffIdInput.disabled = false;
+    staffForm.reset();
+  }
+
+  function handleStaffSubmit(e) {
+    e.preventDefault();
+
+    const newId = staffIdInput.value.trim();
+    const newFullName = fullNameInput.value.trim();
+    const newEmail = emailInput.value.trim();
+    const newRole = roleSelect.value;
+    const newPhone = phoneInput.value.trim();
+    const newPassword = passwordInput.value.trim();
+
+    // Validation
+    if (!newFullName) {
+      showToast("Full name is required.", true);
+      return;
+    }
+    if (!newEmail) {
+      showToast("Email address is required.", true);
+      return;
+    }
+    if (!newEmail.includes('@') || !newEmail.includes('.')) {
+      showToast("Enter a valid email address.", true);
+      return;
+    }
+
+    if (!editMode) {
+      // Add mode - check if ID already exists
+      if (staffList.some(s => s.id === newId)) {
+        showToast(`Staff ID "${newId}" already exists.`, true);
+        return;
+      }
+      
+      const newStaff = {
+        id: newId,
+        fullName: newFullName,
+        email: newEmail,
+        role: newRole,
+        phone: newPhone || ""
+      };
+      staffList.push(newStaff);
+      showToast(`🎉 ${newFullName} added successfully!`, false);
+      nextId++;
+      staffIdInput.value = generateStaffId();
+    } else {
+      // Edit mode
+      const originalId = editStaffIdInput.value;
+      const staffIndex = staffList.findIndex(s => s.id === originalId);
+      if (staffIndex === -1) {
+        showToast("Staff not found, refresh page.", true);
+        closeModal();
+        renderStaffTable();
+        return;
+      }
+      
+      staffList[staffIndex] = {
+        ...staffList[staffIndex],
+        fullName: newFullName,
+        email: newEmail,
+        role: newRole,
+        phone: newPhone || "",
+        id: originalId
+      };
+      
+      // If password was provided, update it (in real DB you would hash it)
+      if (newPassword) {
+        console.log(`Password updated for ${newFullName}`);
+      }
+      
+      showToast(`✏️ ${newFullName} updated successfully.`, false);
+    }
+
+    renderStaffTable();
+    closeModal();
+  }
+
+  // Toggle password visibility in modal
+  const toggleModalPassword = document.getElementById('toggleModalPassword');
+  if (toggleModalPassword) {
+    toggleModalPassword.addEventListener('click', function() {
+      const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+      passwordInput.setAttribute('type', type);
+      this.classList.toggle('bi-eye');
+      this.classList.toggle('bi-eye-slash');
+    });
+  }
+
+  // Event listeners
+  document.getElementById('openAddModalBtn').addEventListener('click', openAddModal);
+  document.getElementById('closeModalBtn').addEventListener('click', closeModal);
+  window.addEventListener('click', (e) => {
+    if (e.target === modal) closeModal();
+  });
+  staffForm.addEventListener('submit', handleStaffSubmit);
+
+  // Load header profile
+  async function loadAdminStaffHeader() {
+    const role = localStorage.getItem('staffAdminRole') || localStorage.getItem('userRole');
+    const email = localStorage.getItem('staffAdminEmail');
+    const name = localStorage.getItem('staffAdminName');
+
+    if (!role && !email) {
+      window.location.href = 'admin_staff_login.html';
+      return;
+    }
+
+    const roleText = role === 'admin' || role === 'Admin' ? 'Admin' : 'Staff';
+    document.getElementById('dropdownUserRole').textContent = roleText;
+    document.getElementById('dropdownUserName').textContent = name || roleText + ' User';
+    document.getElementById('dropdownUserEmail').textContent = email || 'user@utmspace.my';
+    document.getElementById('avatarInitial').textContent = roleText.charAt(0);
+  }
+
+  // Logout
+  document.getElementById('logoutBtn').addEventListener('click', function(e) {
+    e.preventDefault();
+    localStorage.removeItem('staffAdminRole');
+    localStorage.removeItem('staffAdminEmail');
+    localStorage.removeItem('staffAdminName');
+    localStorage.removeItem('staffAdminId');
+    localStorage.removeItem('userRole');
+    localStorage.removeItem('currentUser');
+    window.location.href = 'admin_staff_login.html';
+  });
+
+  // Initialize
+  loadAdminStaffHeader();
+  renderStaffTable();
+</script>
+
+</body>
+</html>
