@@ -81,11 +81,61 @@
       align-items: center;
     }
 
-    .input-wrapper i {
+    .input-wrapper i.left-icon {
       position: absolute;
       left: 15px;
       color: #aaa;
       font-size: 18px;
+      z-index: 1;
+    }
+
+    /* Password wrapper with eye icon */
+    .password-wrapper {
+      position: relative;
+      width: 100%;
+    }
+
+    .password-wrapper i.left-icon {
+      position: absolute;
+      left: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #aaa;
+      font-size: 18px;
+      z-index: 1;
+    }
+
+    .password-wrapper input {
+      width: 100%;
+      padding: 14px 50px 14px 45px;
+      font-size: 15px;
+      border: 1.5px solid #e0e0e0;
+      border-radius: 12px;
+      transition: all 0.3s ease;
+      font-family: 'Roboto', sans-serif;
+      background: white;
+    }
+
+    .password-wrapper input:focus {
+      outline: none;
+      border-color: #2c5a7a;
+      box-shadow: 0 0 0 3px rgba(44, 90, 122, 0.1);
+    }
+
+    .toggle-password {
+      position: absolute;
+      right: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      cursor: pointer;
+      color: #aaa;
+      font-size: 18px;
+      transition: color 0.3s ease;
+      z-index: 2;
+    }
+
+    .toggle-password:hover {
+      color: #2c5a7a;
     }
 
     .form-control {
@@ -180,6 +230,26 @@
     .error-message.show {
       display: block;
     }
+
+    /* Responsive */
+    @media (max-width: 576px) {
+      .signin-header {
+        padding: 30px 20px;
+      }
+      
+      .signin-header h1 {
+        font-size: 28px;
+      }
+      
+      .signin-form {
+        padding: 30px 25px;
+      }
+      
+      .form-control, .password-wrapper input {
+        padding: 12px 50px 12px 40px;
+        font-size: 14px;
+      }
+    }
   </style>
 </head>
 
@@ -199,7 +269,7 @@
       <div class="form-group">
         <label>Login As</label>
         <div class="input-wrapper">
-          <i class="bi bi-person-badge"></i>
+          <i class="bi bi-person-badge left-icon"></i>
           <select class="form-control" id="role">
             <option value="">Select Role</option>
             <option value="staff">Staff</option>
@@ -211,16 +281,17 @@
       <div class="form-group">
         <label>Staff / Admin ID</label>
         <div class="input-wrapper">
-          <i class="bi bi-person"></i>
+          <i class="bi bi-person left-icon"></i>
           <input type="text" class="form-control" id="userid" placeholder="Enter your Staff or Admin ID">
         </div>
       </div>
 
       <div class="form-group">
         <label>Password</label>
-        <div class="input-wrapper">
-          <i class="bi bi-lock"></i>
-          <input type="password" class="form-control" id="password" placeholder="Enter your password">
+        <div class="password-wrapper">
+          <i class="bi bi-lock left-icon"></i>
+          <input type="password" id="password" placeholder="Enter your password">
+          <i class="bi bi-eye-slash toggle-password" id="togglePassword"></i>
         </div>
       </div>
 
@@ -239,8 +310,19 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-   <script src="../supabase.js"></script>
+  <script src="../supabase.js"></script>
   <script>
+    // Toggle password visibility
+    const togglePassword = document.getElementById('togglePassword');
+    const passwordInput = document.getElementById('password');
+
+    togglePassword.addEventListener('click', function() {
+      const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+      passwordInput.setAttribute('type', type);
+      this.classList.toggle('bi-eye');
+      this.classList.toggle('bi-eye-slash');
+    });
+
     document.getElementById("loginBtn").addEventListener("click", async () => {
       const role = document.getElementById("role").value;
       const userid = document.getElementById("userid").value.trim();
@@ -250,8 +332,8 @@
 
       errorMessage.classList.remove('show');
 
-      if (!role  || !userid  || !password ) {
-         errorMessage.innerHTML = '<i class="bi bi-exclamation-triangle-fill"></i> Please fill in all fields.';
+      if (!role || !userid || !password) {
+        errorMessage.innerHTML = '<i class="bi bi-exclamation-triangle-fill"></i> Please fill in all fields.';
         errorMessage.classList.add("show");
         return;
       }
@@ -269,30 +351,28 @@
         .eq('password', password)
         .single();
       
-        console.log('Login data:', data);
-        console.log('Login error:', error);
+      console.log('Login data:', data);
+      console.log('Login error:', error);
 
-        if(error || !data) {
-           errorMessage.innerHTML = '<i class="bi bi-exclamation-triangle-fill"></i> Invalid ID or password.';
-            errorMessage.classList.add('show');
-            loginBtn.innerHTML = 'Login <i class="bi bi-arrow-right"></i>';
-            loginBtn.disabled = false;
-            return;
-        }
+      if (error || !data) {
+        errorMessage.innerHTML = '<i class="bi bi-exclamation-triangle-fill"></i> Invalid ID or password.';
+        errorMessage.classList.add('show');
+        loginBtn.innerHTML = 'Login <i class="bi bi-arrow-right"></i>';
+        loginBtn.disabled = false;
+        return;
+      }
 
-     
       localStorage.setItem('currentUser', JSON.stringify({
-      id: role === 'admin' ? data.admin_id : data.staff_id,
-      name: data.name,
-      role: role === 'admin' ? 'Admin' : 'Staff',
-      email: data.email
+        id: role === 'admin' ? data.admin_id : data.staff_id,
+        name: data.name,
+        role: role === 'admin' ? 'Admin' : 'Staff',
+        email: data.email
       }));
 
       localStorage.setItem('staffAdminRole', role);
       localStorage.setItem('staffAdminEmail', data.email);
       localStorage.setItem('staffAdminId', role === 'admin' ? data.admin_id : data.staff_id);
       window.location.href = 'admin_staff_dashboard.html';
-  
     });
   </script>
 

@@ -157,11 +157,61 @@
       align-items: center;
     }
 
-    .input-wrapper i {
+    .input-wrapper i.left-icon {
       position: absolute;
       left: 15px;
       color: #aaa;
       font-size: 18px;
+      z-index: 1;
+    }
+
+    /* Password wrapper with eye icon */
+    .password-wrapper {
+      position: relative;
+      width: 100%;
+    }
+
+    .password-wrapper i.left-icon {
+      position: absolute;
+      left: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #aaa;
+      font-size: 18px;
+      z-index: 1;
+    }
+
+    .password-wrapper input {
+      width: 100%;
+      padding: 14px 50px 14px 45px;
+      font-size: 15px;
+      border: 1.5px solid #e0e0e0;
+      border-radius: 12px;
+      transition: all 0.3s ease;
+      font-family: 'Roboto', sans-serif;
+      background-color: white;
+    }
+
+    .password-wrapper input:focus {
+      outline: none;
+      border-color: #2c5a7a;
+      box-shadow: 0 0 0 3px rgba(44, 90, 122, 0.1);
+    }
+
+    .toggle-password {
+      position: absolute;
+      right: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      cursor: pointer;
+      color: #aaa;
+      font-size: 18px;
+      transition: color 0.3s ease;
+      z-index: 2;
+    }
+
+    .toggle-password:hover {
+      color: #2c5a7a;
     }
 
     .form-control {
@@ -183,6 +233,10 @@
 
     .form-control.error {
       border-color: #e74c3c;
+    }
+
+    select.form-control {
+      cursor: pointer;
     }
 
     .password-hint {
@@ -327,8 +381,8 @@
         padding: 25px 20px;
       }
       
-      .form-control {
-        padding: 12px 12px 12px 42px;
+      .form-control, .password-wrapper input {
+        padding: 12px 50px 12px 42px;
         font-size: 14px;
       }
       
@@ -382,7 +436,7 @@
         <div class="form-group">
           <label>Account Role</label>
           <div class="input-wrapper">
-            <i class="bi bi-person-badge"></i>
+            <i class="bi bi-person-badge left-icon"></i>
             <select class="form-control" id="accountRole">
               <option value="">Select Staff or Admin</option>
               <option value="Staff">Staff</option>
@@ -394,7 +448,7 @@
         <div class="form-group">
           <label>Email Address</label>
           <div class="input-wrapper">
-            <i class="bi bi-envelope"></i>
+            <i class="bi bi-envelope left-icon"></i>
             <input type="text" class="form-control" id="userIdentifier" placeholder="Enter your email address">
           </div>
         </div>
@@ -413,16 +467,17 @@
         <div class="form-group">
           <label>Verification Code</label>
           <div class="input-wrapper">
-            <i class="bi bi-key"></i>
+            <i class="bi bi-key left-icon"></i>
             <input type="text" class="form-control" id="verificationCode" placeholder="Enter 6-digit code" maxlength="6">
           </div>
         </div>
 
         <div class="form-group">
           <label>New Password</label>
-          <div class="input-wrapper">
-            <i class="bi bi-lock"></i>
-            <input type="password" class="form-control" id="newPassword" placeholder="Create a new password">
+          <div class="password-wrapper">
+            <i class="bi bi-lock left-icon"></i>
+            <input type="password" id="newPassword" placeholder="Create a new password">
+            <i class="bi bi-eye-slash toggle-password" id="toggleNewPassword"></i>
           </div>
           <div class="password-hint">
             <i class="bi bi-info-circle"></i>
@@ -432,9 +487,10 @@
 
         <div class="form-group">
           <label>Confirm New Password</label>
-          <div class="input-wrapper">
-            <i class="bi bi-lock-fill"></i>
-            <input type="password" class="form-control" id="confirmNewPassword" placeholder="Confirm your new password">
+          <div class="password-wrapper">
+            <i class="bi bi-lock-fill left-icon"></i>
+            <input type="password" id="confirmNewPassword" placeholder="Confirm your new password">
+            <i class="bi bi-eye-slash toggle-password" id="toggleConfirmPassword"></i>
           </div>
         </div>
 
@@ -481,6 +537,32 @@
   let generatedOTP = '';
   let selectedRole = '';
   let selectedTable = '';
+
+  // Toggle password visibility for New Password field
+  const toggleNewPassword = document.getElementById('toggleNewPassword');
+  const newPasswordInput = document.getElementById('newPassword');
+
+  if (toggleNewPassword && newPasswordInput) {
+    toggleNewPassword.addEventListener('click', function() {
+      const type = newPasswordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+      newPasswordInput.setAttribute('type', type);
+      this.classList.toggle('bi-eye');
+      this.classList.toggle('bi-eye-slash');
+    });
+  }
+
+  // Toggle password visibility for Confirm Password field
+  const toggleConfirmPassword = document.getElementById('toggleConfirmPassword');
+  const confirmPasswordInput = document.getElementById('confirmNewPassword');
+
+  if (toggleConfirmPassword && confirmPasswordInput) {
+    toggleConfirmPassword.addEventListener('click', function() {
+      const type = confirmPasswordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+      confirmPasswordInput.setAttribute('type', type);
+      this.classList.toggle('bi-eye');
+      this.classList.toggle('bi-eye-slash');
+    });
+  }
 
   function generateOTP() {
     return Math.floor(100000 + Math.random() * 900000).toString();
@@ -565,11 +647,11 @@
     generatedOTP = generateOTP();
     const expiry = Date.now() + 10 * 60 * 1000; // 10 minutes
 
-    // ✅ Save everything to sessionStorage
+    // Save everything to sessionStorage
     sessionStorage.setItem('resetOTP', generatedOTP);
     sessionStorage.setItem('resetOTPExpiry', expiry);
     sessionStorage.setItem('resetRole', selectedRole);
-    sessionStorage.setItem('resetEmail', userEmail); // ← save email too
+    sessionStorage.setItem('resetEmail', userEmail); // save email too
 
     // Send OTP via EmailJS
     try {
@@ -597,7 +679,7 @@
 
     document.getElementById('messageContainer').innerHTML = '';
 
-    // ✅ Restore from sessionStorage
+    // Restore from sessionStorage
     selectedTable = sessionStorage.getItem('resetRole');
     userEmail = sessionStorage.getItem('resetEmail');
 
