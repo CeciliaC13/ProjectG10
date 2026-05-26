@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <title>View Appliance Form - UTMSPACE College Booking</title>
+
+  <link href="img/favicon.png" rel="icon">
+
+  <link href="vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+  <link href="vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
+  <link href="main.css" rel="stylesheet">
+
+  <style>
+    body {
+      background: #f8f9fa;
+      font-family: 'Roboto', sans-serif;
+    }
+
+    .appliance-page {
+      padding: 60px 0;
+      min-height: 100vh;
+    }
+
+    .page-header-box {
+      background: linear-gradient(135deg, #6b092a, #8b0e35);
+      color: white;
+      border-radius: 22px;
+      padding: 35px;
+      margin-bottom: 30px;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.12);
+    }
+
+    .page-header-box h1 {
+      color: white;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+
+    .page-header-box p {
+      margin: 0;
+      color: rgba(255,255,255,0.88);
+    }
+
+    .back-link-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: white;
+      background: rgba(255,255,255,0.18);
+      padding: 8px 16px;
+      border-radius: 30px;
+      text-decoration: none;
+      font-weight: 600;
+      margin-bottom: 18px;
+    }
+
+    .back-link-btn:hover {
+      background: rgba(255,255,255,0.28);
+      color: white;
+    }
+
+    .filter-box,
+    .table-box {
+      background: white;
+      border-radius: 18px;
+      padding: 25px;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+      margin-bottom: 25px;
+    }
+
+    .appliance-table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 1000px;
+    }
+
+    .table-wrapper {
+      overflow-x: auto;
+    }
+
+    .appliance-table th {
+      background: #6b092a;
+      color: white;
+      padding: 14px;
+      text-align: center;
+      font-weight: 600;
+    }
+
+    .appliance-table td {
+      padding: 14px;
+      border-bottom: 1px solid #eee;
+      text-align: center;
+      vertical-align: middle;
+      font-size: 14px;
+    }
+
+    .appliance-table tr:hover {
+      background: #fafafa;
+    }
+
+    .status-badge {
+      display: inline-block;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .status-pending {
+      background: #fff3cd;
+      color: #856404;
+    }
+
+    .status-approved {
+      background: #dcfce7;
+      color: #166534;
+    }
+
+    .status-rejected {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    .view-btn {
+      background: #2c5a7a;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      padding: 7px 14px;
+      font-size: 13px;
+      font-weight: 600;
+      margin: 2px;
+    }
+
+    .view-btn:hover {
+      background: #1a3c5e;
+    }
+
+    .approve-btn {
+      background: #15803d;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      padding: 7px 14px;
+      font-size: 13px;
+      font-weight: 600;
+      margin: 2px;
+    }
+
+    .approve-btn:hover {
+      background: #166534;
+    }
+
+    .reject-btn {
+      background: #dc2626;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      padding: 7px 14px;
+      font-size: 13px;
+      font-weight: 600;
+      margin: 2px;
+    }
+
+    .reject-btn:hover {
+      background: #991b1b;
+    }
+
+    .modal-body p {
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+
+<body>
+
+<section class="appliance-page">
+  <div class="container">
+
+    <div class="page-header-box">
+      <a href="admin_staff_dashboard.html" class="back-link-btn">
+        <i class="bi bi-arrow-left"></i> Back to Dashboard
+      </a>
+
+      <h1>View Appliance Form</h1>
+
+      <p>
+        Staff and Admin can view and manage appliance registration forms submitted by students.
+      </p>
+    </div>
+
+    <div class="filter-box">
+      <div class="row gy-3">
+
+        <div class="col-md-6">
+          <label class="form-label fw-semibold">Filter by Status</label>
+
+          <select class="form-select" id="statusFilter" onchange="renderApplianceForms()">
+            <option value="All">All Status</option>
+            <option value="Pending">Pending</option>
+            <option value="Approved">Approved</option>
+            <option value="Rejected">Rejected</option>
+          </select>
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label fw-semibold">Filter by College</label>
+
+          <select class="form-select" id="collegeFilter" onchange="renderApplianceForms()">
+            <option value="All">All Colleges</option>
+            <option value="Perdana Residence Block U7">Perdana Residence Block U7</option>
+            <option value="Kolej 9">Kolej 9</option>
+            <option value="Kolej 10">Kolej 10</option>
+          </select>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="table-box">
+
+      <h3 class="mb-4">Student Appliance Registration Forms</h3>
+
+      <div class="table-wrapper">
+
+        <table class="appliance-table">
+
+          <thead>
+            <tr>
+              <th>No.</th>
+              <th>Student ID</th>
+              <th>Student Name</th>
+              <th>College</th>
+              <th>Room No.</th>
+              <th>Appliance</th>
+              <th>Quantity</th>
+              <th>Register Date</th>
+              <th>Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+
+          <tbody id="applianceTableBody"></tbody>
+
+        </table>
+
+      </div>
+
+    </div>
+
+  </div>
+</section>
+
+<div class="modal fade" id="applianceModal" tabindex="-1">
+
+  <div class="modal-dialog modal-dialog-centered">
+
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h5 class="modal-title">
+          <i class="bi bi-clipboard-check"></i> Appliance Form Details
+        </h5>
+
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+
+      <div class="modal-body" id="applianceDetails"></div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+          Close
+        </button>
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+<script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+<script>
+  let applianceForms = JSON.parse(localStorage.getItem('applianceForms')) || [
+    {
+      studentId: 'A24DW0011',
+      studentName: 'Aina Natasha',
+      college: 'Kolej 9',
+      roomNo: 'K9-203',
+      appliance: 'Rice Cooker',
+      quantity: 1,
+      registerDate: '2026-05-20',
+      status: 'Pending'
+    },
+    {
+      studentId: 'A24DW0022',
+      studentName: 'Daniel Lim',
+      college: 'Kolej 10',
+      roomNo: 'K10-112',
+      appliance: 'Mini Fridge',
+      quantity: 1,
+      registerDate: '2026-05-18',
+      status: 'Approved'
+    },
+    {
+      studentId: 'A24DW0033',
+      studentName: 'Kavitha Raj',
+      college: 'Perdana Residence Block U7',
+      roomNo: 'U7-501',
+      appliance: 'Electric Kettle',
+      quantity: 2,
+      registerDate: '2026-05-17',
+      status: 'Rejected'
+    }
+  ];
+
+  function saveToStorage() {
+    localStorage.setItem('applianceForms', JSON.stringify(applianceForms));
+  }
+
+  function getStatusClass(status) {
+    if (status === 'Approved') return 'status-approved';
+    if (status === 'Rejected') return 'status-rejected';
+    return 'status-pending';
+  }
+
+  function renderApplianceForms() {
+
+    const tbody = document.getElementById('applianceTableBody');
+
+    const statusFilter = document.getElementById('statusFilter').value;
+    const collegeFilter = document.getElementById('collegeFilter').value;
+
+    const filtered = applianceForms.filter(function(item) {
+
+      const statusMatch =
+        statusFilter === 'All' || item.status === statusFilter;
+
+      const collegeMatch =
+        collegeFilter === 'All' || item.college === collegeFilter;
+
+      return statusMatch && collegeMatch;
+    });
+
+    if (filtered.length === 0) {
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="10">No appliance forms found.</td>
+        </tr>
+      `;
+      return;
+    }
+
+    tbody.innerHTML = filtered.map(function(item, index) {
+
+      const realIndex = applianceForms.indexOf(item);
+
+      return `
+        <tr>
+          <td>${index + 1}</td>
+          <td>${item.studentId}</td>
+          <td>${item.studentName}</td>
+          <td>${item.college}</td>
+          <td>${item.roomNo}</td>
+          <td>${item.appliance}</td>
+          <td>${item.quantity}</td>
+          <td>${item.registerDate}</td>
+
+          <td>
+            <span class="status-badge ${getStatusClass(item.status)}">
+              ${item.status}
+            </span>
+          </td>
+
+          <td>
+            <button class="view-btn" onclick="viewForm(${realIndex})">
+              View
+            </button>
+
+            <button class="approve-btn" onclick="updateStatus(${realIndex}, 'Approved')">
+              Approve
+            </button>
+
+            <button class="reject-btn" onclick="updateStatus(${realIndex}, 'Rejected')">
+              Reject
+            </button>
+          </td>
+        </tr>
+      `;
+    }).join('');
+  }
+
+  function viewForm(index) {
+
+    const item = applianceForms[index];
+
+    document.getElementById('applianceDetails').innerHTML = `
+      <p><strong>Student ID:</strong> ${item.studentId}</p>
+      <p><strong>Student Name:</strong> ${item.studentName}</p>
+      <p><strong>College:</strong> ${item.college}</p>
+      <p><strong>Room Number:</strong> ${item.roomNo}</p>
+      <p><strong>Appliance:</strong> ${item.appliance}</p>
+      <p><strong>Quantity:</strong> ${item.quantity}</p>
+      <p><strong>Register Date:</strong> ${item.registerDate}</p>
+      <p><strong>Status:</strong> ${item.status}</p>
+    `;
+
+    new bootstrap.Modal(document.getElementById('applianceModal')).show();
+  }
+
+  function updateStatus(index, status) {
+
+    applianceForms[index].status = status;
+
+    saveToStorage();
+
+    renderApplianceForms();
+
+    alert('Appliance form has been ' + status + '.');
+  }
+
+  renderApplianceForms();
+</script>
+
+</body>
+
+</html>
