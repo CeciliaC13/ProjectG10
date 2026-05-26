@@ -489,7 +489,6 @@
           <th>Full Name</th>
           <th>Email</th>
           <th>Role</th>
-          <th>Phone</th>
           <th>Actions</th>
         </tr>
       </thead>
@@ -601,302 +600,403 @@
 <script src="../main.js"></script>
 
 <script>
-  // Actual staff data from your database
-  let staffList = [
-    {
-      id: "STF-1001",
-      fullName: "Cecilia",
-      email: "cecilia@utmspace.my",
-      role: "Admin",
-      phone: "+60 12-3456789"
-    },
-    {
-      id: "STF-1002",
-      fullName: "Abbhi",
-      email: "abbhi@utmspace.my",
-      role: "Staff",
-      phone: "+60 12-9876543"
-    },
-    {
-      id: "STF-1003",
-      fullName: "Adam",
-      email: "adam@utmspace.my",
-      role: "Staff",
-      phone: "+60 12-4567890"
-    }
+const _supabase = db;
+ 
+// ── Helpers ──────────────────────────────────────────────────
+ 
+function showToast(message, isError = false) {
+  const toast = document.getElementById('toastMsg');
+  toast.textContent = message;
+  toast.style.backgroundColor = isError ? '#b91c1c' : '#1a3c5e';
+  toast.classList.add('show');
+  setTimeout(() => {
+    toast.classList.remove('show');
+    toast.style.backgroundColor = '#1e293b';
+  }, 2800);
+}
+ 
+function escapeHtml(str) {
+  if (!str) return '';
+  return str.replace(/[&<>]/g, m =>
+    m === '&' ? '&amp;' : m === '<' ? '&lt;' : '&gt;'
+  );
+}
+ 
+// ── Validation helpers ────────────────────────────────────────
+ 
+function isValidEmail(email) {
+  // Must have text @ text . text, no spaces
+  return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email);
+}
+ 
+function validatePassword(password) {
+  // Returns an error string, or null if valid
+  if (password.length < 8)
+    return 'Password must be at least 8 characters.';
+  if (!/[A-Z]/.test(password))
+    return 'Password must contain at least one uppercase letter.';
+  if (!/[a-z]/.test(password))
+    return 'Password must contain at least one lowercase letter.';
+  if (!/[0-9]/.test(password))
+    return 'Password must contain at least one number.';
+  if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password))
+    return 'Password must contain at least one special character (!@#$%...).';
+  return null;
+}
+ 
+// Check email across BOTH tables, optionally excluding one record (for edit mode)
+async function isEmailTaken(email, excludeId = null) {
+  const [{ data: admins }, { data: staff }] = await Promise.all([
+    _supabase.from('Admin').select('admin_id, email'),
+    _supabase.from('Staff').select('staff_id, email'),
+  ]);
+ 
+  const allEmails = [
+    ...(admins || []).map(r => ({ id: r.admin_id, email: r.email })),
+    ...(staff  || []).map(r => ({ id: r.staff_id, email: r.email })),
   ];
-
-  let nextId = 1004;
-
-  function generateStaffId() {
-    return "STF-" + nextId++;
+ 
+  return allEmails.some(r =>
+    r.email.toLowerCase() === email.toLowerCase() && r.id !== excludeId
+  );
+}
+ 
+// ── Generate next ID ──────────────────────────────────────────
+ 
+function nextIdFor(list, prefix, pad) {
+  if (!list.length) return prefix + '0001';
+  const nums = list
+    .map(r => parseInt((r.staff_id || r.admin_id || '').replace(prefix, ''), 10))
+    .filter(n => !isNaN(n));
+  const max = Math.max(0, ...nums);
+  return prefix + String(max + 1).padStart(pad, '0');
+}
+ 
+// ── Render table ──────────────────────────────────────────────
+ 
+function renderStaffTable(adminList, staffList) {
+  const tbody    = document.getElementById('staffTableBody');
+  const statsRow = document.getElementById('statsRow');
+ 
+  const all = [
+    ...adminList.map(r => ({ id: r.admin_id, name: r.name, email: r.email, role: 'Admin', source: 'Admin' })),
+    ...staffList.map(r => ({ id: r.staff_id, name: r.name, email: r.email, role: 'Staff', source: 'Staff' })),
+  ];
+ 
+  statsRow.innerHTML = `
+    <div class="stat-card"><i class="bi bi-people-fill"></i><div class="stat-info"><h3>${all.length}</h3><span>Total Members</span></div></div>
+    <div class="stat-card"><i class="bi bi-shield-check"></i><div class="stat-info"><h3>${adminList.length}</h3><span>Admins</span></div></div>
+    <div class="stat-card"><i class="bi bi-person-badge"></i><div class="stat-info"><h3>${staffList.length}</h3><span>Staff</span></div></div>
+  `;
+ 
+  if (!all.length) {
+    tbody.innerHTML = `<tr><td colspan="5" class="empty-row"><i class="bi bi-person-slash"></i> No members found.</td></tr>`;
+    return;
   }
-
-  function showToast(message, isError = false) {
-    const toast = document.getElementById('toastMsg');
-    toast.textContent = message;
-    toast.style.backgroundColor = isError ? '#b91c1c' : '#1a3c5e';
-    toast.classList.add('show');
-    setTimeout(() => {
-      toast.classList.remove('show');
-      toast.style.backgroundColor = '#1e293b';
-    }, 2500);
+ 
+  tbody.innerHTML = all.map(m => `
+    <tr>
+      <td><strong>${escapeHtml(m.id)}</strong></td>
+      <td>${escapeHtml(m.name)}</td>
+      <td>${escapeHtml(m.email)}</td>
+      <td><span class="role-badge ${m.role === 'Admin' ? 'admin' : 'staff'}">${m.role}</span></td>
+      <td class="action-buttons">
+        <button class="btn-icon btn-edit"   data-id="${m.id}" data-source="${m.source}" title="Edit"><i class="bi bi-pencil"></i> Edit</button>
+        <button class="btn-icon btn-delete" data-id="${m.id}" data-source="${m.source}" title="Delete"><i class="bi bi-trash"></i> Delete</button>
+      </td>
+    </tr>
+  `).join('');
+ 
+  document.querySelectorAll('.btn-edit').forEach(btn =>
+    btn.addEventListener('click', () => openEditModal(btn.dataset.id, btn.dataset.source))
+  );
+  document.querySelectorAll('.btn-delete').forEach(btn =>
+    btn.addEventListener('click', () => deleteMember(btn.dataset.id, btn.dataset.source))
+  );
+}
+ 
+// ── Load data ─────────────────────────────────────────────────
+ 
+async function loadData() {
+  const [{ data: admins, error: e1 }, { data: staff, error: e2 }] = await Promise.all([
+    _supabase.from('Admin').select('admin_id, name, email'),
+    _supabase.from('Staff').select('staff_id, name, email'),
+  ]);
+ 
+  if (e1 || e2) {
+    showToast('Failed to load data from database.', true);
+    console.error(e1 || e2);
+    return;
   }
-
-  function renderStaffTable() {
-    const tbody = document.getElementById('staffTableBody');
-    if (!staffList.length) {
-      tbody.innerHTML = `<tr><td colspan="6" class="empty-row"><i class="bi bi-person-slash"></i> No staff members found. Click "Add New Staff" to start.</td></tr>`;
-      document.getElementById('statsRow').innerHTML = `<div class="stat-card"><i class="bi bi-people"></i><div class="stat-info"><h3>0</h3><span>Total staff</span></div></div>`;
-      return;
-    }
-
-    let rows = '';
-    staffList.forEach(staff => {
-      const roleClass = staff.role === 'Admin' ? 'admin' : 'staff';
-      rows += `
-        <tr>
-          <td><strong>${escapeHtml(staff.id)}</strong></td>
-          <td>${escapeHtml(staff.fullName)}</td>
-          <td>${escapeHtml(staff.email)}</td>
-          <td><span class="role-badge ${roleClass}">${escapeHtml(staff.role || 'Staff')}</span></td>
-          <td>${escapeHtml(staff.phone || '—')}</td>
-          <td class="action-buttons">
-            <button class="btn-icon btn-edit" data-id="${staff.id}" title="Edit staff"><i class="bi bi-pencil"></i> Edit</button>
-            <button class="btn-icon btn-delete" data-id="${staff.id}" title="Delete staff"><i class="bi bi-trash"></i> Delete</button>
-          </td>
-        </tr>
-      `;
-    });
-    tbody.innerHTML = rows;
-
-    // Update stats
-    const adminCount = staffList.filter(s => s.role === 'Admin').length;
-    const staffCount = staffList.filter(s => s.role === 'Staff').length;
-    const statsHtml = `
-      <div class="stat-card"><i class="bi bi-people-fill"></i><div class="stat-info"><h3>${staffList.length}</h3><span>Total Staff</span></div></div>
-      <div class="stat-card"><i class="bi bi-shield-check"></i><div class="stat-info"><h3>${adminCount}</h3><span>Admins</span></div></div>
-      <div class="stat-card"><i class="bi bi-person-badge"></i><div class="stat-info"><h3>${staffCount}</h3><span>Staff</span></div></div>
-    `;
-    document.getElementById('statsRow').innerHTML = statsHtml;
-
-    // Attach event listeners
-    document.querySelectorAll('.btn-edit').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        const staffId = btn.getAttribute('data-id');
-        openEditModal(staffId);
-      });
-    });
-    document.querySelectorAll('.btn-delete').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        const staffId = btn.getAttribute('data-id');
-        deleteStaffById(staffId);
-      });
-    });
-  }
-
-  function escapeHtml(str) {
-    if (!str) return '';
-    return str.replace(/[&<>]/g, function(m) {
-      if (m === '&') return '&amp;';
-      if (m === '<') return '&lt;';
-      if (m === '>') return '&gt;';
-      return m;
-    });
-  }
-
-  function deleteStaffById(staffId) {
-    const staffToDelete = staffList.find(s => s.id === staffId);
-    if (!staffToDelete) return;
-    const confirmDel = confirm(`⚠️ Remove "${staffToDelete.fullName}" (ID: ${staffId}) from the system? This action is permanent.`);
-    if (confirmDel) {
-      staffList = staffList.filter(s => s.id !== staffId);
-      renderStaffTable();
-      showToast(`✅ ${staffToDelete.fullName} has been removed.`, false);
-    }
-  }
-
-  // Modal Logic
-  const modal = document.getElementById('staffModal');
-  const modalTitle = document.getElementById('modalTitle');
-  const modalSubtext = document.getElementById('modalSubtext');
-  const staffForm = document.getElementById('staffForm');
-  const editStaffIdInput = document.getElementById('editStaffId');
-  const staffIdInput = document.getElementById('staffId');
-  const fullNameInput = document.getElementById('fullName');
-  const emailInput = document.getElementById('email');
-  const roleSelect = document.getElementById('role');
-  const phoneInput = document.getElementById('phone');
-  const passwordInput = document.getElementById('password');
-
-  let editMode = false;
-
-  function openAddModal() {
-    editMode = false;
-    modalTitle.innerText = "Add New Staff";
-    modalSubtext.innerText = "Enter staff details (ID will be auto-generated).";
-    staffForm.reset();
-    editStaffIdInput.value = "";
-    staffIdInput.value = generateStaffId();
-    staffIdInput.disabled = true;
-    fullNameInput.value = "";
-    emailInput.value = "";
-    roleSelect.value = "Staff";
-    phoneInput.value = "";
-    passwordInput.value = "";
-    modal.classList.add('active');
-  }
-
-  function openEditModal(staffId) {
-    const staff = staffList.find(s => s.id === staffId);
-    if (!staff) return;
-    editMode = true;
-    modalTitle.innerText = "Edit Staff Information";
-    modalSubtext.innerText = "Update details and save changes.";
-    editStaffIdInput.value = staff.id;
-    staffIdInput.value = staff.id;
-    staffIdInput.disabled = true;
-    fullNameInput.value = staff.fullName;
-    emailInput.value = staff.email;
-    roleSelect.value = staff.role || "Staff";
-    phoneInput.value = staff.phone || "";
-    passwordInput.value = "";
-    modal.classList.add('active');
-  }
-
-  function closeModal() {
-    modal.classList.remove('active');
-    editMode = false;
-    staffIdInput.disabled = false;
-    staffForm.reset();
-  }
-
-  function handleStaffSubmit(e) {
-    e.preventDefault();
-
-    const newId = staffIdInput.value.trim();
-    const newFullName = fullNameInput.value.trim();
-    const newEmail = emailInput.value.trim();
-    const newRole = roleSelect.value;
-    const newPhone = phoneInput.value.trim();
-    const newPassword = passwordInput.value.trim();
-
-    // Validation
-    if (!newFullName) {
-      showToast("Full name is required.", true);
-      return;
-    }
-    if (!newEmail) {
-      showToast("Email address is required.", true);
-      return;
-    }
-    if (!newEmail.includes('@') || !newEmail.includes('.')) {
-      showToast("Enter a valid email address.", true);
-      return;
-    }
-
-    if (!editMode) {
-      // Add mode - check if ID already exists
-      if (staffList.some(s => s.id === newId)) {
-        showToast(`Staff ID "${newId}" already exists.`, true);
-        return;
-      }
-      
-      const newStaff = {
-        id: newId,
-        fullName: newFullName,
-        email: newEmail,
-        role: newRole,
-        phone: newPhone || ""
-      };
-      staffList.push(newStaff);
-      showToast(`🎉 ${newFullName} added successfully!`, false);
-      nextId++;
-      staffIdInput.value = generateStaffId();
-    } else {
-      // Edit mode
-      const originalId = editStaffIdInput.value;
-      const staffIndex = staffList.findIndex(s => s.id === originalId);
-      if (staffIndex === -1) {
-        showToast("Staff not found, refresh page.", true);
-        closeModal();
-        renderStaffTable();
-        return;
-      }
-      
-      staffList[staffIndex] = {
-        ...staffList[staffIndex],
-        fullName: newFullName,
-        email: newEmail,
-        role: newRole,
-        phone: newPhone || "",
-        id: originalId
-      };
-      
-      // If password was provided, update it (in real DB you would hash it)
-      if (newPassword) {
-        console.log(`Password updated for ${newFullName}`);
-      }
-      
-      showToast(`✏️ ${newFullName} updated successfully.`, false);
-    }
-
-    renderStaffTable();
-    closeModal();
-  }
-
-  // Toggle password visibility in modal
-  const toggleModalPassword = document.getElementById('toggleModalPassword');
-  if (toggleModalPassword) {
-    toggleModalPassword.addEventListener('click', function() {
-      const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
-      passwordInput.setAttribute('type', type);
-      this.classList.toggle('bi-eye');
-      this.classList.toggle('bi-eye-slash');
-    });
-  }
-
-  // Event listeners
-  document.getElementById('openAddModalBtn').addEventListener('click', openAddModal);
-  document.getElementById('closeModalBtn').addEventListener('click', closeModal);
-  window.addEventListener('click', (e) => {
-    if (e.target === modal) closeModal();
+ 
+  renderStaffTable(admins || [], staff || []);
+}
+ 
+// ── Delete ────────────────────────────────────────────────────
+ 
+async function deleteMember(id, source) {
+  const label = source === 'Admin' ? 'Admin' : 'Staff';
+  const col   = source === 'Admin' ? 'admin_id' : 'staff_id';
+ 
+  if (!confirm(`⚠️ Remove ${label} "${id}" from the system? This is permanent.`)) return;
+ 
+  const { error } = await _supabase.from(source).delete().eq(col, id);
+  if (error) { showToast(`Delete failed: ${error.message}`, true); return; }
+  showToast(`✅ ${label} ${id} removed.`);
+  loadData();
+}
+ 
+// ── Modal ─────────────────────────────────────────────────────
+ 
+const modal          = document.getElementById('staffModal');
+const modalTitle     = document.getElementById('modalTitle');
+const modalSubtext   = document.getElementById('modalSubtext');
+const staffForm      = document.getElementById('staffForm');
+const editStaffIdInp = document.getElementById('editStaffId');
+const staffIdInp     = document.getElementById('staffId');
+const fullNameInp    = document.getElementById('fullName');
+const emailInp       = document.getElementById('email');
+const roleSelect     = document.getElementById('role');
+const phoneInp       = document.getElementById('phone');
+const passwordInp    = document.getElementById('password');
+ 
+// Password hint element — injected once below the password field
+const pwHint = document.createElement('small');
+pwHint.style.cssText = 'color:#64748b;font-size:0.75rem;margin-top:4px;display:block;line-height:1.4';
+pwHint.textContent   = 'Min 8 chars · uppercase · lowercase · number · special char';
+passwordInp.closest('.password-wrapper').insertAdjacentElement('afterend', pwHint);
+ 
+let editMode   = false;
+let editSource = null;
+ 
+// Hide phone field — no phone column in either table
+const phoneGroup = phoneInp?.closest('.form-group');
+if (phoneGroup) phoneGroup.style.display = 'none';
+ 
+async function refreshPreviewId(role) {
+  const table  = role === 'Admin' ? 'Admin' : 'Staff';
+  const col    = role === 'Admin' ? 'admin_id' : 'staff_id';
+  const prefix = role === 'Admin' ? 'A' : 'S';
+  const { data } = await _supabase.from(table).select(col);
+  staffIdInp.value = nextIdFor(data || [], prefix, 4);
+}
+ 
+async function openAddModal() {
+  editMode   = false;
+  editSource = null;
+  modalTitle.textContent   = 'Add New Member';
+  modalSubtext.textContent = 'ID is auto-generated based on role.';
+  staffForm.reset();
+  clearFieldErrors();
+  editStaffIdInp.value = '';
+  roleSelect.value     = 'Staff';
+  roleSelect.disabled  = false;
+  pwHint.textContent   = 'Min 8 chars · uppercase · lowercase · number · special char';
+  pwHint.style.color   = '#64748b';
+  await refreshPreviewId('Staff');
+  staffIdInp.disabled = true;
+  modal.classList.add('active');
+}
+ 
+roleSelect.addEventListener('change', () => {
+  if (!editMode) refreshPreviewId(roleSelect.value);
+});
+ 
+async function openEditModal(id, source) {
+  const col = source === 'Admin' ? 'admin_id' : 'staff_id';
+  const { data, error } = await _supabase.from(source).select('*').eq(col, id).single();
+  if (error || !data) { showToast('Could not load record.', true); return; }
+ 
+  editMode   = true;
+  editSource = source;
+  modalTitle.textContent   = 'Edit Member';
+  modalSubtext.textContent = 'Update details then save. Leave password blank to keep current.';
+  editStaffIdInp.value = id;
+  staffIdInp.value     = id;
+  staffIdInp.disabled  = true;
+  fullNameInp.value    = data.name  || '';
+  emailInp.value       = data.email || '';
+  roleSelect.value     = source;
+  roleSelect.disabled  = true;
+  passwordInp.value    = '';
+  clearFieldErrors();
+  pwHint.textContent = 'Leave blank to keep current password.';
+  pwHint.style.color = '#64748b';
+  modal.classList.add('active');
+}
+ 
+function closeModal() {
+  modal.classList.remove('active');
+  editMode            = false;
+  editSource          = null;
+  staffIdInp.disabled = false;
+  roleSelect.disabled = false;
+  clearFieldErrors();
+  staffForm.reset();
+}
+ 
+// ── Inline field error helpers ────────────────────────────────
+ 
+function setFieldError(input, message) {
+  clearFieldError(input);
+  input.style.borderColor = '#dc2626';
+  input.style.boxShadow   = '0 0 0 2px rgba(220,38,38,0.2)';
+  const err = document.createElement('small');
+  err.className = 'field-error';
+  err.style.cssText = 'color:#dc2626;font-size:0.75rem;margin-top:4px;display:block';
+  err.textContent = message;
+  input.closest('.form-group, .password-wrapper')?.insertAdjacentElement('afterend', err) ||
+  input.insertAdjacentElement('afterend', err);
+}
+ 
+function clearFieldError(input) {
+  input.style.borderColor = '';
+  input.style.boxShadow   = '';
+  // Remove any existing error message right after the field's parent
+  const parent = input.closest('.form-group');
+  parent?.querySelectorAll('.field-error').forEach(el => el.remove());
+}
+ 
+function clearFieldErrors() {
+  document.querySelectorAll('.field-error').forEach(el => el.remove());
+  [fullNameInp, emailInp, passwordInp].forEach(inp => {
+    inp.style.borderColor = '';
+    inp.style.boxShadow   = '';
   });
-  staffForm.addEventListener('submit', handleStaffSubmit);
-
-  // Load header profile
-  async function loadAdminStaffHeader() {
-    const role = localStorage.getItem('staffAdminRole') || localStorage.getItem('userRole');
-    const email = localStorage.getItem('staffAdminEmail');
-    const name = localStorage.getItem('staffAdminName');
-
-    if (!role && !email) {
-      window.location.href = 'admin_staff_login.html';
-      return;
-    }
-
-    const roleText = role === 'admin' || role === 'Admin' ? 'Admin' : 'Staff';
-    document.getElementById('dropdownUserRole').textContent = roleText;
-    document.getElementById('dropdownUserName').textContent = name || roleText + ' User';
-    document.getElementById('dropdownUserEmail').textContent = email || 'user@utmspace.my';
-    document.getElementById('avatarInitial').textContent = roleText.charAt(0);
+}
+ 
+// Live password strength feedback
+passwordInp.addEventListener('input', () => {
+  const val = passwordInp.value;
+  if (!val) {
+    pwHint.textContent = editMode
+      ? 'Leave blank to keep current password.'
+      : 'Min 8 chars · uppercase · lowercase · number · special char';
+    pwHint.style.color = '#64748b';
+    return;
   }
-
-  // Logout
-  document.getElementById('logoutBtn').addEventListener('click', function(e) {
-    e.preventDefault();
-    localStorage.removeItem('staffAdminRole');
-    localStorage.removeItem('staffAdminEmail');
-    localStorage.removeItem('staffAdminName');
-    localStorage.removeItem('staffAdminId');
-    localStorage.removeItem('userRole');
-    localStorage.removeItem('currentUser');
-    window.location.href = 'admin_staff_login.html';
-  });
-
-  // Initialize
-  loadAdminStaffHeader();
-  renderStaffTable();
+  const err = validatePassword(val);
+  if (err) {
+    pwHint.textContent = '✗ ' + err;
+    pwHint.style.color = '#dc2626';
+  } else {
+    pwHint.textContent = '✓ Password looks good!';
+    pwHint.style.color = '#16a34a';
+  }
+});
+ 
+// ── Submit ────────────────────────────────────────────────────
+ 
+staffForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  clearFieldErrors();
+ 
+  const name     = fullNameInp.value.trim();
+  const email    = emailInp.value.trim();
+  const password = passwordInp.value.trim();
+  const role     = roleSelect.value;
+  const newId    = staffIdInp.value.trim();
+ 
+  let hasError = false;
+ 
+  // Name
+  if (!name) {
+    setFieldError(fullNameInp, 'Full name is required.');
+    hasError = true;
+  }
+ 
+  // Email
+  if (!email) {
+    setFieldError(emailInp, 'Email address is required.');
+    hasError = true;
+  } else if (!isValidEmail(email)) {
+    setFieldError(emailInp, 'Enter a valid email address (e.g. user@domain.com).');
+    hasError = true;
+  }
+ 
+  // Password — required on add, optional on edit
+  if (!editMode && !password) {
+    setFieldError(passwordInp, 'Password is required for new members.');
+    hasError = true;
+  } else if (password) {
+    const pwErr = validatePassword(password);
+    if (pwErr) {
+      setFieldError(passwordInp, pwErr);
+      hasError = true;
+    }
+  }
+ 
+  if (hasError) return;
+ 
+  // Duplicate email check (across both tables, excluding self on edit)
+  const excludeId = editMode ? editStaffIdInp.value : null;
+  const taken = await isEmailTaken(email, excludeId);
+  if (taken) {
+    setFieldError(emailInp, 'This email is already registered to another member.');
+    return;
+  }
+ 
+  const table = role === 'Admin' ? 'Admin' : 'Staff';
+  const idCol = role === 'Admin' ? 'admin_id' : 'staff_id';
+ 
+  if (!editMode) {
+    const { error } = await _supabase.from(table).insert([{ [idCol]: newId, name, email, password }]);
+    if (error) { showToast(`Add failed: ${error.message}`, true); return; }
+    showToast(`🎉 ${name} added as ${role}!`);
+  } else {
+    const updates = { name, email };
+    if (password) updates.password = password;
+    const { error } = await _supabase.from(editSource).update(updates).eq(idCol, editStaffIdInp.value);
+    if (error) { showToast(`Update failed: ${error.message}`, true); return; }
+    showToast(`✏️ ${name} updated.`);
+  }
+ 
+  closeModal();
+  loadData();
+});
+ 
+// ── Password toggle ───────────────────────────────────────────
+ 
+document.getElementById('toggleModalPassword')?.addEventListener('click', function () {
+  const type = passwordInp.getAttribute('type') === 'password' ? 'text' : 'password';
+  passwordInp.setAttribute('type', type);
+  this.classList.toggle('bi-eye');
+  this.classList.toggle('bi-eye-slash');
+});
+ 
+// ── Event listeners ───────────────────────────────────────────
+ 
+document.getElementById('openAddModalBtn').addEventListener('click', openAddModal);
+document.getElementById('closeModalBtn').addEventListener('click', closeModal);
+window.addEventListener('click', e => { if (e.target === modal) closeModal(); });
+ 
+// ── Header profile ────────────────────────────────────────────
+ 
+function loadAdminStaffHeader() {
+  const role  = localStorage.getItem('staffAdminRole') || localStorage.getItem('userRole');
+  const email = localStorage.getItem('staffAdminEmail');
+  const name  = localStorage.getItem('staffAdminName');
+ 
+  if (!role && !email) { window.location.href = 'admin_staff_login.html'; return; }
+ 
+  const roleText = (role === 'admin' || role === 'Admin') ? 'Admin' : 'Staff';
+  document.getElementById('dropdownUserRole').textContent  = roleText;
+  document.getElementById('dropdownUserName').textContent  = name || roleText + ' User';
+  document.getElementById('dropdownUserEmail').textContent = email || 'user@utmspace.my';
+  document.getElementById('avatarInitial').textContent     = roleText.charAt(0);
+}
+ 
+document.getElementById('logoutBtn').addEventListener('click', function (e) {
+  e.preventDefault();
+  ['staffAdminRole','staffAdminEmail','staffAdminName','staffAdminId','userRole','currentUser']
+    .forEach(k => localStorage.removeItem(k));
+  window.location.href = 'admin_staff_login.html';
+});
+ 
+// ── Init ──────────────────────────────────────────────────────
+ 
+loadAdminStaffHeader();
+loadData();
 </script>
 
 </body>
