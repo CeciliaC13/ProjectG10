@@ -413,9 +413,9 @@
           <label>Select Room Type <span class="required">*</span></label>
           <select class="form-select" id="roomType" required>
             <option value="">-- Please select a room type --</option>
-            <option value="Single Bed AC Room|30|day">Single Bed Fan Room - RM30/day </option>
-            <option value="Twin Bed AC Room|35|day">Single Bed AC Room - RM35/day </option>
-            <option value="Twin Bed Fan Room|25|day">Twin Bed Fan Room - RM25/day (Shared Room with Fan)</option>
+            <option value="Single Bed Fan Room">Single Bed Fan Room - RM30/day </option>
+            <option value="Single Bed AC Room">Single Bed AC Room - RM35/day </option>
+            <option value="Twin Bed Fan Room">Twin Bed Fan Room - RM25/day (Shared Room with Fan)</option>
           </select>
         </div>
 
@@ -709,6 +709,21 @@ document.getElementById('reservationForm').addEventListener('submit', async func
     if (document.getElementById('checkOut').value && document.getElementById('checkOut').value <= this.value) {
       document.getElementById('checkOut').value = '';
     }
+  });
+
+    document.addEventListener("DOMContentLoaded", function () {
+      const urlParams = new URLSearchParams(window.location.search);
+      const roomParam = urlParams.get('roomType');
+
+      if (roomParam) {
+          const roomName = roomParam.split('|')[0].trim(); // "Single Room"
+          const roomSelectElement = document.getElementById('roomType');
+          
+          if (roomSelectElement) {
+              roomSelectElement.value = roomName;
+              roomSelectElement.dispatchEvent(new Event('change'));
+          }
+      }
   });
 </script>
 </body>

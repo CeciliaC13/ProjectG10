@@ -572,11 +572,9 @@
 </script>
 
 <a href="#" id="scroll-top" class="scroll-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
-<!-- FIXED: main.js path -->
 <script src="../main.js"></script>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<!-- FIXED: supabase.js path -->
 <script src="../supabase.js"></script>
 <script>
 document.getElementById('reservationForm').addEventListener('submit', async function(e) {
@@ -595,7 +593,6 @@ document.getElementById('reservationForm').addEventListener('submit', async func
     'Double Room': 'Shared room with 2 Single Beds, Study Tables, Chairs, Wardrobe - RM4.00/night'
   };
 
-  // Room type selection event
   document.getElementById('roomType').addEventListener('change', function() {
     const selectedValue = this.value;
     const roomDetailsDiv = document.getElementById('roomDetails');
@@ -607,11 +604,9 @@ document.getElementById('reservationForm').addEventListener('submit', async func
       selectedPrice = parseFloat(parts[1]);
       selectedUnit = parts[2];
       
-      // Show room details
       roomDetailsText.innerHTML = `<strong>${selectedRoomName}</strong> - ${roomDetailsMap[selectedRoomName] || 'Includes all basic amenities'}`;
       roomDetailsDiv.classList.add('show');
       
-      // Recalculate total if dates are selected
       calculateTotal();
     } else {
       roomDetailsDiv.classList.remove('show');
@@ -622,7 +617,6 @@ document.getElementById('reservationForm').addEventListener('submit', async func
     }
   });
 
-  // Date inputs event listeners
   document.getElementById('checkIn').addEventListener('change', calculateTotal);
   document.getElementById('checkOut').addEventListener('change', calculateTotal);
 
@@ -664,7 +658,6 @@ document.getElementById('reservationForm').addEventListener('submit', async func
     }
   }
 
-  // Form submission - redirect to payment page
   document.getElementById('reservationForm').addEventListener('submit', async function(e) {
     e.preventDefault();
     
@@ -681,7 +674,6 @@ document.getElementById('reservationForm').addEventListener('submit', async func
     
     errorAlert.classList.remove('show');
     
-    // Validation
     if (!name || !studentId || !email || !phone || !college || !roomTypeSelect || !checkIn || !checkOut) {
       errorAlert.querySelector('span').textContent = 'Please fill in all required fields.';
       errorAlert.classList.add('show');
@@ -704,13 +696,11 @@ document.getElementById('reservationForm').addEventListener('submit', async func
       setTimeout(() => errorAlert.classList.remove('show'), 3000);
       return;
     }
-    
-    // Calculate total
+
     const diffTime = Math.abs(endDate - startDate);
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     const total = selectedPrice * diffDays;
     
-    // Create reservation object and save to localStorage
     const reservationData = {
       reservation_id: 'K9-10-' + Date.now(),
       student_name: name,
@@ -734,15 +724,12 @@ document.getElementById('reservationForm').addEventListener('submit', async func
       if (error) throw error;
 
       console.log('Saved in Supabase:', data);
-    
-    // Store current reservation for payment page
+  
     localStorage.setItem('currentReservation', JSON.stringify(reservationData));
     
-    // Disable button and show loading
     submitBtn.disabled = true;
     submitBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Redirecting to Payment...';
     
-    // Redirect to payment page
         setTimeout(() => {
           window.location.href = 'payment_student.html';
         }, 500);
@@ -757,12 +744,10 @@ document.getElementById('reservationForm').addEventListener('submit', async func
     saveToSupabase();
   });
   
-  // Set minimum date for check-in (today)
   const today = new Date().toISOString().split('T')[0];
   document.getElementById('checkIn').min = today;
   document.getElementById('checkOut').min = today;
   
-  // Update check-out min date when check-in changes
   document.getElementById('checkIn').addEventListener('change', function() {
     document.getElementById('checkOut').min = this.value;
     if (document.getElementById('checkOut').value && document.getElementById('checkOut').value <= this.value) {

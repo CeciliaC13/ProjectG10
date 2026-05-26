@@ -450,8 +450,8 @@
           <label>Select Room Type <span class="required">*</span></label>
           <select class="form-select" id="roomType" required>
             <option value="">-- Please select a room type --</option>
-            <option value="Double Room|30|day">Double Room - RM30/day</option>
-            <option value="Three Person Room|25|day">Three Person Room - RM25/day</option>
+            <option value="Double Room">Double Room - RM30/day</option>
+            <option value="Three Person Room">Three Person Room - RM25/day</option>
           </select>
         </div>
 
@@ -570,8 +570,7 @@ document.getElementById('reservationForm').addEventListener('submit', async func
     'Single Bed AC Room': 'Private Room with Single Bed, Air-conditioner, Wardrobe, Study Table & Chair',
     'Twin Bed Fan Room': 'Shared Room with 2 Single Beds, Fan, Wardrobe, Study Table & Chair'
   };
-  
-  // Room type selection 
+   
   document.getElementById('roomType').addEventListener('change', function() {
     const selectedValue = this.value;
     const roomDetailsDiv = document.getElementById('roomDetails');
@@ -751,6 +750,21 @@ document.getElementById('reservationForm').addEventListener('submit', async func
     if (document.getElementById('checkOut').value && document.getElementById('checkOut').value <= this.value) {
       document.getElementById('checkOut').value = '';
     }
+  });
+
+   document.addEventListener("DOMContentLoaded", function () {
+      const urlParams = new URLSearchParams(window.location.search);
+      const roomParam = urlParams.get('roomType');
+
+      if (roomParam) {
+          const roomName = roomParam.split('|')[0].trim(); // "Single Room"
+          const roomSelectElement = document.getElementById('roomType');
+          
+          if (roomSelectElement) {
+              roomSelectElement.value = roomName;
+              roomSelectElement.dispatchEvent(new Event('change'));
+          }
+      }
   });
 </script>
 </body>
