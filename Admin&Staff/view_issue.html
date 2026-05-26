@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+
+  <title>View Issue - UTMSPACE College Booking</title>
+
+  <link href="img/favicon.png" rel="icon">
+  <link href="vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+  <link href="vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
+  <link href="main.css" rel="stylesheet">
+
+  <style>
+    body {
+      background: #f5f7fb;
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    .issue-page {
+      padding: 60px 0;
+      min-height: 100vh;
+    }
+
+    .page-header-box {
+      background: linear-gradient(135deg, #6b092a, #8b0e35);
+      border-radius: 24px;
+      padding: 40px;
+      color: white;
+      margin-bottom: 35px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.12);
+    }
+
+    .page-header-box h1 {
+      font-size: 34px;
+      font-weight: 700;
+      margin-bottom: 10px;
+      color: white;
+    }
+
+    .page-header-box p {
+      margin: 0;
+      color: rgba(255,255,255,0.85);
+      font-size: 15px;
+    }
+
+    .back-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 18px;
+      border-radius: 50px;
+      background: rgba(255,255,255,0.15);
+      color: white;
+      text-decoration: none;
+      font-weight: 600;
+      margin-bottom: 20px;
+      transition: 0.3s;
+    }
+
+    .back-btn:hover {
+      background: rgba(255,255,255,0.28);
+      color: white;
+    }
+
+    .top-box {
+      background: white;
+      border-radius: 20px;
+      padding: 25px;
+      margin-bottom: 30px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+    }
+
+    .issue-stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px,1fr));
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+
+    .stat-card {
+      background: white;
+      border-radius: 20px;
+      padding: 25px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .stat-card h3 {
+      font-size: 30px;
+      font-weight: 800;
+      margin-bottom: 6px;
+    }
+
+    .stat-card p {
+      margin: 0;
+      color: #666;
+      font-weight: 500;
+    }
+
+    .stat-icon {
+      position: absolute;
+      right: 20px;
+      top: 20px;
+      font-size: 40px;
+      opacity: 0.12;
+    }
+
+    .table-box {
+      background: white;
+      border-radius: 20px;
+      padding: 30px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+    }
+
+    .table-title {
+      font-size: 24px;
+      font-weight: 700;
+      color: #6b092a;
+      margin-bottom: 25px;
+    }
+
+    .issue-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .issue-table th {
+      background: #6b092a;
+      color: white;
+      padding: 16px;
+      text-align: center;
+      font-size: 14px;
+    }
+
+    .issue-table td {
+      padding: 16px;
+      border-bottom: 1px solid #eee;
+      text-align: center;
+      vertical-align: middle;
+      font-size: 14px;
+    }
+
+    .issue-table tr:hover {
+      background: #fafafa;
+    }
+
+    .status-badge {
+      display: inline-block;
+      padding: 7px 14px;
+      border-radius: 30px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .status-pending {
+      background: #fff3cd;
+      color: #856404;
+    }
+
+    .status-progress {
+      background: #dbeafe;
+      color: #1d4ed8;
+    }
+
+    .status-resolved {
+      background: #dcfce7;
+      color: #166534;
+    }
+
+    .action-btn {
+      border: none;
+      border-radius: 10px;
+      padding: 8px 14px;
+      color: white;
+      font-size: 13px;
+      font-weight: 600;
+      margin: 2px;
+      transition: 0.3s;
+    }
+
+    .view-btn {
+      background: #2c5a7a;
+    }
+
+    .view-btn:hover {
+      background: #1b425d;
+    }
+
+    .update-btn {
+      background: #6b092a;
+    }
+
+    .update-btn:hover {
+      background: #50061d;
+    }
+
+    .filter-label {
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .modal-content {
+      border-radius: 20px;
+      border: none;
+    }
+
+    .modal-header {
+      background: #6b092a;
+      color: white;
+      border-radius: 20px 20px 0 0;
+    }
+
+    .modal-title {
+      font-weight: 700;
+    }
+
+    @media(max-width: 768px) {
+      .page-header-box {
+        padding: 28px;
+      }
+
+      .page-header-box h1 {
+        font-size: 28px;
+      }
+
+      .table-box {
+        overflow-x: auto;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+<section class="issue-page">
+
+  <div class="container">
+
+    <!-- HEADER -->
+    <div class="page-header-box">
+
+      <a href="admin_staff_dashboard.html" class="back-btn">
+        <i class="bi bi-arrow-left"></i>
+        Back to Dashboard
+      </a>
+
+      <h1>View Student Issues</h1>
+
+      <p>
+        Monitor student complaints, maintenance reports, and issue progress updates.
+      </p>
+
+    </div>
+
+    <!-- STATS -->
+    <div class="issue-stats">
+
+      <div class="stat-card">
+        <i class="bi bi-exclamation-circle stat-icon"></i>
+        <h3 id="totalIssues">0</h3>
+        <p>Total Issues</p>
+      </div>
+
+      <div class="stat-card">
+        <i class="bi bi-hourglass-split stat-icon"></i>
+        <h3 id="pendingIssues">0</h3>
+        <p>Pending Issues</p>
+      </div>
+
+      <div class="stat-card">
+        <i class="bi bi-tools stat-icon"></i>
+        <h3 id="progressIssues">0</h3>
+        <p>In Progress</p>
+      </div>
+
+      <div class="stat-card">
+        <i class="bi bi-check-circle stat-icon"></i>
+        <h3 id="resolvedIssues">0</h3>
+        <p>Resolved Issues</p>
+      </div>
+
+    </div>
+
+    <!-- FILTER -->
+    <div class="top-box">
+
+      <div class="row gy-3">
+
+        <div class="col-md-6">
+
+          <label class="filter-label">
+            Filter by Status
+          </label>
+
+          <select
+            class="form-select"
+            id="statusFilter"
+            onchange="renderIssues()"
+          >
+            <option value="All">All Status</option>
+            <option value="Pending">Pending</option>
+            <option value="In Progress">In Progress</option>
+            <option value="Resolved">Resolved</option>
+          </select>
+
+        </div>
+
+        <div class="col-md-6">
+
+          <label class="filter-label">
+            Filter by College
+          </label>
+
+          <select
+            class="form-select"
+            id="collegeFilter"
+            onchange="renderIssues()"
+          >
+            <option value="All">All Colleges</option>
+            <option value="Kolej 9">Kolej 9</option>
+            <option value="Kolej 10">Kolej 10</option>
+            <option value="Perdana Residence Block U7">
+              Perdana Residence Block U7
+            </option>
+          </select>
+
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- TABLE -->
+    <div class="table-box">
+
+      <div class="table-title">
+        Issue Records
+      </div>
+
+      <div class="table-responsive">
+
+        <table class="issue-table">
+
+          <thead>
+            <tr>
+              <th>No.</th>
+              <th>Issue ID</th>
+              <th>Student Name</th>
+              <th>College</th>
+              <th>Issue Type</th>
+              <th>Date</th>
+              <th>Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+
+          <tbody id="issueTableBody"></tbody>
+
+        </table>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</section>
+
+<!-- MODAL -->
+<div class="modal fade" id="issueModal" tabindex="-1">
+
+  <div class="modal-dialog modal-dialog-centered">
+
+    <div class="modal-content">
+
+      <div class="modal-header">
+
+        <h5 class="modal-title">
+          <i class="bi bi-exclamation-circle"></i>
+          Issue Details
+        </h5>
+
+        <button
+          type="button"
+          class="btn-close btn-close-white"
+          data-bs-dismiss="modal"
+        ></button>
+
+      </div>
+
+      <div class="modal-body" id="issueDetails"></div>
+
+    </div>
+
+  </div>
+
+</div>
+
+<script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+<script>
+  let issues =
+    JSON.parse(localStorage.getItem('studentIssues')) || [
+
+    {
+      issueId: 'I001',
+      studentName: 'Aina Natasha',
+      college: 'Kolej 9',
+      issueType: 'Water Leakage',
+      description: 'Water leaking from bathroom ceiling.',
+      date: '2026-05-15',
+      status: 'Pending'
+    },
+
+    {
+      issueId: 'I002',
+      studentName: 'Daniel Lim',
+      college: 'Kolej 10',
+      issueType: 'WiFi Problem',
+      description: 'WiFi connection unavailable in room.',
+      date: '2026-05-16',
+      status: 'In Progress'
+    },
+
+    {
+      issueId: 'I003',
+      studentName: 'Kavitha Raj',
+      college: 'Perdana Residence Block U7',
+      issueType: 'Aircond Not Working',
+      description: 'Air conditioner not cooling properly.',
+      date: '2026-05-17',
+      status: 'Resolved'
+    }
+
+  ];
+
+  function getStatusClass(status) {
+
+    if (status === 'Resolved') {
+      return 'status-resolved';
+    }
+
+    if (status === 'In Progress') {
+      return 'status-progress';
+    }
+
+    return 'status-pending';
+  }
+
+  function updateStats(filteredIssues) {
+
+    document.getElementById('totalIssues').textContent =
+      filteredIssues.length;
+
+    document.getElementById('pendingIssues').textContent =
+      filteredIssues.filter(
+        item => item.status === 'Pending'
+      ).length;
+
+    document.getElementById('progressIssues').textContent =
+      filteredIssues.filter(
+        item => item.status === 'In Progress'
+      ).length;
+
+    document.getElementById('resolvedIssues').textContent =
+      filteredIssues.filter(
+        item => item.status === 'Resolved'
+      ).length;
+  }
+
+  function renderIssues() {
+
+    const tbody =
+      document.getElementById('issueTableBody');
+
+    const statusFilter =
+      document.getElementById('statusFilter').value;
+
+    const collegeFilter =
+      document.getElementById('collegeFilter').value;
+
+    const filtered = issues.filter(function(item) {
+
+      const statusMatch =
+        statusFilter === 'All' ||
+        item.status === statusFilter;
+
+      const collegeMatch =
+        collegeFilter === 'All' ||
+        item.college === collegeFilter;
+
+      return statusMatch && collegeMatch;
+
+    });
+
+    updateStats(filtered);
+
+    if (filtered.length === 0) {
+
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="8">
+            No issue records found.
+          </td>
+        </tr>
+      `;
+
+      return;
+    }
+
+    tbody.innerHTML = filtered.map(function(item, index) {
+
+      const realIndex = issues.indexOf(item);
+
+      return `
+        <tr>
+
+          <td>${index + 1}</td>
+
+          <td>${item.issueId}</td>
+
+          <td>${item.studentName}</td>
+
+          <td>${item.college}</td>
+
+          <td>${item.issueType}</td>
+
+          <td>${item.date}</td>
+
+          <td>
+            <span class="status-badge ${getStatusClass(item.status)}">
+              ${item.status}
+            </span>
+          </td>
+
+          <td>
+
+            <button
+              class="action-btn view-btn"
+              onclick="viewIssue(${realIndex})"
+            >
+              View
+            </button>
+
+            <button
+              class="action-btn update-btn"
+              onclick="updateIssue(${realIndex})"
+            >
+              Update
+            </button>
+
+          </td>
+
+        </tr>
+      `;
+
+    }).join('');
+  }
+
+  function viewIssue(index) {
+
+    const item = issues[index];
+
+    document.getElementById('issueDetails').innerHTML = `
+      <p><strong>Issue ID:</strong> ${item.issueId}</p>
+
+      <p><strong>Student Name:</strong> ${item.studentName}</p>
+
+      <p><strong>College:</strong> ${item.college}</p>
+
+      <p><strong>Issue Type:</strong> ${item.issueType}</p>
+
+      <p><strong>Description:</strong><br>${item.description}</p>
+
+      <p><strong>Date:</strong> ${item.date}</p>
+
+      <p><strong>Status:</strong> ${item.status}</p>
+    `;
+
+    new bootstrap.Modal(
+      document.getElementById('issueModal')
+    ).show();
+  }
+
+  function updateIssue(index) {
+
+    if (issues[index].status === 'Pending') {
+      issues[index].status = 'In Progress';
+    }
+
+    else if (issues[index].status === 'In Progress') {
+      issues[index].status = 'Resolved';
+    }
+
+    else {
+      issues[index].status = 'Pending';
+    }
+
+    localStorage.setItem(
+      'studentIssues',
+      JSON.stringify(issues)
+    );
+
+    renderIssues();
+  }
+
+  renderIssues();
+</script>
+
+</body>
+</html>
