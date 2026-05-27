@@ -314,6 +314,20 @@
       border: 1px solid #f5c6cb;
     }
 
+    .room-details {
+      background: #f0f7ff;
+      border-radius: 10px;
+      padding: 12px;
+      margin-top: 10px;
+      font-size: 13px;
+      color: #1a3c5e;
+      display: none;
+    }
+
+    .room-details.show {
+      display: block;
+    }
+
     @media (max-width: 768px) {
       .room-type-container {
         grid-template-columns: 1fr;
@@ -450,9 +464,14 @@
           <label>Select Room Type <span class="required">*</span></label>
           <select class="form-select" id="roomType" required>
             <option value="">-- Please select a room type --</option>
-            <option value="Double Room">Double Room - RM30/day</option>
-            <option value="Three Person Room">Three Person Room - RM25/day</option>
+            <option value="Double Room|30">Double Room - RM30/day</option>
+            <option value="Three Person Room|25">Three Person Room - RM25/day</option>
           </select>
+        </div>
+
+        <div class="room-details" id="roomDetails">
+          <i class="bi bi-info-circle"></i> 
+          <span id="roomDetailsText"></span>
         </div>
 
         <div class="date-inputs" id="dailyDateInputs">
@@ -486,7 +505,7 @@
           <div class="amount" id="totalAmount">RM0</div>
         </div>
 
-        <button type="button" class="back-btn" id="backBtn" onclick="goBackToU7()">
+        <button type="button" class="back-btn" id="backBtn" onclick="goBackToKLG()">
           <i class="bi bi-arrow-left"></i> Back
         </button>
 
@@ -540,7 +559,6 @@
   </div>
 </footer>
 
-
 <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
 <script>
   AOS.init();
@@ -551,26 +569,20 @@
 <script src="../main.js"></script>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
 <script src="../supabase.js"></script>
 <script>
-document.getElementById('reservationForm').addEventListener('submit', async function(e) {
-    });
-
   let selectedPrice = 0;
-  let selectedUnit = 'day';
   let selectedRoomName = '';
 
-  function goBackToKP() {
-    window.location.href = 'klg.html';
+  function goBackToKLG() {
+    window.location.href = 'klg_student.html';
   }
 
   const roomDetailsMap = {
-    'Single Bed Fan Room': 'Private Room with Single Bed, Fan, Wardrobe, Study Table & Chair',
-    'Single Bed AC Room': 'Private Room with Single Bed, Air-conditioner, Wardrobe, Study Table & Chair',
-    'Twin Bed Fan Room': 'Shared Room with 2 Single Beds, Fan, Wardrobe, Study Table & Chair'
+    'Double Room': 'Private Room with Double Bed, Fan, Wardrobe, Study Table & Chair - RM30/day',
+    'Three Person Room': 'Shared Room with 3 Single Beds, Fan, Wardrobe, Study Table & Chair - RM25/day'
   };
-   
+
   document.getElementById('roomType').addEventListener('change', function() {
     const selectedValue = this.value;
     const roomDetailsDiv = document.getElementById('roomDetails');
@@ -579,14 +591,11 @@ document.getElementById('reservationForm').addEventListener('submit', async func
     if (selectedValue) {
       const parts = selectedValue.split('|');
       selectedRoomName = parts[0];
-      selectedPrice = parseInt(parts[1]);
-      selectedUnit = parts[2];
+      selectedPrice = parseFloat(parts[1]);
       
-      // Show room details
       roomDetailsText.innerHTML = `<strong>${selectedRoomName}</strong> - ${roomDetailsMap[selectedRoomName] || 'Includes all basic amenities'}`;
       roomDetailsDiv.classList.add('show');
       
-      // Recalculate total if dates are selected
       calculateTotal();
     } else {
       roomDetailsDiv.classList.remove('show');
@@ -597,7 +606,6 @@ document.getElementById('reservationForm').addEventListener('submit', async func
     }
   });
 
-  // Date inputs event listeners
   document.getElementById('checkIn').addEventListener('change', calculateTotal);
   document.getElementById('checkOut').addEventListener('change', calculateTotal);
 
@@ -627,19 +635,11 @@ document.getElementById('reservationForm').addEventListener('submit', async func
       const diffTime = Math.abs(endDate - startDate);
       const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
       
-      let total = 0;
-      let durationText = '';
-      
-      if (selectedUnit === 'day') {
-        total = selectedPrice * diffDays;
-        durationText = `${diffDays} night(s)`;
-      } else if (selectedUnit === 'month') {
-        total = selectedPrice;
-        durationText = `1 month (monthly rate)`;
-      }
+      const total = selectedPrice * diffDays;
+      const durationText = `${diffDays} night(s)`;
       
       durationDisplay.innerHTML = `<i class="bi bi-calendar-check"></i> Duration: ${durationText}`;
-      totalAmount.innerHTML = `RM${total}`;
+      totalAmount.innerHTML = `RM${total.toFixed(2)}`;
       totalPriceDisplay.style.display = 'block';
     } else {
       durationDisplay.innerHTML = '<i class="bi bi-calendar"></i> Select check-in and check-out dates';
@@ -647,7 +647,6 @@ document.getElementById('reservationForm').addEventListener('submit', async func
     }
   }
   
-  // Form submission - redirect to payment page
   document.getElementById('reservationForm').addEventListener('submit', async function(e) {
     e.preventDefault();
     
@@ -664,7 +663,6 @@ document.getElementById('reservationForm').addEventListener('submit', async func
     
     errorAlert.classList.remove('show');
     
-    // Validation
     if (!name || !studentId || !email || !phone || !roomTypeSelect || !checkIn || !checkOut) {
       errorAlert.querySelector('span').textContent = 'Please fill in all required fields.';
       errorAlert.classList.add('show');
@@ -691,20 +689,20 @@ document.getElementById('reservationForm').addEventListener('submit', async func
     // Calculate total
     const diffTime = Math.abs(endDate - startDate);
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    let total = selectedUnit === 'day' ? selectedPrice * diffDays : selectedPrice;
+    const total = selectedPrice * diffDays;
     
     const reservationData = {
-        reservation_id: 'KLG' + Date.now(),
-        student_name: name,
-        student_id: studentId,
-        email: email,
-        phone: phone,
-        college: 'KLG', // Assuming college is KLG for this form
-        room_type: selectedRoomName,
-        check_in: checkIn,
-        check_out: checkOut,
-        total_amount: total,
-        status: 'Pending Payment'
+      reservation_id: 'KLG' + Date.now(),
+      student_name: name,
+      student_id: studentId,
+      email: email,
+      phone: phone,
+      college: 'KLG Campus Residence',
+      room_type: selectedRoomName,
+      check_in: checkIn,
+      check_out: checkOut,
+      total_amount: total,
+      status: 'Pending Payment'
     };
 
     async function saveToSupabase() {
@@ -717,14 +715,11 @@ document.getElementById('reservationForm').addEventListener('submit', async func
 
         console.log('Saved in Supabase:', data);
     
-        // Store current reservation for payment page
         localStorage.setItem('currentReservation', JSON.stringify(reservationData));
     
-        // Disable button and show loading
         submitBtn.disabled = true;
         submitBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Redirecting to Payment...';
     
-        // Redirect to payment page
         setTimeout(() => {
           window.location.href = 'payment_student.html';
         }, 500);
@@ -739,12 +734,10 @@ document.getElementById('reservationForm').addEventListener('submit', async func
     saveToSupabase();
   });
 
-  // Set minimum date for check-in (today)
   const today = new Date().toISOString().split('T')[0];
   document.getElementById('checkIn').min = today;
   document.getElementById('checkOut').min = today;
   
-  // Update check-out min date when check-in changes
   document.getElementById('checkIn').addEventListener('change', function() {
     document.getElementById('checkOut').min = this.value;
     if (document.getElementById('checkOut').value && document.getElementById('checkOut').value <= this.value) {
@@ -752,19 +745,41 @@ document.getElementById('reservationForm').addEventListener('submit', async func
     }
   });
 
-   document.addEventListener("DOMContentLoaded", function () {
-      const urlParams = new URLSearchParams(window.location.search);
-      const roomParam = urlParams.get('roomType');
-
-      if (roomParam) {
-          const roomName = roomParam.split('|')[0].trim(); // "Single Room"
-          const roomSelectElement = document.getElementById('roomType');
-          
-          if (roomSelectElement) {
-              roomSelectElement.value = roomName;
-              roomSelectElement.dispatchEvent(new Event('change'));
-          }
+  async function loadStudentInfo() {
+    const email = localStorage.getItem('studentEmail');
+    if (email) {
+      document.getElementById('email').value = email;
+      
+      if (typeof db !== 'undefined' && db) {
+        const { data, error } = await db
+          .from('Student')
+          .select('name, student_id, telephone')
+          .eq('email', email)
+          .single();
+        
+        if (!error && data) {
+          if (data.name) document.getElementById('fullName').value = data.name;
+          if (data.student_id) document.getElementById('studentId').value = data.student_id;
+          if (data.telephone) document.getElementById('phone').value = data.telephone;
+        }
       }
+    }
+  }
+  
+  loadStudentInfo();
+
+  document.addEventListener("DOMContentLoaded", function () {
+    const urlParams = new URLSearchParams(window.location.search);
+    const roomParam = urlParams.get('roomType');
+
+    if (roomParam) {
+      const roomSelectElement = document.getElementById('roomType');
+      
+      if (roomSelectElement) {
+        roomSelectElement.value = roomParam;
+        roomSelectElement.dispatchEvent(new Event('change'));
+      }
+    }
   });
 </script>
 </body>
