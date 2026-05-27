@@ -14,15 +14,88 @@
   
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   
-  <!-- FIXED: main.css path - go up one level from Student folder -->
   <link href="../main.css" rel="stylesheet">
+  
+  <style>
+  /* Additional styles for booking history modal */
+  .booking-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  .booking-table th {
+    background: #6b092a;
+    color: white;
+    padding: 10px;
+    font-size: 13px;
+    text-align: left;
+  }
+  
+  .booking-table td {
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+    font-size: 13px;
+  }
+  
+  .booking-table tr:hover {
+    background: #fafafa;
+  }
+  
+  .status-badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+  
+  .status-confirmed {
+    background: #dcfce7;
+    color: #166534;
+  }
+  
+  .status-pending {
+    background: #fff3cd;
+    color: #856404;
+  }
+  
+  .status-cancelled {
+    background: #fee2e2;
+    color: #991b1b;
+  }
+  
+  .empty-booking {
+    text-align: center;
+    padding: 40px;
+    color: #999;
+  }
+  
+  .empty-booking i {
+    font-size: 48px;
+    margin-bottom: 15px;
+  }
+  
+  .modal-body-scroll {
+    max-height: 500px;
+    overflow-y: auto;
+  }
+  
+  /* MAKE MODAL TITLE WHITE */
+  .modal-header .modal-title {
+    color: white !important;
+  }
+  
+  /* Alternative specific selector */
+  #bookingHistoryModalLabel {
+    color: white;
+  }
+</style>
 </head>
 
 <body class="index-page">
 <header id="header" class="logo d-flex align-items-center" style="margin-right: auto;">
   <div class="container position-relative d-flex align-items-center">
 
-    <!-- FIXED: Logo image path -->
     <a href="dashboard.html" class="logo d-flex align-items-center">
       <img src="../img/spacelogo.png" alt="UTM Space Logo" style="height: 50px; width: auto; max-height:60px;">
     </a>
@@ -74,7 +147,6 @@
           </div>
           <ul class="dropdown-menu-list">
             <li><a href="userprofile_student.html"><i class="bi bi-person-circle"></i> Profile</a></li>
-            <!-- FIXED: Logout link to index.html (which is in Student folder, not root) -->
             <li><a href="index.html" id="logoutBtn"><i class="bi bi-box-arrow-right"></i> Logout</a></li>
           </ul>
         </div>
@@ -102,7 +174,6 @@
       </div>
     </div>
 
-    <!-- Student Info -->
     <div class="profile-info-grid">
       <div class="info-card">
         <h3><i class="bi bi-person-badge"></i> Personal Information</h3>
@@ -135,7 +206,6 @@
       </div>
     </div>
 
-    <!-- Action Buttons -->
     <div class="action-buttons-grid">
       <button class="action-btn edit-btn" onclick="openEditProfileModal()">
         <i class="bi bi-pencil-square"></i> Edit Profile
@@ -143,7 +213,7 @@
       <button class="action-btn password-btn" onclick="openChangePasswordModal()">
         <i class="bi bi-key"></i> Change Password
       </button>
-      <button class="action-btn history-btn" onclick="scrollToHistory()">
+      <button class="action-btn history-btn" onclick="openBookingHistoryModal()">
         <i class="bi bi-clock-history"></i> View Booking History
       </button>
     </div>
@@ -151,7 +221,6 @@
   </div>
 </main>
 
-<!-- ======= FOOTER ======= -->
 <footer id="footer" class="footer position-relative light-background">
   <div class="container">
     <div class="row gy-5">
@@ -194,11 +263,9 @@
   </div>
 </footer>
 
-<!-- Scroll Top & Preloader -->
 <a href="#" id="scroll-top" class="scroll-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
 <div id="preloader"></div>
 
-<!-- Modals -->
 <div class="modal fade" id="editProfileModal" tabindex="-1" aria-labelledby="editProfileModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
@@ -272,22 +339,40 @@
   </div>
 </div>
 
-<!-- FIXED: Vendor JS file paths -->
+<div class="modal fade" id="bookingHistoryModal" tabindex="-1" aria-labelledby="bookingHistoryModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="bookingHistoryModalLabel"><i class="bi bi-clock-history"></i> My Booking History</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body modal-body-scroll">
+        <div id="bookingHistoryContent">
+          <div class="empty-booking">
+            <i class="bi bi-hourglass-split"></i>
+            <p>Loading your booking history...</p>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="../vendor/php-email-form/validate.js"></script>
 <script src="../vendor/aos/aos.js"></script>
 <script src="../vendor/swiper/swiper-bundle.min.js"></script>
 <script src="../vendor/purecounter/purecounter_vanilla.js"></script>
 
-<!-- FIXED: main.js path -->
 <script src="../main.js"></script>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<!-- FIXED: supabase.js path -->
 <script src="../supabase.js"></script>
 
 <script>
-  // Make sure db is available from supabase.js
   console.log("Student Profile Page Loaded");
 
   function updateGenderDisplay(gender) {
@@ -310,8 +395,6 @@
     const email = localStorage.getItem('studentEmail');
     
     console.log('Email from localStorage:', email);
-    console.log('StudentId from localStorage:', localStorage.getItem('studentId'));
-    console.log('Name from localStorage:', localStorage.getItem('studentName'));
 
     if (!email) {
         console.log('No email found, redirecting...');
@@ -319,16 +402,9 @@
         return;
     }
 
-    // Check if db is defined from supabase.js
     if (typeof db === 'undefined') {
-      console.error('Database connection not loaded. Check supabase.js path.');
-      // Fallback: try to load from window
-      if (window.db) {
-        window.db = db;
-      } else {
-        alert('Unable to connect to database. Please refresh the page.');
-        return;
-      }
+      console.error('Database connection not loaded.');
+      return;
     }
 
     const { data, error } = await db
@@ -338,11 +414,9 @@
         .single();
     
     console.log('Supabase data:', data);
-    console.log('Supabase error:', error);
 
     if (error || !data) {
       console.error('Error loading profile:', error);
-      // Still show placeholder data instead of breaking
       return;
     }
 
@@ -360,11 +434,9 @@
     document.getElementById('displayEmail').textContent = data.email;
     document.getElementById('displayPhone').textContent = data.telephone || 'N/A';
 
-    // Display Gender
     const gender = data.gender || 'Not specified';
     updateGenderDisplay(gender);
     
-    // Update profile badge with gender
     const profileGenderBadge = document.getElementById('profileGender');
     if (gender === 'Male') {
       profileGenderBadge.innerHTML = '<i class="bi bi-gender-male"></i> Male Student';
@@ -381,7 +453,7 @@
     document.getElementById('editEmail').value = data.email;
     document.getElementById('editPhone').value = data.telephone || '';
     document.getElementById('editMatric').value = data.student_id;
-    document.getElementById('editGender').value = gender === 'Male' ? '👨 Male' : (gender === 'Female' ? '👩 Female' : 'Not specified');
+    document.getElementById('editGender').value = gender === 'Male' ? 'Male' : (gender === 'Female' ? 'Female' : 'Not specified');
   }
 
   async function saveProfileChanges() {
@@ -389,7 +461,6 @@
     const newName = document.getElementById('editName').value.trim();
     const newPhone = document.getElementById('editPhone').value.trim();
 
-    // Validate Malaysian phone number
     const telDigits = newPhone.replace(/[-\s+]/g, '');
     if (!/^(60|0)[0-9]{9,10}$/.test(telDigits)) {
         alert('Please enter a valid Malaysian phone number (e.g., 0123456789).');
@@ -417,7 +488,6 @@
     document.getElementById('avatarInitial').textContent = newName.charAt(0).toUpperCase();
     document.getElementById('profileAvatar').textContent = newName.charAt(0).toUpperCase();
 
-    // Update localStorage
     localStorage.setItem('studentName', newName);
 
     bootstrap.Modal.getInstance(document.getElementById('editProfileModal')).hide();
@@ -446,7 +516,6 @@
       return;
     }
 
-    // Verify current password
     const { data, error } = await db
       .from('Student')
       .select('password')
@@ -463,7 +532,6 @@
       return;
     }
 
-    // Update to new password
     const { error: updateError } = await db
       .from('Student')
       .update({ password: newPassword })
@@ -477,18 +545,141 @@
     bootstrap.Modal.getInstance(document.getElementById('changePasswordModal')).hide();
     alert('✅ Password changed successfully!');
     
-    // Clear password fields
     document.getElementById('currentPassword').value = '';
     document.getElementById('newPassword').value = '';
     document.getElementById('confirmPassword').value = '';
   }
 
-  // Scroll to booking history (if on same page, otherwise redirect)
-  function scrollToHistory() {
-    window.location.href = 'booking_history.html';
+  async function loadBookingHistory() {
+    const email = localStorage.getItem('studentEmail');
+    const contentDiv = document.getElementById('bookingHistoryContent');
+    
+    if (!email) {
+      contentDiv.innerHTML = `
+        <div class="empty-booking">
+          <i class="bi bi-exclamation-triangle-fill"></i>
+          <p>Please login to view your booking history.</p>
+        </div>
+      `;
+      return;
+    }
+
+    try {
+      const { data: student, error: studentError } = await db
+        .from('Student')
+        .select('student_id')
+        .eq('email', email)
+        .single();
+
+      if (studentError || !student) {
+        contentDiv.innerHTML = `
+          <div class="empty-booking">
+            <i class="bi bi-exclamation-triangle-fill"></i>
+            <p>Unable to load your information.</p>
+          </div>
+        `;
+        return;
+      }
+
+      const { data: bookings, error: bookingError } = await db
+        .from('reservations')
+        .select('*')
+        .eq('student_id', student.student_id)
+        .order('created_at', { ascending: false });
+
+      if (bookingError) {
+        console.error('Error loading bookings:', bookingError);
+        contentDiv.innerHTML = `
+          <div class="empty-booking">
+            <i class="bi bi-exclamation-triangle-fill"></i>
+            <p>Error loading booking history. Please try again later.</p>
+          </div>
+        `;
+        return;
+      }
+
+      if (!bookings || bookings.length === 0) {
+        contentDiv.innerHTML = `
+          <div class="empty-booking">
+            <i class="bi bi-calendar-x"></i>
+            <p>You have no booking history yet.</p>
+            <small>Make your first reservation to see it here!</small>
+          </div>
+        `;
+        return;
+      }
+
+      let tableHtml = `
+        <table class="booking-table">
+          <thead>
+            <tr>
+              <th>Booking ID</th>
+              <th>College</th>
+              <th>Room Type</th>
+              <th>Check-In</th>
+              <th>Check-Out</th>
+              <th>Total Amount</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+      `;
+
+      bookings.forEach(booking => {
+        let statusClass = '';
+        let statusText = '';
+        
+        if (booking.status === 'Confirmed' || booking.status === 'Approved') {
+          statusClass = 'status-confirmed';
+          statusText = 'Confirmed';
+        } else if (booking.status === 'Pending' || booking.status === 'Pending Payment') {
+          statusClass = 'status-pending';
+          statusText = 'Pending';
+        } else if (booking.status === 'Cancelled' || booking.status === 'Rejected') {
+          statusClass = 'status-cancelled';
+          statusText = 'Cancelled';
+        } else {
+          statusClass = 'status-pending';
+          statusText = booking.status || 'Pending';
+        }
+
+        tableHtml += `
+          <tr>
+            <td>${booking.reservation_id || 'N/A'}</td>
+            <td>${booking.college || 'N/A'}</td>
+            <td>${booking.room_type || 'N/A'}</td>
+            <td>${booking.check_in || 'N/A'}</td>
+            <td>${booking.check_out || 'N/A'}</td>
+            <td>RM ${booking.total_amount || 0}</td>
+            <td><span class="status-badge ${statusClass}">${statusText}</span></td>
+          </tr>
+        `;
+      });
+
+      tableHtml += `
+          </tbody>
+        </table>
+      `;
+
+      contentDiv.innerHTML = tableHtml;
+
+    } catch (err) {
+      console.error('Error:', err);
+      contentDiv.innerHTML = `
+        <div class="empty-booking">
+          <i class="bi bi-exclamation-triangle-fill"></i>
+          <p>An error occurred while loading your booking history.</p>
+        </div>
+      `;
+    }
   }
 
-  // Logout
+  function openBookingHistoryModal() {
+    const modal = new bootstrap.Modal(document.getElementById('bookingHistoryModal'));
+    loadBookingHistory();
+    modal.show();
+  }
+
   document.getElementById('logoutBtn').addEventListener('click', (e) => {
     e.preventDefault();
     localStorage.removeItem('studentEmail');
@@ -497,7 +688,6 @@
     window.location.href = 'index.html';
   });
 
-  // Open modals
   function openEditProfileModal() {
     new bootstrap.Modal(document.getElementById('editProfileModal')).show();
   }
@@ -515,7 +705,6 @@
     document.getElementById('confirmPassword').value = '';
   });
   
-  // Initialize notification and user dropdown functionality
   function initDropdowns() {
     const notifBtn = document.getElementById('notificationBtn');
     const notifDropdown = document.getElementById('notificationDropdown');
