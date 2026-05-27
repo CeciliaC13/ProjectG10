@@ -15,81 +15,16 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   
   <link href="../main.css" rel="stylesheet">
-  
+
   <style>
-  /* Additional styles for booking history modal */
-  .booking-table {
-    width: 100%;
-    border-collapse: collapse;
-  }
-  
-  .booking-table th {
-    background: #6b092a;
-    color: white;
-    padding: 10px;
-    font-size: 13px;
-    text-align: left;
-  }
-  
-  .booking-table td {
-    padding: 10px;
-    border-bottom: 1px solid #eee;
-    font-size: 13px;
-  }
-  
-  .booking-table tr:hover {
-    background: #fafafa;
-  }
-  
-  .status-badge {
-    display: inline-block;
-    padding: 4px 10px;
-    border-radius: 20px;
-    font-size: 11px;
-    font-weight: 600;
-  }
-  
-  .status-confirmed {
-    background: #dcfce7;
-    color: #166534;
-  }
-  
-  .status-pending {
-    background: #fff3cd;
-    color: #856404;
-  }
-  
-  .status-cancelled {
-    background: #fee2e2;
-    color: #991b1b;
-  }
-  
-  .empty-booking {
-    text-align: center;
-    padding: 40px;
-    color: #999;
-  }
-  
-  .empty-booking i {
-    font-size: 48px;
-    margin-bottom: 15px;
-  }
-  
-  .modal-body-scroll {
-    max-height: 500px;
-    overflow-y: auto;
-  }
-  
-  /* MAKE MODAL TITLE WHITE */
-  .modal-header .modal-title {
+    .modal-header .modal-title {
     color: white !important;
-  }
-  
-  /* Alternative specific selector */
-  #bookingHistoryModalLabel {
-    color: white;
-  }
-</style>
+    }
+
+    .modal-header .modal-title i {
+    color: white !important;
+    }
+  </style>
 </head>
 
 <body class="index-page">
@@ -213,7 +148,7 @@
       <button class="action-btn password-btn" onclick="openChangePasswordModal()">
         <i class="bi bi-key"></i> Change Password
       </button>
-      <button class="action-btn history-btn" onclick="openBookingHistoryModal()">
+      <button class="action-btn history-btn" onclick="window.location.href='booking_history.html'">
         <i class="bi bi-clock-history"></i> View Booking History
       </button>
     </div>
@@ -334,28 +269,6 @@
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
         <button type="button" class="btn-save" onclick="changePassword()">Update Password</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<div class="modal fade" id="bookingHistoryModal" tabindex="-1" aria-labelledby="bookingHistoryModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered modal-lg">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="bookingHistoryModalLabel"><i class="bi bi-clock-history"></i> My Booking History</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body modal-body-scroll">
-        <div id="bookingHistoryContent">
-          <div class="empty-booking">
-            <i class="bi bi-hourglass-split"></i>
-            <p>Loading your booking history...</p>
-          </div>
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
       </div>
     </div>
   </div>
@@ -492,7 +405,7 @@
 
     bootstrap.Modal.getInstance(document.getElementById('editProfileModal')).hide();
     alert('✅ Profile updated successfully!');
-}
+  }
 
   async function changePassword() {
     const email = localStorage.getItem('studentEmail');
@@ -548,136 +461,6 @@
     document.getElementById('currentPassword').value = '';
     document.getElementById('newPassword').value = '';
     document.getElementById('confirmPassword').value = '';
-  }
-
-  async function loadBookingHistory() {
-    const email = localStorage.getItem('studentEmail');
-    const contentDiv = document.getElementById('bookingHistoryContent');
-    
-    if (!email) {
-      contentDiv.innerHTML = `
-        <div class="empty-booking">
-          <i class="bi bi-exclamation-triangle-fill"></i>
-          <p>Please login to view your booking history.</p>
-        </div>
-      `;
-      return;
-    }
-
-    try {
-      const { data: student, error: studentError } = await db
-        .from('Student')
-        .select('student_id')
-        .eq('email', email)
-        .single();
-
-      if (studentError || !student) {
-        contentDiv.innerHTML = `
-          <div class="empty-booking">
-            <i class="bi bi-exclamation-triangle-fill"></i>
-            <p>Unable to load your information.</p>
-          </div>
-        `;
-        return;
-      }
-
-      const { data: bookings, error: bookingError } = await db
-        .from('reservations')
-        .select('*')
-        .eq('student_id', student.student_id)
-        .order('created_at', { ascending: false });
-
-      if (bookingError) {
-        console.error('Error loading bookings:', bookingError);
-        contentDiv.innerHTML = `
-          <div class="empty-booking">
-            <i class="bi bi-exclamation-triangle-fill"></i>
-            <p>Error loading booking history. Please try again later.</p>
-          </div>
-        `;
-        return;
-      }
-
-      if (!bookings || bookings.length === 0) {
-        contentDiv.innerHTML = `
-          <div class="empty-booking">
-            <i class="bi bi-calendar-x"></i>
-            <p>You have no booking history yet.</p>
-            <small>Make your first reservation to see it here!</small>
-          </div>
-        `;
-        return;
-      }
-
-      let tableHtml = `
-        <table class="booking-table">
-          <thead>
-            <tr>
-              <th>Booking ID</th>
-              <th>College</th>
-              <th>Room Type</th>
-              <th>Check-In</th>
-              <th>Check-Out</th>
-              <th>Total Amount</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-          <tbody>
-      `;
-
-      bookings.forEach(booking => {
-        let statusClass = '';
-        let statusText = '';
-        
-        if (booking.status === 'Confirmed' || booking.status === 'Approved') {
-          statusClass = 'status-confirmed';
-          statusText = 'Confirmed';
-        } else if (booking.status === 'Pending' || booking.status === 'Pending Payment') {
-          statusClass = 'status-pending';
-          statusText = 'Pending';
-        } else if (booking.status === 'Cancelled' || booking.status === 'Rejected') {
-          statusClass = 'status-cancelled';
-          statusText = 'Cancelled';
-        } else {
-          statusClass = 'status-pending';
-          statusText = booking.status || 'Pending';
-        }
-
-        tableHtml += `
-          <tr>
-            <td>${booking.reservation_id || 'N/A'}</td>
-            <td>${booking.college || 'N/A'}</td>
-            <td>${booking.room_type || 'N/A'}</td>
-            <td>${booking.check_in || 'N/A'}</td>
-            <td>${booking.check_out || 'N/A'}</td>
-            <td>RM ${booking.total_amount || 0}</td>
-            <td><span class="status-badge ${statusClass}">${statusText}</span></td>
-          </tr>
-        `;
-      });
-
-      tableHtml += `
-          </tbody>
-        </table>
-      `;
-
-      contentDiv.innerHTML = tableHtml;
-
-    } catch (err) {
-      console.error('Error:', err);
-      contentDiv.innerHTML = `
-        <div class="empty-booking">
-          <i class="bi bi-exclamation-triangle-fill"></i>
-          <p>An error occurred while loading your booking history.</p>
-        </div>
-      `;
-    }
-  }
-
-  function openBookingHistoryModal() {
-    const modal = new bootstrap.Modal(document.getElementById('bookingHistoryModal'));
-    loadBookingHistory();
-    modal.show();
   }
 
   document.getElementById('logoutBtn').addEventListener('click', (e) => {
@@ -737,7 +520,6 @@
     }
   }
   
-  // Load on page ready
   document.addEventListener('DOMContentLoaded', function() {
     initDropdowns();
     loadStudentProfile();
