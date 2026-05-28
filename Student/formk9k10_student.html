@@ -474,8 +474,8 @@
           <label>Select Room Type <span class="required">*</span></label>
           <select class="form-select" id="roomType" required>
             <option value="">-- Please select a room type --</option>
-            <option value="Single Room|6">Single Room - RM6.00/night</option>
-            <option value="Double Room|4">Double Room - RM4.00/night</option>
+            <option value="Single Room">Single Room - RM6.00/night</option>
+            <option value="Double Room">Double Room - RM4.00/night</option>
           </select>
         </div>
 
@@ -581,29 +581,36 @@
     'Single Room': 'Private room with Single Bed, Study Table, Chair, Wardrobe - RM6.00/night',
     'Double Room': 'Shared room with 2 Single Beds, Study Tables, Chairs, Wardrobe - RM4.00/night'
   };
+// Room type pricing configuration dictionary
+const roomPriceConfig = {
+  'Single Room': { price: 6, unit: 'day' },
+  'Double Room': { price: 4, unit: 'day' }
+};
 
-  document.getElementById('roomType').addEventListener('change', function() {
-    const selectedValue = this.value;
-    const roomDetailsDiv = document.getElementById('roomDetails');
-    const roomDetailsText = document.getElementById('roomDetailsText');
+// Room type selection event handler
+document.getElementById('roomType').addEventListener('change', function() {
+  const selectedValue = this.value; // Will be "Single Bed Fan Room", etc.
+  const roomDetailsDiv = document.getElementById('roomDetails');
+  const roomDetailsText = document.getElementById('roomDetailsText');
+  
+  if (selectedValue && roomPriceConfig[selectedValue]) {
+    selectedRoomName = selectedValue;
+    selectedPrice = roomPriceConfig[selectedValue].price;
+    selectedUnit = roomPriceConfig[selectedValue].unit;
     
-    if (selectedValue) {
-      const parts = selectedValue.split('|');
-      selectedRoomName = parts[0];
-      selectedPrice = parseFloat(parts[1]);
-      
-      roomDetailsText.innerHTML = `<strong>${selectedRoomName}</strong> - ${roomDetailsMap[selectedRoomName] || 'Includes all basic amenities'}`;
-      roomDetailsDiv.classList.add('show');
-      
-      calculateTotal();
-    } else {
-      roomDetailsDiv.classList.remove('show');
-      selectedRoomName = '';
-      selectedPrice = 0;
-      document.getElementById('totalPriceDisplay').style.display = 'none';
-      document.getElementById('durationDisplay').innerHTML = '<i class="bi bi-calendar"></i> Select dates to see duration';
-    }
-  });
+    roomDetailsText.innerHTML = `<strong>${selectedRoomName}</strong> - ${roomDetailsMap[selectedRoomName] || 'Includes all basic amenities'}`;
+    roomDetailsDiv.classList.add('show');
+
+    calculateTotal();
+  } else {
+    roomDetailsDiv.classList.remove('show');
+    selectedRoomName = '';
+    selectedPrice = 0;
+    selectedUnit = 'day';
+    if (document.getElementById('totalPriceDisplay')) document.getElementById('totalPriceDisplay').style.display = 'none';
+    document.getElementById('durationDisplay').innerHTML = '<i class="bi bi-calendar"></i> Select dates to see duration';
+  }
+});
 
   document.getElementById('checkIn').addEventListener('change', calculateTotal);
   document.getElementById('checkOut').addEventListener('change', calculateTotal);
@@ -645,7 +652,7 @@
       totalPriceDisplay.style.display = 'none';
     }
   }
-
+// Form submission - redirect to Dashboard page
   document.getElementById('reservationForm').addEventListener('submit', async function(e) {
     e.preventDefault();
     
@@ -653,17 +660,16 @@
     const studentId = document.getElementById('studentId').value.trim();
     const email = document.getElementById('email').value.trim();
     const phone = document.getElementById('phone').value.trim();
-    const college = document.getElementById('college').value;
     const roomTypeSelect = document.getElementById('roomType').value;
     const checkIn = document.getElementById('checkIn').value;
     const checkOut = document.getElementById('checkOut').value;
+    
     const errorAlert = document.getElementById('errorAlert');
     const submitBtn = document.getElementById('submitBtn');
     
     errorAlert.classList.remove('show');
-    
-    // Validation
-    if (!name || !studentId || !email || !phone || !college || !roomTypeSelect || !checkIn || !checkOut) {
+
+    if (!name || !studentId || !email || !phone || !roomTypeSelect || !checkIn || !checkOut) {
       errorAlert.querySelector('span').textContent = 'Please fill in all required fields.';
       errorAlert.classList.add('show');
       setTimeout(() => errorAlert.classList.remove('show'), 3000);
@@ -685,25 +691,63 @@
       setTimeout(() => errorAlert.classList.remove('show'), 3000);
       return;
     }
+
+    try {
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<i class="bi bi-shield-lock-fill"></i> Verifying Eligibility...';
+
+      if (typeof db === 'undefined') throw new Error("Database configuration context missing.");
+
+      const { data: activeReservations, error: checkError } = await db
+        .from('reservations')
+        .select('status, reservation_id')
+        .eq('student_id', studentId)
+        .in('status', ['Pending', 'Pending Payment', 'Rejected']);
+
+      if (checkError) throw checkError;
+
+      if (activeReservations && activeReservations.length > 0) {
+        const currentConflict = activeReservations[0];
+        
+        errorAlert.querySelector('span').innerHTML = `
+          <strong>Access Denied:</strong> You already have an active application 
+          (${currentConflict.reservation_id}) marked as <strong>${currentConflict.status}</strong>. 
+          You cannot submit a new application until your current request is cleared or updated.
+        `;
+        errorAlert.classList.add('show');
+        
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = 'Confirm Reservation';
+        return; 
+      }
+
+    } catch (checkErr) {
+      console.error('Eligibility check dropped:', checkErr.message);
+      alert('System failed to verify booking restrictions: ' + checkErr.message);
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = 'Confirm Reservation';
+      return;
+    }
     
     const diffTime = Math.abs(endDate - startDate);
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    const total = selectedPrice * diffDays;
+    let total = selectedUnit === 'day' ? selectedPrice * diffDays : selectedPrice;
     
     const reservationData = {
-      reservation_id: 'K9-10-' + Date.now(),
-      student_name: name,
-      student_id: studentId,
-      email: email,
-      phone: phone,
-      college: college,
-      room_type: selectedRoomName,
-      check_in: checkIn,
-      check_out: checkOut,
-      total_amount: total,
-      status: 'Pending Payment'
+        reservation_id: 'KP' + Date.now(),
+        student_name: name,
+        student_id: studentId,
+        email: email,
+        phone: phone,
+        college: 'KP', 
+        room_type: selectedRoomName,
+        check_in: checkIn,
+        check_out: checkOut,
+        total_amount: total,
+        status: 'Pending Payment',
+        created_at: new Date().toISOString()
     };
-    
+
     async function saveToSupabase() {
       try {
         const { data, error } = await db
@@ -713,16 +757,15 @@
         if (error) throw error;
 
         console.log('Saved in Supabase:', data);
-      
+    
         localStorage.setItem('currentReservation', JSON.stringify(reservationData));
-        
+    
         submitBtn.disabled = true;
-        submitBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Redirecting to Payment...';
-        
+        submitBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Redirecting to Dashboard...';
+    
         setTimeout(() => {
-          window.location.href = 'payment_student.html';
+          window.location.href = 'DashBoard.html'; 
         }, 500);
-
       } catch (err) {
         console.error('Submit failed:', err.message);
         alert('Submit failed, please try again: ' + err.message);
@@ -730,6 +773,7 @@
         submitBtn.innerHTML = 'Confirm Reservation';
       }
     }
+
     saveToSupabase();
   });
   

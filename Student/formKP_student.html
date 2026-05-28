@@ -406,7 +406,7 @@
 
         <div class="form-group">
           <label>Phone Number <span class="required">*</span></label>
-          <input type="tel" class="form-control" id="phone" required>
+          <input type="tel" class="form-control" id="phone" placeholder="e.g., 012-3456789" required>
         </div>
 
         <div class="form-group">
@@ -511,6 +511,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="../supabase.js"></script>
 <script>
+
 document.getElementById('reservationForm').addEventListener('submit', async function(e) {
     });
 
@@ -528,33 +529,40 @@ document.getElementById('reservationForm').addEventListener('submit', async func
     'Single Bed AC Room': 'Private Room with Single Bed, Air-conditioner, Wardrobe, Study Table & Chair',
     'Twin Bed Fan Room': 'Shared Room with 2 Single Beds, Fan, Wardrobe, Study Table & Chair'
   };
+  // Room type pricing configuration dictionary
+const roomPriceConfig = {
+  'Single Bed Fan Room': { price: 30, unit: 'day' },
+  'Single Bed AC Room': { price: 35, unit: 'day' },
+  'Twin Bed Fan Room': { price: 25, unit: 'day' }
+};
+
+// Room type selection event handler
+document.getElementById('roomType').addEventListener('change', function() {
+  const selectedValue = this.value; // Will be "Single Bed Fan Room", etc.
+  const roomDetailsDiv = document.getElementById('roomDetails');
+  const roomDetailsText = document.getElementById('roomDetailsText');
   
-  // Room type selection 
-  document.getElementById('roomType').addEventListener('change', function() {
-    const selectedValue = this.value;
-    const roomDetailsDiv = document.getElementById('roomDetails');
-    const roomDetailsText = document.getElementById('roomDetailsText');
+  if (selectedValue && roomPriceConfig[selectedValue]) {
+    // Look up data dynamically from configuration map
+    selectedRoomName = selectedValue;
+    selectedPrice = roomPriceConfig[selectedValue].price;
+    selectedUnit = roomPriceConfig[selectedValue].unit;
     
-    if (selectedValue) {
-      const parts = selectedValue.split('|');
-      selectedRoomName = parts[0];
-      selectedPrice = parseInt(parts[1]);
-      selectedUnit = parts[2];
-      
-      // Show room details
-      roomDetailsText.innerHTML = `<strong>${selectedRoomName}</strong> - ${roomDetailsMap[selectedRoomName] || 'Includes all basic amenities'}`;
-      roomDetailsDiv.classList.add('show');
-      
-      // Recalculate total if dates are selected
-      calculateTotal();
-    } else {
-      roomDetailsDiv.classList.remove('show');
-      selectedRoomName = '';
-      selectedPrice = 0;
-      document.getElementById('totalPriceDisplay').style.display = 'none';
-      document.getElementById('durationDisplay').innerHTML = '<i class="bi bi-calendar"></i> Select dates to see duration';
-    }
-  });
+    // Render room details panel text
+    roomDetailsText.innerHTML = `<strong>${selectedRoomName}</strong> - ${roomDetailsMap[selectedRoomName] || 'Includes all basic amenities'}`;
+    roomDetailsDiv.classList.add('show');
+    
+    // Recalculate total pricing window instantly
+    calculateTotal();
+  } else {
+    roomDetailsDiv.classList.remove('show');
+    selectedRoomName = '';
+    selectedPrice = 0;
+    selectedUnit = 'day';
+    if (document.getElementById('totalPriceDisplay')) document.getElementById('totalPriceDisplay').style.display = 'none';
+    document.getElementById('durationDisplay').innerHTML = '<i class="bi bi-calendar"></i> Select dates to see duration';
+  }
+});
 
   // Date inputs event listeners
   document.getElementById('checkIn').addEventListener('change', calculateTotal);
@@ -605,8 +613,7 @@ document.getElementById('reservationForm').addEventListener('submit', async func
       totalPriceDisplay.style.display = 'none';
     }
   }
-  
-  // Form submission - redirect to payment page
+  // Form submission - redirect to Dashboard page
   document.getElementById('reservationForm').addEventListener('submit', async function(e) {
     e.preventDefault();
     
@@ -622,8 +629,7 @@ document.getElementById('reservationForm').addEventListener('submit', async func
     const submitBtn = document.getElementById('submitBtn');
     
     errorAlert.classList.remove('show');
-    
-    // Validation
+
     if (!name || !studentId || !email || !phone || !roomTypeSelect || !checkIn || !checkOut) {
       errorAlert.querySelector('span').textContent = 'Please fill in all required fields.';
       errorAlert.classList.add('show');
@@ -646,8 +652,44 @@ document.getElementById('reservationForm').addEventListener('submit', async func
       setTimeout(() => errorAlert.classList.remove('show'), 3000);
       return;
     }
+
+    try {
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<i class="bi bi-shield-lock-fill"></i> Verifying Eligibility...';
+
+      if (typeof db === 'undefined') throw new Error("Database configuration context missing.");
+
+      const { data: activeReservations, error: checkError } = await db
+        .from('reservations')
+        .select('status, reservation_id')
+        .eq('student_id', studentId)
+        .in('status', ['Pending', 'Pending Payment', 'Rejected']);
+
+      if (checkError) throw checkError;
+
+      if (activeReservations && activeReservations.length > 0) {
+        const currentConflict = activeReservations[0];
+        
+        errorAlert.querySelector('span').innerHTML = `
+          <strong>Access Denied:</strong> You already have an active application 
+          (${currentConflict.reservation_id}) marked as <strong>${currentConflict.status}</strong>. 
+          You cannot submit a new application until your current request is cleared or updated.
+        `;
+        errorAlert.classList.add('show');
+        
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = 'Confirm Reservation';
+        return; 
+      }
+
+    } catch (checkErr) {
+      console.error('Eligibility check dropped:', checkErr.message);
+      alert('System failed to verify booking restrictions: ' + checkErr.message);
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = 'Confirm Reservation';
+      return;
+    }
     
-    // Calculate total
     const diffTime = Math.abs(endDate - startDate);
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     let total = selectedUnit === 'day' ? selectedPrice * diffDays : selectedPrice;
@@ -658,12 +700,13 @@ document.getElementById('reservationForm').addEventListener('submit', async func
         student_id: studentId,
         email: email,
         phone: phone,
-        college: 'KP', // Assuming college is KP for this form
+        college: 'KP', 
         room_type: selectedRoomName,
         check_in: checkIn,
         check_out: checkOut,
         total_amount: total,
-        status: 'Pending Payment'
+        status: 'Pending Payment',
+        created_at: new Date().toISOString()
     };
 
     async function saveToSupabase() {
@@ -676,16 +719,13 @@ document.getElementById('reservationForm').addEventListener('submit', async func
 
         console.log('Saved in Supabase:', data);
     
-        // Store current reservation for payment page
         localStorage.setItem('currentReservation', JSON.stringify(reservationData));
     
-        // Disable button and show loading
         submitBtn.disabled = true;
-        submitBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Redirecting to Payment...';
+        submitBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Redirecting to Dashboard...';
     
-        // Redirect to payment page
         setTimeout(() => {
-          window.location.href = 'payment_student.html';
+          window.location.href = 'DashBoard.html'; 
         }, 500);
       } catch (err) {
         console.error('Submit failed:', err.message);
@@ -698,12 +738,10 @@ document.getElementById('reservationForm').addEventListener('submit', async func
     saveToSupabase();
   });
 
-  // Set minimum date for check-in (today)
   const today = new Date().toISOString().split('T')[0];
   document.getElementById('checkIn').min = today;
   document.getElementById('checkOut').min = today;
-  
-  // Update check-out min date when check-in changes
+
   document.getElementById('checkIn').addEventListener('change', function() {
     document.getElementById('checkOut').min = this.value;
     if (document.getElementById('checkOut').value && document.getElementById('checkOut').value <= this.value) {
@@ -712,19 +750,45 @@ document.getElementById('reservationForm').addEventListener('submit', async func
   });
 
     document.addEventListener("DOMContentLoaded", function () {
-      const urlParams = new URLSearchParams(window.location.search);
-      const roomParam = urlParams.get('roomType');
+  autofillStudentDetails();
 
-      if (roomParam) {
-          const roomName = roomParam.split('|')[0].trim(); // "Single Room"
-          const roomSelectElement = document.getElementById('roomType');
-          
-          if (roomSelectElement) {
-              roomSelectElement.value = roomName;
-              roomSelectElement.dispatchEvent(new Event('change'));
-          }
+  const urlParams = new URLSearchParams(window.location.search);
+  const roomParam = urlParams.get('roomType');
+
+  if (roomParam) {
+    const roomName = roomParam.split('|')[0].trim();
+    const roomSelectElement = document.getElementById('roomType');
+    
+    if (roomSelectElement) {
+      roomSelectElement.value = roomName;
+      roomSelectElement.dispatchEvent(new Event('change'));
+    }
+  }
+});
+
+// Auto-fill student info from localStorage
+  async function loadStudentInfo() {
+    const email = localStorage.getItem('studentEmail');
+    if (email) {
+      document.getElementById('email').value = email;
+      
+      if (typeof db !== 'undefined' && db) {
+        const { data, error } = await db
+          .from('Student')
+          .select('name, student_id, telephone')
+          .eq('email', email)
+          .single();
+        
+        if (!error && data) {
+          if (data.name) document.getElementById('fullName').value = data.name;
+          if (data.student_id) document.getElementById('studentId').value = data.student_id;
+          if (data.telephone) document.getElementById('phone').value = data.telephone;
+        }
       }
-  });
+    }
+  }
+  
+  loadStudentInfo();
 </script>
 </body>
 </html>
