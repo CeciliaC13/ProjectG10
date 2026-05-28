@@ -1,261 +1,139 @@
 <!DOCTYPE html>
 <html lang="en">
 
+<!DOCTYPE html>
+<html lang="en">
 <head>
   <meta charset="utf-8">
   <meta content="width=device-width, initial-scale=1.0" name="viewport">
   <title>Update Booking Status - UTMSPACE College Booking</title>
-
   <link href="../img/favicon.png" rel="icon">
   <link href="../img/apple-touch-icon.png" rel="apple-touch-icon">
-
   <link href="https://fonts.googleapis.com" rel="preconnect">
   <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&family=Montserrat:wght@400;500;600;700;800;900&family=Raleway:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-
   <link href="../vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
   <link href="../vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
   <link href="../vendor/aos/aos.css" rel="stylesheet">
   <link href="../vendor/swiper/swiper-bundle.min.css" rel="stylesheet">
   <link href="../main.css" rel="stylesheet">
-
   <style>
-    .status-page {
-      padding: 60px 0;
-      background: #f8f9fa;
-      min-height: 100vh;
-    }
-
+    .status-page { padding: 60px 0; background: #f8f9fa; min-height: 100vh; }
     .page-header-box {
       background: linear-gradient(135deg, #6b092a, #8b0e35);
-      color: white;
-      border-radius: 22px;
-      padding: 35px;
-      margin-bottom: 35px;
-      box-shadow: 0 8px 25px rgba(0,0,0,0.12);
+      color: white; border-radius: 22px; padding: 35px;
+      margin-bottom: 35px; box-shadow: 0 8px 25px rgba(0,0,0,0.12);
     }
-
-    .page-header-box h1 {
-      color: white;
-      font-weight: 700;
-      margin-bottom: 10px;
-    }
-
-    .page-header-box p {
-      margin: 0;
-      color: rgba(255,255,255,0.85);
-    }
-
+    .page-header-box h1 { color: white; font-weight: 700; margin-bottom: 10px; }
+    .page-header-box p  { margin: 0; color: rgba(255,255,255,0.85); }
     .back-link-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      color: white;
-      background: rgba(255,255,255,0.18);
-      padding: 8px 16px;
-      border-radius: 30px;
-      text-decoration: none;
-      font-weight: 600;
-      margin-bottom: 18px;
+      display: inline-flex; align-items: center; gap: 8px;
+      color: white; background: rgba(255,255,255,0.18);
+      padding: 8px 16px; border-radius: 30px;
+      text-decoration: none; font-weight: 600; margin-bottom: 18px;
     }
-
-    .back-link-btn:hover {
-      color: white;
-      background: rgba(255,255,255,0.28);
+    .back-link-btn:hover { color: white; background: rgba(255,255,255,0.28); }
+    .filter-box, .table-box {
+      background: white; border-radius: 18px; padding: 25px;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.08); margin-bottom: 30px;
     }
-
-    .filter-box,
-    .table-box {
-      background: white;
-      border-radius: 18px;
-      padding: 25px;
-      box-shadow: 0 8px 25px rgba(0,0,0,0.08);
-      margin-bottom: 30px;
-    }
-
-    .booking-table {
-      width: 100%;
-      border-collapse: collapse;
-      min-width: 950px;
-    }
-
-    .table-wrapper {
-      overflow-x: auto;
-    }
-
+    .booking-table { width: 100%; border-collapse: collapse; min-width: 1050px; }
+    .table-wrapper { overflow-x: auto; }
     .booking-table th {
-      background: #6b092a;
-      color: white;
-      padding: 14px;
-      font-weight: 600;
-      text-align: center;
+      background: #6b092a; color: white; padding: 14px;
+      font-weight: 600; text-align: center;
     }
-
     .booking-table td {
-      padding: 14px;
-      border-bottom: 1px solid #eee;
-      text-align: center;
-      font-size: 14px;
-      vertical-align: middle;
+      padding: 12px 14px; border-bottom: 1px solid #eee;
+      text-align: center; font-size: 14px; vertical-align: middle;
     }
-
-    .booking-table tr:hover {
-      background: #fafafa;
-    }
-
+    .booking-table tr:hover { background: #fafafa; }
     .status-badge {
-      display: inline-block;
-      padding: 6px 14px;
-      border-radius: 20px;
-      font-size: 12px;
-      font-weight: 700;
+      display: inline-block; padding: 5px 12px;
+      border-radius: 20px; font-size: 12px; font-weight: 700;
     }
+    .status-pending          { background: #fff3cd; color: #856404; }
+    .status-approved         { background: #dbeafe; color: #1e40af; }
+    .status-pending-payment  { background: #fef3c7; color: #d97706; }
+    .status-paid             { background: #dcfce7; color: #166534; }
+    .status-rejected         { background: #fee2e2; color: #991b1b; }
+    .status-cancelled        { background: #e5e7eb; color: #374151; }
 
-    .status-pending {
-      background: #fff3cd;
-      color: #856404;
+    /* Action buttons */
+    .btn-approve {
+      background: #166534; color: white; border: none;
+      border-radius: 8px; padding: 6px 12px;
+      font-size: 12px; font-weight: 600; cursor: pointer; margin: 2px;
     }
-
-    .status-approved {
-      background: #dcfce7;
-      color: #166534;
+    .btn-approve:hover { background: #14532d; }
+    .btn-reject {
+      background: #991b1b; color: white; border: none;
+      border-radius: 8px; padding: 6px 12px;
+      font-size: 12px; font-weight: 600; cursor: pointer; margin: 2px;
     }
-
-    .status-rejected {
-      background: #fee2e2;
-      color: #991b1b;
+    .btn-reject:hover { background: #7f1d1d; }
+    .btn-keyhanded {
+      background: #d97706; color: white; border: none;
+      border-radius: 8px; padding: 6px 12px;
+      font-size: 12px; font-weight: 600; cursor: pointer; margin: 2px;
+      display: inline-flex; align-items: center; gap: 5px;
     }
-
-    .status-cancelled {
-      background: #e5e7eb;
-      color: #374151;
+    .btn-keyhanded:hover { background: #b45309; }
+    .btn-delete {
+      background: #dc2626; color: white; border: none;
+      border-radius: 8px; padding: 6px 12px;
+      font-size: 12px; font-weight: 600; cursor: pointer; margin: 2px;
     }
-
-    .update-btn {
-      background: #2c5a7a;
-      color: white;
-      border: none;
-      border-radius: 10px;
-      padding: 7px 12px;
-      font-size: 13px;
-      font-weight: 600;
-      margin: 2px;
+    .btn-delete:hover { background: #b91c1c; }
+    .btn-receipt {
+      background: #17a2b8; color: white; border: none;
+      padding: 5px 10px; border-radius: 6px;
+      font-size: 12px; cursor: pointer;
     }
+    .btn-receipt:hover { background: #138496; }
 
-    .update-btn:hover {
-      background: #1a3c5e;
+    /* Inline delete confirm */
+    .confirm-wrap { display: inline-flex; align-items: center; gap: 4px; flex-wrap: wrap; justify-content: center; }
+    .confirm-wrap span { font-size: 12px; color: #dc2626; font-weight: 600; }
+    .btn-yes { background: #dc2626; color: white; border: none; border-radius: 6px; padding: 4px 10px; font-size: 12px; font-weight: 600; cursor: pointer; }
+    .btn-no  { background: #e2e8f0; color: #1e293b; border: none; border-radius: 6px; padding: 4px 10px; font-size: 12px; font-weight: 600; cursor: pointer; }
+
+    .locked-label { color: #aaa; font-size: 12px; }
+    .paid-label   { color: #166534; font-size: 12px; font-weight: 600; }
+
+    .message-box { display: none; padding: 12px; border-radius: 12px; margin-bottom: 18px; font-size: 14px; font-weight: 500; }
+    .message-box.show  { display: block; }
+    .message-success   { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
+    .message-error     { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
+
+    .payment-warning {
+      color: #e74c3c; font-size: 11px; font-weight: 600; margin-top: 4px;
+      animation: pulseWarn 1.5s infinite alternate;
     }
+    @keyframes pulseWarn { 0% { opacity: 0.6; } 100% { opacity: 1; } }
+    tr.row-overdue { background-color: rgba(231, 76, 60, 0.06) !important; }
 
-    .delete-btn {
-      background: #dc2626;
-      color: white;
-      border: none;
-      border-radius: 10px;
-      padding: 7px 12px;
-      font-size: 13px;
-      font-weight: 600;
-      margin: 2px;
+    /* Flow legend */
+    .flow-legend {
+      display: flex; align-items: center; gap: 8px;
+      flex-wrap: wrap; margin-bottom: 20px;
+      font-size: 13px; color: #555;
     }
-
-    .delete-btn:hover {
-      background: #b91c1c;
+    .flow-step {
+      display: inline-flex; align-items: center; gap: 5px;
+      background: #f1f5f9; border-radius: 8px; padding: 5px 12px;
+      font-weight: 600; font-size: 12px;
     }
-
-    .message-box {
-      display: none;
-      padding: 12px;
-      border-radius: 12px;
-      margin-bottom: 18px;
-      font-size: 14px;
-      font-weight: 500;
-    }
-
-    .message-box.show {
-      display: block;
-    }
-
-    .message-success {
-      background: #dcfce7;
-      color: #166534;
-      border: 1px solid #bbf7d0;
-    }
-    /* Styling for Pending Payment Status */
-.status-badge.status-pending-payment {
-    background-color: #f39c12;
-    color: #fff;
-    padding: 4px 8px;
-    border-radius: 4px;
-    font-size: 0.85em;
-    font-weight: bold;
-}
-
-/* Row shading change for Overdue Records */
-tr.row-overdue {
-    background-color: rgba(231, 76, 60, 0.08) !important;
-}
-
-/* Animated warning element under student names */
-.payment-warning {
-    color: #e74c3c;
-    font-size: 0.8rem;
-    font-weight: 600;
-    margin-top: 4px;
-    animation: pulseWarning 1.5s infinite alternate;
-}
-
-@keyframes pulseWarning {
-    0% { opacity: 0.6; }
-    100% { opacity: 1; }
-}
-
-/* Receipt Button Styling */
-.btn-info {
-    background-color: #17a2b8;
-    color: #fff;
-    border: none;
-    padding: 4px 10px;
-    border-radius: 4px;
-    font-size: 0.85rem;
-    cursor: pointer;
-    transition: background 0.2s ease;
-}
-
-.btn-info:hover {
-    background-color: #138496;
-}
-
-/* Locked Badge for Unpaid Staff View */
-.badge.bg-secondary {
-    background-color: #6c757d;
-    color: #fff;
-    padding: 5px 8px;
-    border-radius: 4px;
-    font-size: 0.8rem;
-    display: inline-block;
-}
-
-/* Disabled styling overlay adjustments */
-select:disabled, button:disabled {
-    cursor: not-allowed;
-    opacity: 0.65;
-}
-
-/* Icon spaces if using Bootstrap Icons */
-.bi {
-    margin-right: 4px;
-}
+    .flow-arrow { color: #aaa; font-size: 16px; }
   </style>
 </head>
-
 <body class="index-page">
 
 <header id="header" class="logo d-flex align-items-center" style="margin-right: auto;">
   <div class="container position-relative d-flex align-items-center">
-
     <a href="admin_staff_dashboard.html" class="logo d-flex align-items-center">
-      <img src="../img/spacelogo.png" alt="UTM Space Logo" style="height: 50px; width: auto; max-height:60px;">
+      <img src="../img/spacelogo.png" alt="UTM Space Logo" style="height:50px;width:auto;max-height:60px;">
     </a>
-
     <nav id="navmenu" class="navmenu">
       <ul>
         <li><a href="admin_staff_dashboard.html">Home</a></li>
@@ -266,46 +144,33 @@ select:disabled, button:disabled {
       </ul>
       <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>
     </nav>
-
     <div class="header-actions">
-
       <div class="header-social-links">
-        <a href="https://www.facebook.com/utmspace/" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><i class="bi bi-facebook"></i></a>
-        <a href="https://www.instagram.com/spaceutm_official/?hl=en" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><i class="bi bi-instagram"></i></a>
+        <a href="https://www.facebook.com/utmspace/" target="_blank" rel="noopener noreferrer"><i class="bi bi-facebook"></i></a>
+        <a href="https://www.instagram.com/spaceutm_official/?hl=en" target="_blank" rel="noopener noreferrer"><i class="bi bi-instagram"></i></a>
       </div>
-
-      <a href="notification.html" class="notification-btn" title="Notifications">
-        <i class="bi bi-bell-fill"></i>
-      </a>
-
+      <a href="notification.html" class="notification-btn" title="Notifications"><i class="bi bi-bell-fill"></i></a>
       <div class="user-profile">
-        <div class="user-avatar">
-          <div class="avatar-placeholder" id="avatarInitial">A</div>
-        </div>
-
+        <div class="user-avatar"><div class="avatar-placeholder" id="avatarInitial">A</div></div>
         <div class="user-dropdown">
           <div class="dropdown-header">
             <div class="user-info">
-              <div class="user-name" id="dropdownUserName">Admin / Staff Name</div>
-              <div class="user-role" id="dropdownUserRole">Admin / Staff</div>
+              <div class="user-name"  id="dropdownUserName">Admin / Staff Name</div>
+              <div class="user-role"  id="dropdownUserRole">Admin / Staff</div>
               <div class="user-email" id="dropdownUserEmail">user@utmspace.my</div>
             </div>
           </div>
-
           <ul class="dropdown-menu-list">
             <li><a href="userprofile_admin_staff.html"><i class="bi bi-person-circle"></i> Profile</a></li>
             <li><a href="#" id="logoutBtn"><i class="bi bi-box-arrow-right"></i> Logout</a></li>
           </ul>
         </div>
       </div>
-
     </div>
-
   </div>
 </header>
 
 <main class="main">
-
   <section class="status-page">
     <div class="container">
 
@@ -314,10 +179,22 @@ select:disabled, button:disabled {
           <i class="bi bi-arrow-left"></i> Back to Dashboard
         </a>
         <h1>Update Booking Status</h1>
-        <p>Staff and Admin can update booking status or delete invalid booking records.</p>
+        <p>Manage student bookings — approve, reject, and confirm key handover.</p>
       </div>
 
+      <!-- Booking flow legend -->
       <div class="filter-box">
+        <div class="flow-legend">
+          <span style="font-weight:600; color:#333;">Booking Flow:</span>
+          <span class="flow-step" style="color:#856404;"><i class="bi bi-hourglass-split"></i> Pending</span>
+          <span class="flow-arrow">→</span>
+          <span class="flow-step" style="color:#1e40af;"><i class="bi bi-check-circle"></i> Approved</span>
+          <span class="flow-arrow">→</span>
+          <span class="flow-step" style="color:#d97706;"><i class="bi bi-key-fill"></i> Key Handed → Pending Payment</span>
+          <span class="flow-arrow">→</span>
+          <span class="flow-step" style="color:#166534;"><i class="bi bi-credit-card-fill"></i> Paid</span>
+        </div>
+
         <div class="row gy-3">
           <div class="col-md-6">
             <label class="form-label fw-semibold">Filter by Status</label>
@@ -325,11 +202,12 @@ select:disabled, button:disabled {
               <option value="All">All Status</option>
               <option value="Pending">Pending</option>
               <option value="Approved">Approved</option>
+              <option value="Pending Payment">Pending Payment</option>
+              <option value="Paid">Paid</option>
               <option value="Rejected">Rejected</option>
               <option value="Cancelled">Cancelled</option>
             </select>
           </div>
-
           <div class="col-md-6">
             <label class="form-label fw-semibold">Filter by College</label>
             <select class="form-select" id="collegeFilter" onchange="renderBookings()">
@@ -343,10 +221,8 @@ select:disabled, button:disabled {
       </div>
 
       <div class="table-box">
-        <h3 class="mb-4">Booking Status Records</h3>
-
+        <h3 class="mb-3">Booking Records</h3>
         <div class="message-box" id="messageBox"></div>
-
         <div class="table-wrapper">
           <table class="booking-table">
             <thead>
@@ -357,13 +233,11 @@ select:disabled, button:disabled {
                 <th>Student Name</th>
                 <th>College</th>
                 <th>Room Type</th>
-                <th>Current Status</th>
-                <th>Change Status</th>
+                <th>Status</th>
                 <th>Receipt</th>
-                <th>Action</th>
+                <th>Actions</th>
               </tr>
             </thead>
-
             <tbody id="bookingTableBody"></tbody>
           </table>
         </div>
@@ -371,28 +245,23 @@ select:disabled, button:disabled {
 
     </div>
   </section>
-
 </main>
 
 <footer id="footer" class="footer position-relative light-background">
-
   <div class="container">
     <div class="row gy-5">
-
       <div class="col-lg-4">
         <div class="footer-brand">
           <a href="admin_staff_dashboard.html" class="logo d-flex align-items-center mb-3">
             <span class="sitename">UTM SPACE</span>
           </a>
           <p class="tagline">Transforming the way colleges book, manage, and connect — with modern simplicity.</p>
-
           <div class="social-links mt-4">
-            <a href="https://www.facebook.com/utmspace/" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><i class="bi bi-facebook"></i></a>
-            <a href="https://www.instagram.com/spaceutm_official/?hl=en" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><i class="bi bi-instagram"></i></a>
+            <a href="https://www.facebook.com/utmspace/" target="_blank" rel="noopener noreferrer"><i class="bi bi-facebook"></i></a>
+            <a href="https://www.instagram.com/spaceutm_official/?hl=en" target="_blank" rel="noopener noreferrer"><i class="bi bi-instagram"></i></a>
           </div>
         </div>
       </div>
-
       <div class="col-lg-6">
         <div class="footer-links-grid">
           <div class="col-6 col-md-4">
@@ -405,28 +274,18 @@ select:disabled, button:disabled {
           </div>
         </div>
       </div>
-
     </div>
   </div>
-
   <div class="footer-bottom">
     <div class="container">
-      <div class="row">
-        <div class="col-12">
-          <div class="footer-bottom-content">
-            <p class="mb-0">© <strong>UTMSPACE</strong>. All rights reserved.</p>
-          </div>
-        </div>
-      </div>
+      <p class="mb-0">© <strong>UTMSPACE</strong>. All rights reserved.</p>
     </div>
   </div>
-
 </footer>
 
 <a href="#" id="scroll-top" class="scroll-top d-flex align-items-center justify-content-center">
   <i class="bi bi-arrow-up-short"></i>
 </a>
-
 <div id="preloader"></div>
 
 <script src="../vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
@@ -439,284 +298,292 @@ select:disabled, button:disabled {
 <script src="../supabase.js"></script>
 
 <script>
-  window.notifications = window.notifications || [];
-  window.loadNotifications = window.loadNotifications || function() {};
-
   let bookings = [];
   const currentUserRole = (localStorage.getItem('staffAdminRole') || 'staff').toLowerCase();
+  const isAdmin = currentUserRole === 'admin';
 
+  // ── FETCH ──────────────────────────────────────────────────────────────────
   async function fetchBookings() {
+    document.getElementById('bookingTableBody').innerHTML =
+      `<tr><td colspan="9" style="text-align:center;padding:30px;color:#999;">
+        <i class="bi bi-hourglass-split"></i> Loading bookings...
+      </td></tr>`;
     try {
-      if (typeof db === 'undefined') {
-        throw new Error("db is missing. Check your script config imports.");
-      }
-
+      if (typeof db === 'undefined') throw new Error('Supabase client not found.');
       const { data, error } = await db
         .from('reservations')
         .select('*')
         .order('created_at', { ascending: false });
-
       if (error) throw error;
-      
-      bookings = data.map(function(item) {
-        return {
-          id: item.id,
-          bookingId: item.reservation_id,
-          studentId: item.student_id,
-          studentName: item.student_name,
-          college: item.college,
-          roomType: item.room_type,
-          status: item.status || 'Pending', 
-          createdAt: item.created_at,
-          receiptUrl: item.receipt_url || null,
-          checkInDate: item.check_in_date || null, 
-          checkOutDate: item.check_out_date || null
-        };
-      });
+
+      bookings = data.map(item => ({
+        bookingId:   item.reservation_id,
+        studentId:   item.student_id,
+        studentName: item.student_name,
+        college:     item.college,
+        roomType:    item.room_type,
+        status:      item.status || 'Pending',
+        createdAt:   item.created_at,
+        receiptUrl:  item.receipt_url || null,
+        checkInDate: item.check_in_date || null,
+      }));
 
       renderBookings();
-      
-      // 📡 Run notifications distribution engine after data maps fully
-      await checkAndSendNotifications();
-
+      runPassiveNotifications();
     } catch (err) {
-      console.error('Error fetching data:', err.message);
+      showMessage('Failed to load: ' + err.message, 'error');
     }
   }
 
-  async function checkAndSendNotifications() {
-    const now = new Date();
-
-    for (const item of bookings) {
-      if (!item.studentId) continue; // Skip entries missing student references
-
-      const createdDate = new Date(item.createdAt);
-      // Fixed Math: Calculate real elapsed full days instead of rounding up fractions
-      const daysDiff = Math.floor((now - createdDate) / (1000 * 60 * 60 * 24));
-      
-      // Rule 1: Overdue Payment handling
-      if (item.status === 'Approved' && !item.receiptUrl && daysDiff >= 7) {
-        const overdueMessage = `Your approved booking (${item.bookingId || 'Notice'}) is at risk! Payment has been missing for ${daysDiff} days. Please upload your receipt to avoid blockages next semester.`;
-        await sendNotificationToStudent(item.studentId.trim(), 'Overdue Payment Alert', overdueMessage);
-      }
-
-      // Rule 2: Upcoming Check-In windows
-      if (item.status === 'Approved' && item.checkInDate) {
-        const checkInTime = new Date(item.checkInDate);
-        const timeUntilCheckIn = checkInTime - now;
-        const daysUntilCheckIn = Math.ceil(timeUntilCheckIn / (1000 * 60 * 60 * 24));
-
-        if (daysUntilCheckIn > 0 && daysUntilCheckIn <= 3) {
-          const checkInMessage = `Get ready! Your check-in for room ${item.roomType || ''} is in ${daysUntilCheckIn} day(s) (${item.checkInDate}).`;
-          await sendNotificationToStudent(item.studentId.trim(), 'Upcoming Check-In', checkInMessage);
-        }
-      }
-    }
-  }
-
-  async function sendNotificationToStudent(studentId, type, message) {
-    try {
-      // 1. Delete previous notifications of this exact type FOR THIS SPECIFIC STUDENT ONLY
-      await db
-        .from('notifications')
-        .delete()
-        .eq('student_id', studentId)
-        .eq('type', type);
-
-      // 2. Insert fresh message notice block with active standard properties
-      const { error: insertError } = await db
-        .from('notifications')
-        .insert({
-          student_id: studentId,
-          type: type,
-          message: message,
-          read: false,
-          created_at: new Date().toISOString() // Explicitly set timestamp so your user-dropdown sorting engine functions cleanly
-        });
-          
-      if (insertError) throw insertError;
-      console.log(`📡 Notification synchronizer active: Refreshed '${type}' for student ${studentId}`);
-    } catch (err) {
-      console.error('Failed to route notification setup:', err.message);
-    }
-  }
-
+  // ── RENDER ─────────────────────────────────────────────────────────────────
   function renderBookings() {
-    const tbody = document.getElementById('bookingTableBody');
-    const statusFilter = document.getElementById('statusFilter').value;
+    const tbody         = document.getElementById('bookingTableBody');
+    const statusFilter  = document.getElementById('statusFilter').value;
     const collegeFilter = document.getElementById('collegeFilter').value;
 
-    const filtered = bookings.filter(function(item) {
-      const statusMatch = statusFilter === 'All' || item.status === statusFilter;
-      const collegeMatch = collegeFilter === 'All' || item.college === collegeFilter;
-      return statusMatch && collegeMatch;
-    });
+    const filtered = bookings.filter(b =>
+      (statusFilter  === 'All' || b.status  === statusFilter) &&
+      (collegeFilter === 'All' || b.college === collegeFilter)
+    );
 
     if (filtered.length === 0) {
-      tbody.innerHTML = `<tr><td colspan="10">No booking records found.</td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="9" style="text-align:center;padding:30px;color:#999;">No records found.</td></tr>`;
       return;
     }
 
     const now = new Date();
+    tbody.innerHTML = filtered.map((item, index) => {
+      const daysDiff  = Math.floor((now - new Date(item.createdAt)) / 86400000);
+      const isOverdue = item.status === 'Pending Payment' && !item.receiptUrl && daysDiff >= 7;
 
-    tbody.innerHTML = filtered.map(function(item, index) {
-      const realIndex = bookings.indexOf(item);
-      const displayId = item.bookingId || 'N/A';
-      
-      const createdDate = new Date(item.createdAt);
-      const daysDiff = Math.floor((now - createdDate) / (1000 * 60 * 60 * 24));
-      
-      const isUnpaidApproved = (item.status === 'Approved' && !item.receiptUrl);
-      const isOverdue = (isUnpaidApproved && daysDiff >= 7);
+      // ── Receipt cell ──
+      const receiptCell = item.receiptUrl
+        ? `<button class="btn-receipt" onclick="viewReceipt('${escAttr(item.receiptUrl)}')">
+             <i class="bi bi-file-earmark-image"></i> View
+           </button>`
+        : `<span class="locked-label">None</span>`;
 
-      let selectOptions = `
-        <option value="Pending" ${item.status === 'Pending' ? 'selected' : ''}>Pending</option>
-        <option value="Approved" ${item.status === 'Approved' ? 'selected' : ''}>Approved</option>
-        <option value="Rejected" ${item.status === 'Rejected' ? 'selected' : ''}>Rejected</option>
-        <option value="Cancelled" ${item.status === 'Cancelled' ? 'selected' : ''}>Cancelled</option>
-        <option value="Pending Payment" ${item.status === 'Pending Payment' ? 'selected' : ''}>Pending Payment</option>
-      `;
+      // ── Action cell — buttons depend on current status ──
+      //
+      // Pending        → [Approve] [Reject] | [Delete admin only]
+      // Approved       → [Key Handed] [Reject] | [Delete admin only]
+      // Pending Payment→ read-only (student pays) | [Delete admin only]
+      // Paid           → fully locked
+      // Rejected/Cancel→ [Delete admin only]
 
-      let deleteButtonHtml = `<button class="delete-btn" onclick="deleteBooking(${realIndex})">Delete</button>`;
+      let actionButtons = '';
 
-      let receiptButtonHtml = item.receiptUrl 
-        ? `<button class="btn btn-sm btn-info" onclick="viewReceipt('${item.receiptUrl}')"><i class="bi bi-file-earmark-image"></i> View Receipt</button>`
-        : `<span class="text-muted">No receipt uploaded</span>`;
+      if (item.status === 'Pending') {
+        actionButtons = `
+          <button class="btn-approve" onclick="setStatus('${item.bookingId}', 'Approved', this)">
+            <i class="bi bi-check-lg"></i> Approve
+          </button>
+          <button class="btn-reject" onclick="setStatus('${item.bookingId}', 'Rejected', this)">
+            <i class="bi bi-x-lg"></i> Reject
+          </button>`;
 
-      const warningBadge = isOverdue 
-        ? `<div class="payment-warning" style="color: red; font-weight: bold; font-size: 11px; margin-top: 4px;"><i class="bi bi-exclamation-triangle-fill"></i> Unpaid (Approved Slot) for ${daysDiff} days! Blocked next sem.</div>` 
+      } else if (item.status === 'Approved') {
+        actionButtons = `
+          <button class="btn-keyhanded" onclick="setStatus('${item.bookingId}', 'Pending Payment', this)">
+            <i class="bi bi-key-fill"></i> Key Handed
+          </button>
+          <button class="btn-reject" onclick="setStatus('${item.bookingId}', 'Rejected', this)">
+            <i class="bi bi-x-lg"></i> Reject
+          </button>`;
+
+      } else if (item.status === 'Pending Payment') {
+        actionButtons = `<span class="locked-label"><i class="bi bi-clock"></i> Awaiting student payment</span>`;
+
+      } else if (item.status === 'Paid') {
+        actionButtons = `<span class="paid-label"><i class="bi bi-check-circle-fill"></i> Complete</span>`;
+
+      } else {
+        // Rejected / Cancelled
+        actionButtons = `<span class="locked-label">—</span>`;
+      }
+
+      // Delete button — admin only, not shown for Paid records
+      const deleteBtn = isAdmin && item.status !== 'Paid'
+        ? `<button class="btn-delete" style="margin-top:4px;" onclick="confirmDelete('${item.bookingId}', this)">
+             <i class="bi bi-trash"></i>
+           </button>`
+        : '';
+
+      const warningHtml = isOverdue
+        ? `<div class="payment-warning"><i class="bi bi-exclamation-triangle-fill"></i> Overdue ${daysDiff}d</div>`
         : '';
 
       return `
         <tr class="${isOverdue ? 'row-overdue' : ''}">
           <td>${index + 1}</td>
-          <td>${displayId}</td>
-          <td>${item.studentId || 'N/A'}</td>
-          <td>
-            <strong>${item.studentName || 'N/A'}</strong>
-            ${warningBadge}
-          </td>
-          <td>${item.college || 'N/A'}</td>
+          <td><strong>${item.bookingId || 'N/A'}</strong></td>
+          <td>${item.studentId   || 'N/A'}</td>
+          <td><strong>${item.studentName || 'N/A'}</strong>${warningHtml}</td>
+          <td>${item.college  || 'N/A'}</td>
           <td>${item.roomType || 'N/A'}</td>
           <td><span class="status-badge ${getStatusClass(item.status)}">${item.status}</span></td>
-          <td>
-            <select class="form-select form-select-sm" id="statusSelect${realIndex}">
-              ${selectOptions}
-            </select>
-          </td>
-          <td>${receiptButtonHtml}</td>
-          <td>
-            <button class="update-btn" onclick="updateBookingStatus(${realIndex}, event)">Update</button>
-            ${deleteButtonHtml}
-          </td>
-        </tr>
-      `;
+          <td>${receiptCell}</td>
+          <td>${actionButtons}${deleteBtn}</td>
+        </tr>`;
     }).join('');
   }
 
-  function viewReceipt(url) {
-    window.open(url, '_blank', 'width=600,height=800');
-  }
+  // ── SET STATUS (approve / reject / key handed) ─────────────────────────────
+  async function setStatus(bookingId, newStatus, btn) {
+    const item = bookings.find(b => b.bookingId === bookingId);
+    if (!item) return;
 
-  function getStatusClass(status) {
-    if (status === 'Approved') return 'status-approved';
-    if (status === 'Rejected') return 'status-rejected';
-    if (status === 'Cancelled') return 'status-cancelled';
-    if (status === 'Pending Payment') return 'status-pending-payment';
-    return 'status-pending';
-  }
-
-  async function updateBookingStatus(index, event) {
-  const item = bookings[index];
-  const selectElement = document.getElementById('statusSelect' + index);
-  if (!selectElement) return;
-  const newStatus = selectElement.value;
-
-  try {
-    const btn = event.target;
-    btn.disabled = true;
-    btn.innerHTML = "Saving...";
-
-    // 1. Update the reservations database table
-    const { error } = await db
-      .from('reservations')
-      .update({ status: newStatus })
-      .eq('reservation_id', item.bookingId);
-
-    if (error) throw error;
-
-    // 2. Local array memory synchronizer
-    bookings[index].status = newStatus;
-    renderBookings();
-    showMessage('Status updated successfully!');
-
-    // 🟢 NEW: Instantly generate custom notification based on the chosen status
-    if (item.studentId) {
-      const cleanStudentId = item.studentId.trim();
-      let statusType = 'Booking Status Update';
-      let statusMessage = '';
-
-      switch (newStatus) {
-        case 'Approved':
-          statusMessage = `Congratulations! Your booking request (${item.bookingId || 'Notice'}) has been APPROVED. Please verify your check-in dates and upload your payment receipt promptly.`;
-          break;
-        case 'Rejected':
-          statusMessage = `Your booking request (${item.bookingId || 'Notice'}) has been declined. Please contact the housing management office for further details.`;
-          break;
-        case 'Pending Payment':
-          statusMessage = `Your booking (${item.bookingId || 'Notice'}) requires processing. Please upload your transaction slip/receipt to finalize your slot reservation.`;
-          break;
-        case 'Cancelled':
-          statusMessage = `The reservation record linked to reference (${item.bookingId || 'Notice'}) has been marked as cancelled.`;
-          break;
-        case 'Pending':
-          statusMessage = `Your room booking (${item.bookingId || 'Notice'}) status has shifted back to under evaluation review.`;
-          break;
-        default:
-          statusMessage = `The status tracking updates for booking (${item.bookingId || 'Notice'}) were modified to: ${newStatus}.`;
-      }
-
-      // Route the notification right away
-      await sendNotificationToStudent(cleanStudentId, statusType, statusMessage);
+    // Guard: only allow valid transitions
+    const allowed = {
+      'Pending':         ['Approved', 'Rejected'],
+      'Approved':        ['Pending Payment', 'Rejected'],
+      'Pending Payment': [],   // system/student only
+      'Paid':            [],   // locked
+    };
+    if (!(allowed[item.status] || []).includes(newStatus)) {
+      showMessage('This status change is not allowed.', 'error');
+      return;
     }
 
-    await checkAndSendNotifications();
-
-  } catch (err) {
-    alert('Update process dropped: ' + err.message);
-    fetchBookings();
-  }
-}
-
-  async function deleteBooking(index) {
-    const item = bookings[index];
-    if (!confirm('Are you absolutely sure you want to delete this booking tracking entry?')) return;
+    btn.disabled = true;
+    const orig = btn.innerHTML;
+    btn.innerHTML = '<i class="bi bi-hourglass-split"></i> Saving...';
 
     try {
       const { error } = await db
         .from('reservations')
-        .delete()
-        .eq('reservation_id', item.bookingId);
-
+        .update({ status: newStatus })
+        .eq('reservation_id', bookingId);
       if (error) throw error;
 
-      bookings.splice(index, 1);
+      item.status = newStatus;
       renderBookings();
-      showMessage('Record removed successfully.');
+      showMessage(`Booking ${bookingId} set to "${newStatus}".`);
+
+      // Notify student
+      if (item.studentId) {
+        const messages = {
+          'Approved':        `Your booking (${bookingId}) has been approved. Please wait for key handover before making payment.`,
+          'Pending Payment': `You have collected your room key for booking (${bookingId}). Please log in to complete your payment.`,
+          'Rejected':        `Your booking (${bookingId}) has been declined. Please contact the housing office for more information.`,
+        };
+        if (messages[newStatus]) {
+          await sendNotification(item.studentId.trim(), 'Booking Status Update', messages[newStatus], bookingId);
+        }
+      }
     } catch (err) {
-      alert('Failed to drop record: ' + err.message);
+      showMessage('Update failed: ' + err.message, 'error');
+      btn.disabled = false;
+      btn.innerHTML = orig;
     }
   }
 
-  function showMessage(text) {
-    const box = document.getElementById('messageBox');
-    if (!box) return;
-    box.className = 'message-box show message-success';
-    box.textContent = text;
-    setTimeout(() => { box.className = 'message-box'; }, 2500);
+  // ── DELETE (admin only) ────────────────────────────────────────────────────
+  function confirmDelete(bookingId, btn) {
+    if (!isAdmin) return;
+    btn.style.display = 'none';
+    const cell = btn.parentNode;
+    const wrap = document.createElement('div');
+    wrap.className = 'confirm-wrap';
+    wrap.style.marginTop = '4px';
+    wrap.innerHTML = `
+      <span>Delete?</span>
+      <button class="btn-yes" onclick="executeDelete('${bookingId}', this)">Yes</button>
+      <button class="btn-no"  onclick="cancelDelete(this, '${bookingId}')">No</button>`;
+    cell.appendChild(wrap);
   }
 
-  // Auto initialize on script read
+  function cancelDelete(noBtn, bookingId) {
+    noBtn.closest('.confirm-wrap').remove();
+    // Re-show the delete button
+    const td = document.querySelector(`[data-bid="${bookingId}"]`);
+    // Fallback: just re-render
+    renderBookings();
+  }
+
+  async function executeDelete(bookingId, btn) {
+    if (!isAdmin) return;
+    btn.disabled = true;
+    try {
+      const { error } = await db
+        .from('reservations')
+        .delete()
+        .eq('reservation_id', bookingId);
+      if (error) throw error;
+      bookings = bookings.filter(b => b.bookingId !== bookingId);
+      renderBookings();
+      showMessage('Record deleted.');
+    } catch (err) {
+      showMessage('Delete failed: ' + err.message, 'error');
+      renderBookings();
+    }
+  }
+
+  // ── NOTIFICATIONS ──────────────────────────────────────────────────────────
+  // Runs once per page load for passive reminders only (overdue payment).
+  // Status-change notifications are sent directly in setStatus().
+  let notifChecked = false;
+  async function runPassiveNotifications() {
+    if (notifChecked) return;
+    notifChecked = true;
+    const now = new Date();
+    for (const item of bookings) {
+      if (!item.studentId) continue;
+      const daysDiff = Math.floor((now - new Date(item.createdAt)) / 86400000);
+      if (item.status === 'Pending Payment' && !item.receiptUrl && daysDiff >= 7) {
+        const msg = `Your booking (${item.bookingId}) has been awaiting payment for ${daysDiff} days. Please complete payment to secure your room.`;
+        await sendNotification(item.studentId.trim(), 'Overdue Payment Alert', msg, item.bookingId);
+      }
+    }
+  }
+
+  // Dedup key includes bookingId so separate bookings don't overwrite each other
+  async function sendNotification(studentId, type, message, bookingId) {
+    try {
+      const dedupKey = `${type}__${bookingId}`;
+      await db.from('notifications').delete()
+        .eq('student_id', studentId).eq('type', dedupKey);
+      await db.from('notifications').insert({
+        student_id: studentId,
+        type:       dedupKey,
+        message,
+        read:       false,
+        created_at: new Date().toISOString()
+      });
+    } catch (err) {
+      console.error('Notification error:', err.message);
+    }
+  }
+
+  // ── HELPERS ────────────────────────────────────────────────────────────────
+  function getStatusClass(status) {
+    const map = {
+      'Pending':         'status-pending',
+      'Approved':        'status-approved',
+      'Pending Payment': 'status-pending-payment',
+      'Paid':            'status-paid',
+      'Rejected':        'status-rejected',
+      'Cancelled':       'status-cancelled',
+    };
+    return map[status] || 'status-pending';
+  }
+
+  function escAttr(str) {
+    return (str || '').replace(/'/g, '&#39;').replace(/"/g, '&quot;');
+  }
+
+  function viewReceipt(url) {
+    if (!url || !url.startsWith('https://')) { alert('Invalid receipt URL.'); return; }
+    window.open(url, '_blank', 'noopener,noreferrer,width=600,height=800');
+  }
+
+  function showMessage(text, type) {
+    const box = document.getElementById('messageBox');
+    box.className = 'message-box show ' + (type === 'error' ? 'message-error' : 'message-success');
+    box.textContent = text;
+    setTimeout(() => { box.className = 'message-box'; }, 3500);
+  }
+
   fetchBookings();
 </script>
 </body>

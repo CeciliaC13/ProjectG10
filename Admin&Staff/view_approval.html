@@ -35,16 +35,8 @@
       box-shadow: 0 8px 25px rgba(0,0,0,0.12);
     }
 
-    .page-header-box h1 {
-      color: white;
-      font-weight: 700;
-      margin-bottom: 10px;
-    }
-
-    .page-header-box p {
-      margin: 0;
-      color: rgba(255,255,255,0.85);
-    }
+    .page-header-box h1 { color: white; font-weight: 700; margin-bottom: 10px; }
+    .page-header-box p { margin: 0; color: rgba(255,255,255,0.85); }
 
     .back-link-btn {
       display: inline-flex;
@@ -58,11 +50,7 @@
       font-weight: 600;
       margin-bottom: 18px;
     }
-
-    .back-link-btn:hover {
-      color: white;
-      background: rgba(255,255,255,0.28);
-    }
+    .back-link-btn:hover { color: white; background: rgba(255,255,255,0.28); }
 
     .status-page-btn {
       display: inline-flex;
@@ -76,14 +64,9 @@
       font-weight: 600;
       margin-top: 18px;
     }
+    .status-page-btn:hover { color: white; background: #1a3c5e; }
 
-    .status-page-btn:hover {
-      color: white;
-      background: #1a3c5e;
-    }
-
-    .filter-box,
-    .table-box {
+    .filter-box, .table-box {
       background: white;
       border-radius: 18px;
       padding: 25px;
@@ -97,9 +80,7 @@
       min-width: 900px;
     }
 
-    .table-wrapper {
-      overflow-x: auto;
-    }
+    .table-wrapper { overflow-x: auto; }
 
     .approval-table th {
       background: #6b092a;
@@ -117,9 +98,7 @@
       vertical-align: middle;
     }
 
-    .approval-table tr:hover {
-      background: #fafafa;
-    }
+    .approval-table tr:hover { background: #fafafa; }
 
     .status-badge {
       display: inline-block;
@@ -129,25 +108,12 @@
       font-weight: 700;
     }
 
-    .status-pending {
-      background: #fff3cd;
-      color: #856404;
-    }
-
-    .status-approved {
-      background: #dcfce7;
-      color: #166534;
-    }
-
-    .status-rejected {
-      background: #fee2e2;
-      color: #991b1b;
-    }
-
-    .status-cancelled {
-      background: #e5e7eb;
-      color: #374151;
-    }
+    .status-pending { background: #fff3cd; color: #856404; }
+    .status-approved { background: #dcfce7; color: #166534; }
+    .status-rejected { background: #fee2e2; color: #991b1b; }
+    .status-cancelled { background: #e5e7eb; color: #374151; }
+    .status-pending-payment { background: #fef3c7; color: #d97706; }
+    .status-paid { background: #dcfce7; color: #166534; }
 
     .view-btn {
       background: #2c5a7a;
@@ -158,11 +124,34 @@
       font-size: 13px;
       font-weight: 600;
       margin: 2px;
+      cursor: pointer;
     }
+    .view-btn:hover { background: #1a3c5e; }
 
-    .view-btn:hover {
-      background: #1a3c5e;
+    /* Approve / Reject buttons inside modal */
+    .btn-approve {
+      background: #16a34a;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      padding: 8px 20px;
+      font-weight: 600;
+      cursor: pointer;
     }
+    .btn-approve:hover { background: #15803d; }
+
+    .btn-reject {
+      background: #dc2626;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      padding: 8px 20px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .btn-reject:hover { background: #b91c1c; }
+
+    .empty-state { text-align: center; padding: 40px; color: #999; }
   </style>
 </head>
 
@@ -170,11 +159,9 @@
 
 <header id="header" class="logo d-flex align-items-center" style="margin-right: auto;">
   <div class="container position-relative d-flex align-items-center">
-
     <a href="admin_staff_dashboard.html" class="logo d-flex align-items-center">
       <img src="../img/spacelogo.png" alt="UTM Space Logo" style="height: 50px; width: auto; max-height:60px;">
     </a>
-
     <nav id="navmenu" class="navmenu">
       <ul>
         <li><a href="admin_staff_dashboard.html">Home</a></li>
@@ -185,23 +172,18 @@
       </ul>
       <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>
     </nav>
-
     <div class="header-actions">
-
       <div class="header-social-links">
-        <a href="https://www.facebook.com/utmspace/" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><i class="bi bi-facebook"></i></a>
-        <a href="https://www.instagram.com/spaceutm_official/?hl=en" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><i class="bi bi-instagram"></i></a>
+        <a href="https://www.facebook.com/utmspace/" target="_blank" rel="noopener noreferrer"><i class="bi bi-facebook"></i></a>
+        <a href="https://www.instagram.com/spaceutm_official/?hl=en" target="_blank" rel="noopener noreferrer"><i class="bi bi-instagram"></i></a>
       </div>
-
       <a href="notification.html" class="notification-btn" title="Notifications">
         <i class="bi bi-bell-fill"></i>
       </a>
-
       <div class="user-profile">
         <div class="user-avatar">
           <div class="avatar-placeholder" id="avatarInitial">A</div>
         </div>
-
         <div class="user-dropdown">
           <div class="dropdown-header">
             <div class="user-info">
@@ -210,21 +192,17 @@
               <div class="user-email" id="dropdownUserEmail">user@utmspace.my</div>
             </div>
           </div>
-
           <ul class="dropdown-menu-list">
             <li><a href="userprofile_admin_staff.html"><i class="bi bi-person-circle"></i> Profile</a></li>
             <li><a href="#" id="logoutBtn"><i class="bi bi-box-arrow-right"></i> Logout</a></li>
           </ul>
         </div>
       </div>
-
     </div>
-
   </div>
 </header>
 
 <main class="main">
-
   <section class="approval-page">
     <div class="container">
 
@@ -233,8 +211,7 @@
           <i class="bi bi-arrow-left"></i> Back to Dashboard
         </a>
         <h1>View Approvals</h1>
-        <p>Staff and Admin can view student room booking applications and check booking details.</p>
-
+        <p>Review student room booking applications and approve or reject them.</p>
         <a href="update_booking_status.html" class="status-page-btn">
           <i class="bi bi-arrow-repeat"></i> Go to Update Booking Status
         </a>
@@ -247,19 +224,21 @@
             <select class="form-select" id="statusFilter" onchange="filterApprovals()">
               <option value="All">All Status</option>
               <option value="Pending">Pending</option>
+              <option value="Pending Payment">Pending Payment</option>
               <option value="Approved">Approved</option>
+              <option value="Paid">Paid</option>
               <option value="Rejected">Rejected</option>
               <option value="Cancelled">Cancelled</option>
             </select>
           </div>
-
           <div class="col-md-6">
             <label class="form-label fw-semibold">Filter by College</label>
             <select class="form-select" id="collegeFilter" onchange="filterApprovals()">
               <option value="All">All Colleges</option>
-              <option value="Perdana Residence Block U7">Perdana Residence Block U7</option>
+              <option value="KP">Perdana Residence (KP)</option>
               <option value="Kolej 9">Kolej 9</option>
               <option value="Kolej 10">Kolej 10</option>
+              <option value="KLG">KLG Campus Residence</option>
             </select>
           </div>
         </div>
@@ -267,7 +246,6 @@
 
       <div class="table-box">
         <h3 class="mb-4">Student Booking Applications</h3>
-
         <div class="table-wrapper">
           <table class="approval-table">
             <thead>
@@ -283,36 +261,48 @@
                 <th>Action</th>
               </tr>
             </thead>
-
-            <tbody id="approvalTableBody"></tbody>
+            <tbody id="approvalTableBody">
+              <tr><td colspan="9" class="empty-state">Loading...</td></tr>
+            </tbody>
           </table>
         </div>
       </div>
 
     </div>
   </section>
-
 </main>
 
-<footer id="footer" class="footer position-relative light-background">
+<!-- Booking Detail + Approve/Reject Modal -->
+<div class="modal fade" id="bookingModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title"><i class="bi bi-file-earmark-text"></i> Booking Details</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body" id="bookingDetails"></div>
+      <div class="modal-footer" id="modalFooter">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
 
+<footer id="footer" class="footer position-relative light-background">
   <div class="container">
     <div class="row gy-5">
-
       <div class="col-lg-4">
         <div class="footer-brand">
           <a href="admin_staff_dashboard.html" class="logo d-flex align-items-center mb-3">
             <span class="sitename">UTM SPACE</span>
           </a>
           <p class="tagline">Transforming the way colleges book, manage, and connect — with modern simplicity.</p>
-
           <div class="social-links mt-4">
-            <a href="https://www.facebook.com/utmspace/" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><i class="bi bi-facebook"></i></a>
-            <a href="https://www.instagram.com/spaceutm_official/?hl=en" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><i class="bi bi-instagram"></i></a>
+            <a href="https://www.facebook.com/utmspace/" target="_blank" rel="noopener noreferrer"><i class="bi bi-facebook"></i></a>
+            <a href="https://www.instagram.com/spaceutm_official/?hl=en" target="_blank" rel="noopener noreferrer"><i class="bi bi-instagram"></i></a>
           </div>
         </div>
       </div>
-
       <div class="col-lg-6">
         <div class="footer-links-grid">
           <div class="col-6 col-md-4">
@@ -325,52 +315,24 @@
           </div>
         </div>
       </div>
-
     </div>
   </div>
-
   <div class="footer-bottom">
     <div class="container">
-      <div class="row">
-        <div class="col-12">
-          <div class="footer-bottom-content">
-            <p class="mb-0">© <strong>UTMSPACE</strong>. All rights reserved.</p>
-          </div>
-        </div>
-      </div>
+      <p class="mb-0">© <strong>UTMSPACE</strong>. All rights reserved.</p>
     </div>
   </div>
-
 </footer>
 
 <a href="#" id="scroll-top" class="scroll-top d-flex align-items-center justify-content-center">
   <i class="bi bi-arrow-up-short"></i>
 </a>
-
 <div id="preloader"></div>
 
-<div class="modal fade" id="bookingModal" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title"><i class="bi bi-file-earmark-text"></i> Booking Details</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body" id="bookingDetails"></div>
-      <div class="modal-footer">
-        <a href="update_booking_status.html" class="btn btn-primary">Update Status</a>
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-      </div>
-    </div>
-  </div>
-</div>
-
 <script src="../vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
-<script src="../vendor/php-email-form/validate.js"></script>
 <script src="../vendor/aos/aos.js"></script>
 <script src="../vendor/swiper/swiper-bundle.min.js"></script>
 <script src="../vendor/purecounter/purecounter_vanilla.js"></script>
->
 <script src="../main.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="../supabase.js"></script>
@@ -378,124 +340,191 @@
 <script>
   window.notifications = window.notifications || [];
   window.loadNotifications = window.loadNotifications || function() {};
+
   let approvals = [];
-   function getStatusClass(status) {
-    const lowerStatus = (status || '').toLowerCase();
-    if (lowerStatus === 'approved') return 'status-approved';
-    if (lowerStatus === 'rejected') return 'status-rejected';
-    if (lowerStatus === 'cancelled') return 'status-cancelled';
+  let currentBookingId = null; // reservation_id of currently viewed booking
+
+  // ---- STATUS CLASS ----
+  function getStatusClass(status) {
+    const s = (status || '').toLowerCase();
+    if (s === 'approved') return 'status-approved';
+    if (s === 'rejected') return 'status-rejected';
+    if (s === 'cancelled') return 'status-cancelled';
+    if (s === 'pending payment') return 'status-pending-payment';
+    if (s === 'paid') return 'status-paid';
     return 'status-pending';
   }
 
+  // ---- FETCH RESERVATIONS ----
   async function fetchReservations() {
-  try {
-    let { data, error } = await db
-      .from('reservations')
-      .select('*')
-      .order('created_at', { ascending: false });
+    try {
+      const { data, error } = await db
+        .from('reservations')
+        .select('*')
+        .order('created_at', { ascending: false });
 
-    if (error) throw error;
+      if (error) throw error;
 
-    approvals = (data || []).map(function(item) {
-      return {
+      // ✅ FIX: default status is 'Pending', NOT 'Pending Payment'
+      approvals = (data || []).map(item => ({
         id: item.id,
-        bookingId: item.reservation_id, 
-        studentId: item.student_id,     
-        studentName: item.student_name, 
+        bookingId: item.reservation_id,
+        studentId: item.student_id,
+        studentName: item.student_name,
         college: item.college,
         roomType: item.room_type,
-        status: item.status || 'Pending Payment', 
-        createdAt: item.created_at,   
-        receiptUrl: item.receipt_url || null 
-      };
+        checkIn: item.check_in,
+        checkOut: item.check_out,
+        totalAmount: item.total_amount,
+        status: item.status || 'Pending', // ✅ FIXED: default to 'Pending'
+        createdAt: item.created_at,
+        receiptUrl: item.receipt_url || null
+      }));
+
+      renderApprovals();
+    } catch (err) {
+      console.error('Error fetching reservations:', err.message);
+      document.getElementById('approvalTableBody').innerHTML =
+        `<tr><td colspan="9" class="empty-state">Failed to load reservations.</td></tr>`;
+    }
+  }
+
+  // ---- RENDER TABLE ----
+  function renderApprovals() {
+    const tbody = document.getElementById('approvalTableBody');
+    const statusFilter = document.getElementById('statusFilter').value;
+    const collegeFilter = document.getElementById('collegeFilter').value;
+
+    const filtered = approvals.filter(item => {
+      const statusMatch = statusFilter === 'All' || item.status === statusFilter;
+      const collegeMatch = collegeFilter === 'All' || item.college === collegeFilter;
+      return statusMatch && collegeMatch;
     });
 
-    renderApprovals();
-  } catch (err) {
-    console.error('Error fetching from database:', err.message);
-    alert('Failed to load reservations.');
-  }
-}
+    if (filtered.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="9" class="empty-state">No booking applications found.</td></tr>`;
+      return;
+    }
 
-  function renderApprovals() {
-  const tbody = document.getElementById('approvalTableBody');
-  const statusFilter = document.getElementById('statusFilter').value;
-  const collegeFilter = document.getElementById('collegeFilter').value;
+    tbody.innerHTML = filtered.map((item, index) => {
+      const realIndex = approvals.indexOf(item);
+      const applyDate = item.createdAt ? item.createdAt.substring(0, 10) : '-';
 
-  const filtered = approvals.filter(function(item) {
-    const statusMatch = statusFilter === 'All' || item.status === statusFilter;
-    const collegeMatch = collegeFilter === 'All' || item.college === collegeFilter;
-    return statusMatch && collegeMatch;
-  });
-
-  if (filtered.length === 0) {
-    tbody.innerHTML = `
-      <tr>
-        <td colspan="9">No booking applications found.</td>
-      </tr>
-    `;
-    return;
-  }
-
-  tbody.innerHTML = filtered.map(function(item, index) {
-    const realIndex = approvals.indexOf(item);
-
-    const bookingId = item.bookingId || 'B00' + (realIndex + 1);
-    const studentId = item.studentId || '-';
-    const studentName = item.studentName || '-';
-    const college = item.college || '-';
-    const roomType = item.roomType || '-';
-    
-    // Formatting the timestamp string down to just YYYY-MM-DD
-    const applyDate = item.createdAt ? item.createdAt.substring(0, 10) : '-';
-    const status = item.status;
-
-    return `
-      <tr>
-        <td>${index + 1}</td>
-        <td>${bookingId}</td>
-        <td>${studentId}</td>
-        <td>${studentName}</td>
-        <td>${college}</td>
-        <td>${roomType}</td>
-        <td>${applyDate}</td>
-        <td><span class="status-badge ${getStatusClass(status)}">${status}</span></td>
-        <td>
-          <button class="view-btn" onclick="viewBooking(${realIndex})">View</button>
-        </td>
-      </tr>
-    `;
-  }).join('');
-}
-  function filterApprovals() {
-    renderApprovals();
+      return `
+        <tr>
+          <td>${index + 1}</td>
+          <td><strong>${item.bookingId || '-'}</strong></td>
+          <td>${item.studentId || '-'}</td>
+          <td>${item.studentName || '-'}</td>
+          <td>${item.college || '-'}</td>
+          <td>${item.roomType || '-'}</td>
+          <td>${applyDate}</td>
+          <td><span class="status-badge ${getStatusClass(item.status)}">${item.status}</span></td>
+          <td>
+            <button class="view-btn" onclick="viewBooking(${realIndex})">
+              <i class="bi bi-eye"></i> View
+            </button>
+          </td>
+        </tr>`;
+    }).join('');
   }
 
+  function filterApprovals() { renderApprovals(); }
+
+  // ---- VIEW BOOKING MODAL ----
   function viewBooking(index) {
-  const item = approvals[index];
-  
-  const bookingId = item.bookingId || 'B00' + (index + 1);
-  const studentId = item.studentId || '-';
-  const studentName = item.studentName || '-';
-  const college = item.college || '-';
-  const roomType = item.roomType || '-';
-  const applyDate = item.createdAt ? item.createdAt.substring(0, 10) : '-';
-  const status = item.status;
+    const item = approvals[index];
+    currentBookingId = item.bookingId;
 
-  document.getElementById('bookingDetails').innerHTML = `
-    <p><strong>Booking ID:</strong> ${bookingId}</p>
-    <p><strong>Student ID:</strong> ${studentId}</p>
-    <p><strong>Student Name:</strong> ${studentName}</p>
-    <p><strong>College:</strong> ${college}</p>
-    <p><strong>Room Type:</strong> ${roomType}</p>
-    <p><strong>Apply Date:</strong> ${applyDate}</p>
-    <p><strong>Status:</strong> ${status}</p>
-    ${item.receiptUrl ? `<p><strong>Receipt:</strong> <a href="${item.receiptUrl}" target="_blank">View Receipt</a></p>` : ''}
-  `;
+    const applyDate = item.createdAt ? item.createdAt.substring(0, 10) : '-';
+    const checkIn = item.checkIn ? item.checkIn.substring(0, 10) : '-';
+    const checkOut = item.checkOut ? item.checkOut.substring(0, 10) : '-';
+    const amount = item.totalAmount ? `RM ${parseFloat(item.totalAmount).toFixed(2)}` : '-';
 
-  new bootstrap.Modal(document.getElementById('bookingModal')).show();
-}
+    document.getElementById('bookingDetails').innerHTML = `
+      <div class="row">
+        <div class="col-6">
+          <p><strong>Booking ID:</strong></p>
+          <p><strong>Student ID:</strong></p>
+          <p><strong>Student Name:</strong></p>
+          <p><strong>College:</strong></p>
+          <p><strong>Room Type:</strong></p>
+          <p><strong>Check-In:</strong></p>
+          <p><strong>Check-Out:</strong></p>
+          <p><strong>Total Amount:</strong></p>
+          <p><strong>Apply Date:</strong></p>
+          <p><strong>Status:</strong></p>
+        </div>
+        <div class="col-6">
+          <p>${item.bookingId || '-'}</p>
+          <p>${item.studentId || '-'}</p>
+          <p>${item.studentName || '-'}</p>
+          <p>${item.college || '-'}</p>
+          <p>${item.roomType || '-'}</p>
+          <p>${checkIn}</p>
+          <p>${checkOut}</p>
+          <p><strong>${amount}</strong></p>
+          <p>${applyDate}</p>
+          <p><span class="status-badge ${getStatusClass(item.status)}">${item.status}</span></p>
+        </div>
+      </div>
+      ${item.receiptUrl ? `<p><strong>Receipt:</strong> <a href="${item.receiptUrl}" target="_blank">View Receipt</a></p>` : ''}
+    `;
 
+    // Show Approve/Reject buttons only for Pending bookings
+    const footer = document.getElementById('modalFooter');
+    if (item.status === 'Pending') {
+      footer.innerHTML = `
+        <button class="btn-approve" onclick="updateStatus('Pending Payment')">
+          <i class="bi bi-check-circle"></i> Approve
+        </button>
+        <button class="btn-reject" onclick="updateStatus('Rejected')">
+          <i class="bi bi-x-circle"></i> Reject
+        </button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      `;
+    } else {
+      footer.innerHTML = `
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      `;
+    }
+
+    new bootstrap.Modal(document.getElementById('bookingModal')).show();
+  }
+
+  // ---- APPROVE / REJECT ----
+  // ✅ When admin approves → status becomes 'Pending Payment' (student can now pay)
+  // ✅ When admin rejects → status becomes 'Rejected'
+  async function updateStatus(newStatus) {
+    if (!currentBookingId) return;
+
+    try {
+      const { error } = await db
+        .from('reservations')
+        .update({ status: newStatus })
+        .eq('reservation_id', currentBookingId);
+
+      if (error) throw error;
+
+      // Close modal
+      bootstrap.Modal.getInstance(document.getElementById('bookingModal')).hide();
+
+      // Show success message
+      const msg = newStatus === 'Pending Payment'
+        ? '✅ Booking approved! Student can now make payment.'
+        : '❌ Booking has been rejected.';
+      alert(msg);
+
+      // Refresh table
+      await fetchReservations();
+
+    } catch (err) {
+      console.error('Error updating status:', err.message);
+      alert('Failed to update status. Please try again.');
+    }
+  }
+
+  // ---- HEADER ----
   async function loadAdminStaffHeader() {
     const role = localStorage.getItem('staffAdminRole') || localStorage.getItem('userRole');
     const email = localStorage.getItem('staffAdminEmail');
@@ -507,29 +536,28 @@
     }
 
     const roleText = role === 'admin' || role === 'Admin' ? 'Admin' : 'Staff';
-
     document.getElementById('dropdownUserRole').textContent = roleText;
     document.getElementById('dropdownUserName').textContent = name || roleText + ' User';
     document.getElementById('dropdownUserEmail').textContent = email || 'user@utmspace.my';
     document.getElementById('avatarInitial').textContent = roleText.charAt(0);
   }
 
+  // ---- LOGOUT ----
   document.getElementById('logoutBtn').addEventListener('click', function(e) {
     e.preventDefault();
-
     localStorage.removeItem('staffAdminRole');
     localStorage.removeItem('staffAdminEmail');
     localStorage.removeItem('staffAdminName');
     localStorage.removeItem('staffAdminId');
     localStorage.removeItem('userRole');
     localStorage.removeItem('currentUser');
-
     window.location.href = 'admin_staff_login.html';
   });
+
   function loadNotifications() {
-  // Empty safety placeholder block to satisfy main.js call
-  console.log("Notification engine ready.");
-}
+    console.log("Notification engine ready.");
+  }
+
   loadAdminStaffHeader();
   fetchReservations();
 </script>
