@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Upload Message Broadcast - UTMSPACE College Booking</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: #f5f7fb;
+      font-family: 'Segoe UI', sans-serif;
+      color: #333;
+    }
+
+    .broadcast-page {
+      padding: 60px 0;
+      min-height: 100vh;
+    }
+
+    .page-header-box {
+      background: linear-gradient(135deg, #6b092a, #8b0e35);
+      border-radius: 24px;
+      padding: 40px;
+      color: white;
+      margin-bottom: 35px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.12);
+    }
+
+    .page-header-box h1 {
+      font-size: 34px;
+      font-weight: 700;
+      margin-bottom: 10px;
+      color: white;
+    }
+
+    .page-header-box p {
+      margin: 0;
+      color: rgba(255,255,255,0.85);
+      font-size: 15px;
+    }
+
+    .back-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 18px;
+      border-radius: 50px;
+      background: rgba(255,255,255,0.15);
+      color: white;
+      text-decoration: none;
+      font-weight: 600;
+      margin-bottom: 20px;
+      transition: 0.3s;
+    }
+
+    .back-btn:hover {
+      background: rgba(255,255,255,0.28);
+      color: white;
+    }
+
+    .broadcast-layout {
+      display: grid;
+      grid-template-columns: 1fr 1.2fr;
+      gap: 30px;
+    }
+
+    .form-box,
+    .history-box {
+      background: white;
+      border-radius: 22px;
+      padding: 30px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+    }
+
+    .section-title {
+      font-size: 24px;
+      font-weight: 700;
+      color: #6b092a;
+      margin-bottom: 25px;
+    }
+
+    .form-label {
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: #444;
+    }
+
+    .form-control,
+    .form-select {
+      border-radius: 12px;
+      padding: 12px 15px;
+      border: 1px solid #dcdcdc;
+      font-size: 15px;
+    }
+
+    .form-control:focus,
+    .form-select:focus {
+      border-color: #6b092a;
+      box-shadow: 0 0 0 0.15rem rgba(107, 9, 42, 0.2);
+    }
+
+    textarea.form-control {
+      resize: none;
+    }
+
+    .send-btn {
+      width: 100%;
+      background: linear-gradient(135deg, #6b092a, #8b0e35);
+      color: white;
+      border: none;
+      border-radius: 14px;
+      padding: 14px;
+      font-size: 16px;
+      font-weight: 700;
+      transition: 0.3s;
+    }
+
+    .send-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 20px rgba(107, 9, 42, 0.25);
+    }
+
+    .history-card {
+      border: 1px solid #eee;
+      border-radius: 18px;
+      padding: 20px;
+      margin-bottom: 18px;
+      transition: 0.3s;
+      background: #fafafa;
+    }
+
+    .history-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.06);
+    }
+
+    .history-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .broadcast-badge {
+      background: #f3e8ff;
+      color: #6b092a;
+      padding: 6px 14px;
+      border-radius: 30px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .history-date {
+      font-size: 13px;
+      color: #777;
+    }
+
+    .history-title {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 10px;
+      color: #222;
+    }
+
+    .history-message {
+      color: #555;
+      line-height: 1.7;
+      font-size: 14px;
+    }
+
+    .empty-box {
+      text-align: center;
+      padding: 40px 20px;
+      color: #888;
+    }
+
+    .empty-box i {
+      font-size: 55px;
+      margin-bottom: 15px;
+      color: #ccc;
+    }
+
+    .message-alert {
+      display: none;
+      padding: 14px;
+      border-radius: 12px;
+      margin-bottom: 20px;
+      font-weight: 600;
+    }
+
+    .message-success {
+      background: #dcfce7;
+      color: #166534;
+      border: 1px solid #bbf7d0;
+    }
+
+    @media(max-width: 991px) {
+      .broadcast-layout {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media(max-width: 768px) {
+      .page-header-box {
+        padding: 28px;
+      }
+
+      .page-header-box h1 {
+        font-size: 28px;
+      }
+
+      .form-box,
+      .history-box {
+        padding: 22px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+<section class="broadcast-page">
+
+  <div class="container">
+
+    <div class="page-header-box">
+
+      <a href="admin_staff_dashboard.html" class="back-btn">
+        <i class="bi bi-arrow-left"></i>
+        Back to Dashboard
+      </a>
+
+      <h1>Upload Message Broadcast</h1>
+
+      <p>
+        Send important announcements and updates to all students easily.
+      </p>
+
+    </div>
+
+    <div class="broadcast-layout">
+
+      <!-- LEFT FORM -->
+      <div class="form-box">
+
+        <div class="section-title">
+          Create Broadcast
+        </div>
+
+        <div class="message-alert message-success" id="successBox">
+          Broadcast message sent successfully!
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Broadcast Title</label>
+          <input type="text" class="form-control" id="broadcastTitle" placeholder="Enter announcement title">
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Audience</label>
+
+          <select class="form-select" id="broadcastAudience">
+            <option value="All Students">All Students</option>
+            <option value="KLG Students">KLG Students</option>
+            <option value="Kolej Perdana Students">Kolej Perdana Students</option>
+            <option value="Kolej 9 & 10 Students">Kolej 9 & 10 Students</option>
+          </select>
+        </div>
+
+        <div class="mb-4">
+          <label class="form-label">Message</label>
+
+          <textarea 
+            class="form-control" 
+            rows="7" 
+            id="broadcastMessage"
+            placeholder="Type your broadcast message here..."
+          ></textarea>
+        </div>
+
+        <button class="send-btn" onclick="sendBroadcast()">
+          <i class="bi bi-send-fill"></i>
+          Send Broadcast
+        </button>
+
+      </div>
+
+      <!-- RIGHT HISTORY -->
+      <div class="history-box">
+
+        <div class="section-title">
+          Broadcast History
+        </div>
+
+        <div id="broadcastList"></div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</section>
+
+<script>
+  let broadcasts = JSON.parse(localStorage.getItem('broadcasts')) || [];
+
+  function renderBroadcasts() {
+
+    const list = document.getElementById('broadcastList');
+
+    if (broadcasts.length === 0) {
+      list.innerHTML = `
+        <div class="empty-box">
+          <i class="bi bi-megaphone"></i>
+          <h5>No Broadcasts Yet</h5>
+          <p>Announcements sent will appear here.</p>
+        </div>
+      `;
+      return;
+    }
+
+    list.innerHTML = broadcasts.map(function(item) {
+
+      return `
+        <div class="history-card">
+
+          <div class="history-top">
+            <div class="broadcast-badge">
+              ${item.audience}
+            </div>
+
+            <div class="history-date">
+              ${item.date}
+            </div>
+          </div>
+
+          <div class="history-title">
+            ${item.title}
+          </div>
+
+          <div class="history-message">
+            ${item.message}
+          </div>
+
+        </div>
+      `;
+    }).join('');
+  }
+
+  function sendBroadcast() {
+
+    const title = document.getElementById('broadcastTitle').value.trim();
+    const audience = document.getElementById('broadcastAudience').value;
+    const message = document.getElementById('broadcastMessage').value.trim();
+
+    if (!title || !message) {
+      alert('Please fill in all fields.');
+      return;
+    }
+
+    const newBroadcast = {
+      title: title,
+      audience: audience,
+      message: message,
+      date: new Date().toLocaleString()
+    };
+
+    broadcasts.unshift(newBroadcast);
+
+    localStorage.setItem('broadcasts', JSON.stringify(broadcasts));
+
+    renderBroadcasts();
+
+    document.getElementById('broadcastTitle').value = '';
+    document.getElementById('broadcastAudience').value = 'All Students';
+    document.getElementById('broadcastMessage').value = '';
+
+    const successBox = document.getElementById('successBox');
+
+    successBox.style.display = 'block';
+
+    setTimeout(function() {
+      successBox.style.display = 'none';
+    }, 2500);
+  }
+
+  renderBroadcasts();
+</script>
+
+</body>
+</html>
