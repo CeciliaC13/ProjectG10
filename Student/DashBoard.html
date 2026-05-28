@@ -133,18 +133,20 @@
         <a href="https://www.instagram.com/spaceutm_official/?hl=en" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><i class="bi bi-instagram"></i></a>
       </div>
 
-      <div class="notification-wrapper">
-        <button class="notification-btn" id="notificationBtn" title="Notifications">
-          <i class="bi bi-bell-fill"></i>
-        </button>
-        <div class="notification-dropdown" id="notificationDropdown">
-          <div class="notification-dropdown-header">
-            <h4><i class="bi bi-bell-fill"></i> Notifications</h4>
-            <a href="#" class="mark-all-link" id="markAllNotifications">Mark all as read</a>
-          </div>
-          <div class="notification-list" id="notificationList"></div>
+    <div class="notification-wrapper">
+      <button class="notification-btn" id="notificationBtn" title="Notifications">
+        <i class="bi bi-bell-fill"></i>
+        <span class="notification-badge" id="notificationBadge" onclick="markAllNotificationsAsRead(); event.stopPropagation();"style="display: none;">0</span>
+      </button>
+      
+      <div class="notification-dropdown" id="notificationDropdown">
+        <div class="notification-dropdown-header" onclick="markNotificationAsRead();">
+          <h4><i class="bi bi-bell-fill"></i> Notifications</h4>
+          <a href="#" class="mark-all-link" id="markAllNotifications">Mark all as read</a>
         </div>
+        <div class="notification-list" id="notificationList"></div>
       </div>
+    </div>
 
       <div class="user-profile">
         <div class="user-avatar">
@@ -258,6 +260,23 @@
       </div>
     </div>
   </div>
+  <!-- Success Confirmation Modal -->
+<div class="modal fade" id="successModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content style-modal" style="border-radius: 20px; overflow: hidden; border: none; box-shadow: 0 15px 30px rgba(0,0,0,0.2);">
+      <div class="modal-body text-center p-5">
+        <div class="mb-4">
+          <i class="bi bi-check-circle-fill text-success" style="font-size: 4rem;"></i>
+        </div>
+        <h3 class="modal-title mb-2" id="successModalLabel" style="font-family: 'Montserrat', sans-serif; font-weight: 700; color: #333;">Submission Successful!</h3>
+        <p class="text-muted mb-4" id="modalReferenceId">Your report has been securely transmitted to management.</p>
+        <button type="button" class="btn btn-success px-5 py-2" id="modalOkBtn" style="border-radius: 10px; font-weight: 600; background-color: #28a745; border: none;">
+          Go to Main Page
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
 </footer>
 
 <a href="#" id="scroll-top" class="scroll-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
@@ -393,23 +412,157 @@
     renderCollegeCards();
     renderPictures();
 
-    // Notification dropdown functionality
-    const notifBtn = document.getElementById('notificationBtn');
-    const notifDropdown = document.getElementById('notificationDropdown');
-    if (notifBtn && notifDropdown) {
-      notifBtn.addEventListener('click', function(e) {
-        e.stopPropagation();
-        notifDropdown.classList.toggle('show');
-      });
-      document.addEventListener('click', function() {
-        notifDropdown.classList.remove('show');
-      });
-      notifDropdown.addEventListener('click', function(e) {
-        e.stopPropagation();
-      });
+document.addEventListener('DOMContentLoaded', function() {
+  const notifBtn = document.getElementById('notificationBtn');
+  const notifDropdown = document.getElementById('notificationDropdown');
+  const markAllLink = document.getElementById('markAllNotifications');
+
+  // Set the initial hidden state explicitly via JS since we aren't modifying CSS
+  if (notifDropdown) {
+    notifDropdown.style.display = 'none';
+  }
+
+  if (notifBtn && notifDropdown) {
+    // 1. Handle Bell Click Toggle via direct inline styles
+    notifBtn.addEventListener('click', function(e) {
+      e.stopPropagation(); // Prevents the document click event from closing it instantly
+      
+      if (notifDropdown.style.display === 'none') {
+        notifDropdown.style.display = 'block';
+        loadStudentNotifications(); // Fetch fresh data from Supabase
+      } else {
+        notifDropdown.style.display = 'none';
+      }
+    });
+
+    // 2. Hide dropdown if the user clicks anywhere else on the document
+    document.addEventListener('click', function() {
+      notifDropdown.style.display = 'none';
+    });
+
+    // 3. Prevent the dropdown from self-closing when clicking internal elements
+    notifDropdown.style.display = 'none';
+    notifDropdown.addEventListener('click', function(e) {
+      e.stopPropagation();
+    });
+  }
+
+  if (markAllLink) {
+    markAllLink.addEventListener('click', async function(e) {
+      e.preventDefault();
+      await markAllNotificationsAsRead();
+    });
+  }
+});
+
+window.notifications = window.notifications || [];
+
+async function loadStudentNotifications() {
+  const badge = document.getElementById('notificationBadge');
+  const listContainer = document.getElementById('notificationList');
+  const studentId = localStorage.getItem('studentId') || localStorage.getItem('currentStudentId') || 'A21DW0000'; 
+
+  try {
+    if (typeof db === 'undefined') return;
+
+    const { data: notifications, error } = await db
+      .from('notifications')
+      .select('*')
+      .eq('student_id', studentId.trim())
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+
+    const count = notifications ? notifications.length : 0;
+    if (badge) {
+      badge.textContent = count;
+      badge.style.display = count > 0 ? 'inline-block' : 'none';
     }
 
-    // User dropdown functionality
+    if (!listContainer) return;
+    
+    if (!notifications || notifications.length === 0) {
+      listContainer.innerHTML = `<div style="padding: 15px; text-align: center; color: #888;">No notifications found.</div>`;
+      return;
+    }
+
+    // Clean notification item cards with NO confusing sub-buttons inside them anymore
+    listContainer.innerHTML = notifications.map(notif => {
+      const typeText = notif.type || 'Notification';
+      const messageText = notif.message || 'No description provided.';
+      
+      return `
+        <div style="padding: 15px; border-bottom: 1px solid #eee; background: #fff;" id="notif-${notif.id}">
+          <div style="display: flex; align-items: center; gap: 5px; margin-bottom: 5px; color: #b91c1c; font-weight: bold;">
+            <span>📌</span> <span>${typeText}</span>
+          </div>
+          <p style="margin: 0; font-size: 13px; color: #555; line-height: 1.4;">${messageText}</p>
+        </div>
+      `;
+    }).join('');
+
+  } catch (err) {
+    console.error('Failed to load notifications:', err.message);
+  }
+}
+
+// Single bulk delete action function
+async function markAllNotificationsAsRead() {
+  const studentId = localStorage.getItem('studentId') || localStorage.getItem('currentStudentId') || 'A21DW0000';
+  
+  try {
+    if (typeof db === 'undefined') throw new Error("Database reference missing.");
+
+    // 1. Wipe out everything for this student ID from Supabase
+    const { error } = await db
+      .from('notifications')
+      .delete()
+      .eq('student_id', studentId.trim());
+
+    if (error) throw error;
+    
+    // 2. Clear UI instantly
+    const listContainer = document.getElementById('notificationList');
+    if (listContainer) {
+      listContainer.innerHTML = `<div style="padding: 15px; text-align: center; color: #888;">No notifications found.</div>`;
+    }
+
+    const badge = document.getElementById('notificationBadge');
+    if (badge) {
+      badge.textContent = '0';
+      badge.style.display = 'none';
+    }
+
+    console.log("Database notifications completely cleared via badge click.");
+  } catch (err) {
+    console.error('Failed processing bulk purge actions:', err.message);
+  }
+}
+
+// Expose functions to layout window global context scopes safely
+window.loadStudentNotifications = loadStudentNotifications;
+window.markAllNotificationsAsRead = markAllNotificationsAsRead;
+
+if (typeof db !== 'undefined') {
+  loadStudentNotifications();
+}
+async function checkAndSendNotifications() {
+  console.log("Checking notifications pipeline for", bookings.length, "bookings...");
+  const now = new Date();
+
+  for (const item of bookings) {
+    const createdDate = new Date(item.createdAt);
+    const daysDiff = Math.ceil(Math.abs(now - createdDate) / (1000 * 60 * 60 * 24));
+    
+    console.log(`Booking ${item.bookingId}: Status = ${item.status}, Days Unpaid = ${daysDiff}`);
+    
+    if (item.status === 'Pending Payment' && daysDiff >= 7) {
+      const overdueMessage = `Your booking (${item.bookingId}) is overdue! Payment has been pending for ${daysDiff} days.`;
+      console.log(`Triggering overdue insert for student: ${item.studentId}`);
+      await sendNotificationToStudent(item.studentId, 'Overdue Payment', overdueMessage);
+    }
+  }
+}
     const userProfile = document.querySelector('.user-profile');
     const userDropdown = document.getElementById('userDropdown');
     if (userProfile && userDropdown) {
@@ -425,7 +578,6 @@
       });
     }
 
-    // Load user data from localStorage or session
     try {
       const userData = localStorage.getItem('user') || sessionStorage.getItem('user');
       if (userData) {

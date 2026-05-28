@@ -11,7 +11,7 @@
 
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-  
+  <link href="../vendor/aos/aos.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="../main.css" rel="stylesheet">
   
@@ -297,6 +297,27 @@
               <label>Email Address <span class="required">*</span></label>
               <input type="email" id="email" placeholder="you@utm.my">
             </div>
+            <!-- Added missing Phone Field -->
+            <div class="form-group">
+              <label>Phone Number <span class="required">*</span></label>
+              <input type="tel" id="phone" placeholder="e.g., +60123456789">
+            </div>
+          </div>
+
+          <div class="two-columns">
+            <div class="form-group">
+              <label>Residential College (Kolej) <span class="required">*</span></label>
+              <select id="kolej">
+                <option value="">-- Select College --</option>
+                <option value="KLG">KLG - KLG Campus Residence</option>
+                <option value="Kolej Perdana">KP - Kolej Perdana</option>
+                <option value="Kolej 9 & 10">K9K10 - Kolej 9 & 10</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Room / Block Number <span class="required">*</span></label>
+              <input type="text" id="roomNumber" placeholder="e.g., UA2 1025">
+            </div>
           </div>
 
           <div class="two-columns">
@@ -389,26 +410,23 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../vendor/aos/aos.js"></script>
 <script src="../supabase.js"></script>
 <script src="../main.js"></script>
 <script>
-// Back button
 document.getElementById('backBtn').addEventListener('click', function() {
   window.location.href = 'dashboard.html';
 });
 
-// Auto-fill student info from localStorage instantly, fallback to Supabase
 async function loadStudentInfo() {
   const email = localStorage.getItem('studentEmail');
   const cachedName = localStorage.getItem('studentName');
   const cachedId = localStorage.getItem('studentId');
 
-  // 1. Instantly fill from localStorage if available
   if (email) document.getElementById('email').value = email;
   if (cachedName) document.getElementById('fullName').value = cachedName;
   if (cachedId) document.getElementById('matricNo').value = cachedId;
 
-  // 2. If any data is missing from cache, fetch it from Supabase
   if (email && (!cachedName || !cachedId)) {
     if (typeof db !== 'undefined' && db) {
       const { data, error } = await db
@@ -420,13 +438,13 @@ async function loadStudentInfo() {
       if (!error && data) {
         if (data.name) {
           document.getElementById('fullName').value = data.name;
-          localStorage.setItem('studentName', data.name); // Save to cache
+          localStorage.setItem('studentName', data.name);
         }
         if (data.student_id) {
           document.getElementById('matricNo').value = data.student_id;
-          localStorage.setItem('studentId', data.student_id); // Save to cache
+          localStorage.setItem('studentId', data.student_id);
         }
-        if (data.phone) {
+        if (data.phone && document.getElementById('phone')) {
           document.getElementById('phone').value = data.phone;
         }
       }
@@ -434,28 +452,24 @@ async function loadStudentInfo() {
   }
 }
 
-// Form submission (Connected to Supabase)
 document.getElementById('reportForm').addEventListener('submit', async function(e) {
   e.preventDefault();
   
-  const fullName = document.getElementById('fullName').value.trim();
-  const matricNo = document.getElementById('matricNo').value.trim();
-  const phone = document.getElementById('phone').value.trim();
-  const email = document.getElementById('email').value.trim();
-  const kolej = document.getElementById('kolej').value;
-  const roomNumber = document.getElementById('roomNumber').value.trim();
-  const issueCategory = document.getElementById('issueCategory').value;
-  const priority = document.getElementById('priority').value;
-  const description = document.getElementById('description').value.trim();
+  const fullName = document.getElementById('fullName')?.value?.trim() || "";
+  const matricNo = document.getElementById('matricNo')?.value?.trim() || "";
+  const phone = document.getElementById('phone')?.value?.trim() || "";
+  const email = document.getElementById('email')?.value?.trim() || "";
+  const kolej = document.getElementById('kolej')?.value || "";
+  const roomNumber = document.getElementById('roomNumber')?.value?.trim() || "";
+  const issueCategory = document.getElementById('issueCategory')?.value || "";
+  const priority = document.getElementById('priority')?.value || "";
+  const description = document.getElementById('description')?.value?.trim() || "";
   
   const errorAlert = document.getElementById('errorAlert');
-  const successAlert = document.getElementById('successAlert');
   const submitBtn = document.getElementById('submitBtn');
   
-  errorAlert.classList.remove('show');
-  successAlert.classList.remove('show');
+  if (errorAlert) errorAlert.classList.remove('show');
   
-  // Validation
   if (!fullName || !matricNo || !phone || !email || !kolej || !roomNumber || !issueCategory || !priority || !description) {
     showValidationError('Please fill in all required fields.');
     return;
@@ -466,11 +480,9 @@ document.getElementById('reportForm').addEventListener('submit', async function(
     return;
   }
   
-  // Disable button and change state
   submitBtn.disabled = true;
   submitBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Submitting...';
 
-  // Ensure database instance exists
   if (typeof db === 'undefined' || !db) {
     showValidationError('Database connection error. Please try again later.');
     resetButton(submitBtn);
@@ -479,22 +491,21 @@ document.getElementById('reportForm').addEventListener('submit', async function(
 
   const generatedReportId = 'RPT-' + Date.now();
 
-  // Send data to Supabase 'Reports' table
   const { error: dbError } = await db
-    .from('Reports') // Ensure this matches your target table name exactly
+    .from('Report') 
     .insert([
       {
         report_id: generatedReportId,
-        full_name: fullName,
-        matric_no: matricNo,
-        phone: phone,
-        email: email,
-        kolej: kolej,
-        room_number: roomNumber,
+        student_name: fullName,       
+        student_id: matricNo,       
+        phone: phone,              
+        email: email,              
+        college: kolej,              
+        room_number: roomNumber,   
         issue_category: issueCategory,
         priority: priority,
         description: description,
-        status: 'Pending' // Explicit string fallback or let DB handle default
+        status: 'Pending'
       }
     ]);
 
@@ -505,29 +516,43 @@ document.getElementById('reportForm').addEventListener('submit', async function(
     return;
   }
   
-  // Show success state if record saves cleanly
-  successAlert.textContent = '✅ Report submitted! Reference ID: ' + generatedReportId;
-  successAlert.classList.add('show');
+  // --- FOOLPROOF REDIRECT SOLUTION ---
+  // We check if the modal layout block physically exists on the screen.
+  const referenceContainer = document.getElementById('modalReferenceId');
+  const fallbackModal = document.getElementById('successModal');
   
+  if (referenceContainer && fallbackModal) {
+    // If your browser finally loaded the HTML modal correctly, use it!
+    referenceContainer.innerHTML = `Your report has been successfully submitted.<br><strong>Reference ID: ${generatedReportId}</strong>`;
+    const successModal = new bootstrap.Modal(fallbackModal);
+    successModal.show();
+    
+    document.getElementById('modalOkBtn').addEventListener('click', function() {
+      window.location.href = 'dashboard.html';
+    });
+  } else {
+    // If your browser cache is stubborn and STILL cannot find the HTML container elements, 
+    // fall back to a clean native popup alert box so it never throws an innerHTML crash again.
+    alert(`Submission Successful!\n\nYour report has been securely saved.\nReference ID: ${generatedReportId}`);
+    window.location.href = 'dashboard.html';
+  }
+
   document.getElementById('reportForm').reset();
   loadStudentInfo();
-  
   resetButton(submitBtn);
-  
-  setTimeout(() => {
-    successAlert.classList.remove('show');
-  }, 5000);
 });
 
-// Helper function to handle error messaging safely
 function showValidationError(message) {
   const errorAlert = document.getElementById('errorAlert');
-  errorAlert.textContent = message;
-  errorAlert.classList.add('show');
-  setTimeout(() => errorAlert.classList.remove('show'), 4000);
+  if (errorAlert) {
+    errorAlert.textContent = message;
+    errorAlert.classList.add('show');
+    setTimeout(() => errorAlert.classList.remove('show'), 4000);
+  } else {
+    alert(message);
+  }
 }
 
-// Helper function to restore original UI state to submit button
 function resetButton(btn) {
   setTimeout(() => {
     btn.disabled = false;
@@ -537,7 +562,6 @@ function resetButton(btn) {
 
 loadStudentInfo();
 
-// Load header profile
 async function loadHeaderProfile() {
   const email = localStorage.getItem('studentEmail');
   if (!email) return;
@@ -564,7 +588,6 @@ async function loadHeaderProfile() {
 
 loadHeaderProfile();
 
-// Logout
 const logoutBtn = document.getElementById('logoutBtn');
 if (logoutBtn) {
   logoutBtn.addEventListener('click', () => {

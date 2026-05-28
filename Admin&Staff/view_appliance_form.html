@@ -2,16 +2,17 @@
 <html lang="en">
 
 <head>
-  <meta charset="utf-8">
-  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+<meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
   <title>View Appliance Form - UTMSPACE College Booking</title>
 
   <link href="img/favicon.png" rel="icon">
-
-  <link href="vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
-  <link href="vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
-  <link href="main.css" rel="stylesheet">
-
+  <link href="../vendor/aos/aos.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  
+  <link href="../main.css" rel="stylesheet">
   <style>
     body {
       background: #f8f9fa;
@@ -176,6 +177,62 @@
 
 <body>
 
+<header id="header" class="logo d-flex align-items-center" style="margin-right: auto;">
+  <div class="container position-relative d-flex align-items-center">
+
+    <a href="admin_staff_dashboard.html" class="logo d-flex align-items-center">
+      <img src="../img/spacelogo.png" alt="UTM Space Logo" style="height: 50px; width: auto; max-height:60px;">
+    </a>
+
+    <nav id="navmenu" class="navmenu">
+      <ul>
+        <li><a href="admin_staff_dashboard.html" class="active">Home</a></li>
+        <li><a href="room_availability.html">Room Availability</a></li>
+        <li><a href="view_approval.html">Approvals</a></li>
+        <li><a href="update_booking_status.html">Update Status</a></li>
+        <li><a href="view_issue.html">Issue</a></li>
+      </ul>
+      <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>
+    </nav>
+
+    <div class="header-actions">
+
+      <div class="header-social-links">
+        <a href="https://www.facebook.com/utmspace/" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><i class="bi bi-facebook"></i></a>
+        <a href="https://www.instagram.com/spaceutm_official/?hl=en" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><i class="bi bi-instagram"></i></a>
+      </div>
+
+      <a href="notification.html" class="notification-btn" title="Notifications">
+        <i class="bi bi-bell-fill"></i>
+      </a>
+
+      <div class="user-profile">
+        <div class="user-avatar">
+          <div class="avatar-placeholder" id="avatarInitial">A</div>
+        </div>
+
+        <div class="user-dropdown">
+          <div class="dropdown-header">
+            <div class="user-info">
+              <div class="user-name" id="dropdownUserName">Admin / Staff Name</div>
+              <div class="user-role" id="dropdownUserRole">Admin / Staff</div>
+              <div class="user-email" id="dropdownUserEmail">user@utmspace.my</div>
+            </div>
+          </div>
+
+          <ul class="dropdown-menu-list">
+            <li><a href="userprofile_admin_staff.html"><i class="bi bi-person-circle"></i> Profile</a></li>
+            <li><a href="logout.html" id="logoutBtn"><i class="bi bi-box-arrow-right"></i> Logout</a></li>
+          </ul>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+</header>
+
+
 <section class="appliance-page">
   <div class="container">
 
@@ -252,7 +309,54 @@
 
   </div>
 </section>
+<footer id="footer" class="footer position-relative light-background">
 
+  <div class="container">
+    <div class="row gy-5">
+
+      <div class="col-lg-4">
+        <div class="footer-brand">
+          <a href="admin_staff_dashboard.html" class="logo d-flex align-items-center mb-3">
+            <span class="sitename">UTM SPACE</span>
+          </a>
+          <p class="tagline">Transforming the way colleges book, manage, and connect — with modern simplicity.</p>
+
+          <div class="social-links mt-4">
+            <a href="https://www.facebook.com/utmspace/" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><i class="bi bi-facebook"></i></a>
+            <a href="https://www.instagram.com/spaceutm_official/?hl=en" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><i class="bi bi-instagram"></i></a>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-6">
+        <div class="footer-links-grid">
+          <div class="col-6 col-md-4">
+            <h5>Support</h5>
+            <ul class="list-unstyled">
+              <li><a href="#">Contact Us: +607-531 8000</a></li>
+              <li><a href="#">Privacy Policy</a></li>
+              <li><a href="#">Terms of Service</a></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="footer-bottom">
+    <div class="container">
+      <div class="row">
+        <div class="col-12">
+          <div class="footer-bottom-content">
+            <p class="mb-0">© <strong>UTMSPACE</strong>. All rights reserved.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</footer>
 <div class="modal fade" id="applianceModal" tabindex="-1">
 
   <div class="modal-dialog modal-dialog-centered">
@@ -281,45 +385,14 @@
 
 </div>
 
-<script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../vendor/aos/aos.js"></script>
+<script src="../supabase.js"></script>
+<script src="../main.js"></script>
 
 <script>
-  let applianceForms = JSON.parse(localStorage.getItem('applianceForms')) || [
-    {
-      studentId: 'A24DW0011',
-      studentName: 'Aina Natasha',
-      college: 'Kolej 9',
-      roomNo: 'K9-203',
-      appliance: 'Rice Cooker',
-      quantity: 1,
-      registerDate: '2026-05-20',
-      status: 'Pending'
-    },
-    {
-      studentId: 'A24DW0022',
-      studentName: 'Daniel Lim',
-      college: 'Kolej 10',
-      roomNo: 'K10-112',
-      appliance: 'Mini Fridge',
-      quantity: 1,
-      registerDate: '2026-05-18',
-      status: 'Approved'
-    },
-    {
-      studentId: 'A24DW0033',
-      studentName: 'Kavitha Raj',
-      college: 'Perdana Residence Block U7',
-      roomNo: 'U7-501',
-      appliance: 'Electric Kettle',
-      quantity: 2,
-      registerDate: '2026-05-17',
-      status: 'Rejected'
-    }
-  ];
-
-  function saveToStorage() {
-    localStorage.setItem('applianceForms', JSON.stringify(applianceForms));
-  }
+  let applianceForms = [];
 
   function getStatusClass(status) {
     if (status === 'Approved') return 'status-approved';
@@ -327,35 +400,65 @@
     return 'status-pending';
   }
 
+  // Pull live data rows out of your Supabase 'appliance' table
+  async function fetchApplianceFormsFromSupabase() {
+    if (typeof db === 'undefined' || !db) {
+      console.error('Supabase DB instance link missing or not configured correctly.');
+      return;
+    }
+
+    try {
+      const { data, error } = await db
+        .from('appliance') 
+        .select('*')
+        .order('declaration_date', { ascending: false }); 
+
+      if (error) throw error;
+
+      applianceForms = data.map(item => ({
+        id: item.appliance_id || item.id || item.student_id, 
+        
+        studentId: item.student_id || item.matric_no || 'N/A',
+        studentName: item.student_name || item.full_name || 'Unknown Student',
+        college: item.college || 'N/A',
+        roomNo: item.room_number || 'N/A',
+        appliance: item.appliance_name || item.appliances || 'N/A',
+        quantity: item.quantity || 1,
+        registerDate: item.declaration_date ? item.declaration_date.substring(0, 10) : 'N/A',
+        status: item.status || 'Pending'
+      }));
+
+      renderApplianceForms();
+
+    } catch (err) {
+      console.error('Error querying data rows from Supabase:', err.message);
+    }
+  }
+
+  // Render entries loop parsing priority filters and colleges
   function renderApplianceForms() {
-
     const tbody = document.getElementById('applianceTableBody');
+    if (!tbody) return;
 
-    const statusFilter = document.getElementById('statusFilter').value;
-    const collegeFilter = document.getElementById('collegeFilter').value;
+    const statusFilter = document.getElementById('statusFilter')?.value || 'All';
+    const collegeFilter = document.getElementById('collegeFilter')?.value || 'All';
 
     const filtered = applianceForms.filter(function(item) {
-
-      const statusMatch =
-        statusFilter === 'All' || item.status === statusFilter;
-
-      const collegeMatch =
-        collegeFilter === 'All' || item.college === collegeFilter;
-
+      const statusMatch = statusFilter === 'All' || item.status === statusFilter;
+      const collegeMatch = collegeFilter === 'All' || item.college === collegeFilter;
       return statusMatch && collegeMatch;
     });
 
     if (filtered.length === 0) {
       tbody.innerHTML = `
         <tr>
-          <td colspan="10">No appliance forms found.</td>
+          <td colspan="10" class="text-center text-muted py-4">No appliance forms found matching filters.</td>
         </tr>
       `;
       return;
     }
 
     tbody.innerHTML = filtered.map(function(item, index) {
-
       const realIndex = applianceForms.indexOf(item);
 
       return `
@@ -368,61 +471,97 @@
           <td>${item.appliance}</td>
           <td>${item.quantity}</td>
           <td>${item.registerDate}</td>
-
           <td>
             <span class="status-badge ${getStatusClass(item.status)}">
               ${item.status}
             </span>
           </td>
-
           <td>
-            <button class="view-btn" onclick="viewForm(${realIndex})">
-              View
-            </button>
-
-            <button class="approve-btn" onclick="updateStatus(${realIndex}, 'Approved')">
-              Approve
-            </button>
-
-            <button class="reject-btn" onclick="updateStatus(${realIndex}, 'Rejected')">
-              Reject
-            </button>
+            <div class="d-flex gap-1">
+              <button class="btn btn-sm btn-outline-primary px-2" style="font-size:12px; border-radius:6px;" onclick="viewForm(${realIndex})">
+                View
+              </button>
+              <button class="btn btn-sm btn-success px-2" style="font-size:12px; border-radius:6px;" onclick="updateStatus(${realIndex}, 'Approved')">
+                Approve
+              </button>
+              <button class="btn btn-sm btn-danger px-2" style="font-size:12px; border-radius:6px;" onclick="updateStatus(${realIndex}, 'Rejected')">
+                Reject
+              </button>
+              <button class="btn btn-sm btn-outline-secondary px-1" style="font-size:12px; border-radius:6px;" onclick="deleteForm(${realIndex})">
+                <i class="bi bi-trash"></i>
+              </button>
+            </div>
           </td>
         </tr>
       `;
     }).join('');
   }
 
+  // Display specific appliance form details cleanly inside your modal popup
   function viewForm(index) {
-
     const item = applianceForms[index];
 
     document.getElementById('applianceDetails').innerHTML = `
-      <p><strong>Student ID:</strong> ${item.studentId}</p>
+      <p><strong>Student ID / Matric:</strong> ${item.studentId}</p>
       <p><strong>Student Name:</strong> ${item.studentName}</p>
-      <p><strong>College:</strong> ${item.college}</p>
+      <p><strong>College Residence:</strong> ${item.college}</p>
       <p><strong>Room Number:</strong> ${item.roomNo}</p>
-      <p><strong>Appliance:</strong> ${item.appliance}</p>
-      <p><strong>Quantity:</strong> ${item.quantity}</p>
-      <p><strong>Register Date:</strong> ${item.registerDate}</p>
-      <p><strong>Status:</strong> ${item.status}</p>
+      <p><strong>Registered Appliance:</strong> ${item.appliance}</p>
+      <p><strong>Quantity Units:</strong> ${item.quantity}</p>
+      <p><strong>Application Date:</strong> ${item.registerDate}</p>
+      <p><strong>Current Status:</strong> <span class="status-badge ${getStatusClass(item.status)}">${item.status}</span></p>
     `;
 
     new bootstrap.Modal(document.getElementById('applianceModal')).show();
   }
 
-  function updateStatus(index, status) {
+  async function updateStatus(index, newStatus) {
+    const item = applianceForms[index];
 
-    applianceForms[index].status = status;
+    try {
+      const { error } = await db
+        .from('appliance')
+        .update({ status: newStatus })
+        .eq('appliance_id', item.id) // Change the left side to match your actual column title in Supabase!
+      if (error) throw error;
 
-    saveToStorage();
+      item.status = newStatus;
+      renderApplianceForms();
+      alert(`Appliance form status has been updated to: ${newStatus}`);
 
-    renderApplianceForms();
-
-    alert('Appliance form has been ' + status + '.');
+    } catch (err) {
+      alert('Failed to update appliance state context upstream: ' + err.message);
+    }
   }
 
-  renderApplianceForms();
+  async function deleteForm(index) {
+    const item = applianceForms[index];
+
+    if (!confirm(`Delete appliance entry for ${item.studentName}'s ${item.appliance}?`)) {
+      return;
+    }
+
+    try {
+      const { error } = await db
+        .from('appliance')
+        .delete()
+        .eq('appliance_id', item.id);
+
+      if (error) throw error;
+
+      applianceForms.splice(index, 1);
+      renderApplianceForms();
+      alert('Entry removed successfully.');
+
+    } catch (err) {
+      alert('Failed to delete application row item: ' + err.message);
+    }
+  }
+
+  document.getElementById('statusFilter')?.addEventListener('change', renderApplianceForms);
+  document.getElementById('collegeFilter')?.addEventListener('change', renderApplianceForms);
+
+  fetchApplianceFormsFromSupabase();
 </script>
 
 </body>

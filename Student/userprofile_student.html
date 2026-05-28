@@ -292,10 +292,10 @@
     const genderIcon = document.getElementById('genderIcon');
     const genderText = document.getElementById('genderText');
     
-    if (gender === 'Male') {
+    if (gender === 'Male'||gender === 'male') {
       genderIcon.innerHTML = '<i class="bi bi-gender-male" style="color: #2c5a7a;"></i>';
       genderText.textContent = 'Male';
-    } else if (gender === 'Female') {
+    } else if (gender === 'Female'||'female') {
       genderIcon.innerHTML = '<i class="bi bi-gender-female" style="color: #e74c3c;"></i>';
       genderText.textContent = 'Female';
     } else {
@@ -351,10 +351,10 @@
     updateGenderDisplay(gender);
     
     const profileGenderBadge = document.getElementById('profileGender');
-    if (gender === 'Male') {
+    if (gender === 'Male' || gender === 'male') {
       profileGenderBadge.innerHTML = '<i class="bi bi-gender-male"></i> Male Student';
       profileGenderBadge.style.background = '#2c5a7a';
-    } else if (gender === 'Female') {
+    } else if (gender === 'Female' || gender === 'female') {
       profileGenderBadge.innerHTML = '<i class="bi bi-gender-female"></i> Female Student';
       profileGenderBadge.style.background = '#e74c3c';
     } else {
@@ -366,7 +366,11 @@
     document.getElementById('editEmail').value = data.email;
     document.getElementById('editPhone').value = data.telephone || '';
     document.getElementById('editMatric').value = data.student_id;
+<<<<<<< Updated upstream
     document.getElementById('editGender').value = gender === 'Male' ? 'Male' : (gender === 'Female' ? 'Female' : 'Not specified');
+=======
+    document.getElementById('editGender').value = gender === 'Male' || gender === 'male' ? '👨 Male' : (gender === 'Female' || gender === 'female' ? '👩 Female' : 'Not specified');
+>>>>>>> Stashed changes
   }
 
   async function saveProfileChanges() {

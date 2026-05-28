@@ -463,6 +463,23 @@
               <label><i class="bi bi-calendar-x"></i> Check-out Date<span class="required">*</span></label>
               <input type="date" class="info-value" id="checkOut" required>
             </div>
+            <div class="info-item">
+              <label><i class="bi bi-building"></i>Residential College <span class="required">*</span></label>
+              <select id="studentCollege" class="form-select" required>
+                <option value="">-- Select Your College --</option>
+                <option value="KLG">KLG - KLG Campus Residence</option>
+                <option value="Kolej Perdana">KP - Kolej Perdana</option>
+                <option value="Kolej 9 & 10">K9K10 - Kolej 9 & 10</option>
+              </select>
+            </div>
+            <div class="info-item">
+              <label><i class="bi bi-universal-access"></i>Gender <span class="required">*</span></label>
+              <select id="studentGender" class="form-select" required>
+                <option value="">-- Select Gender --</option>
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+              </select>
+            </div>
           </div>
         </div>
 
@@ -652,7 +669,26 @@
 <script src="../supabase.js"></script>
 
 <script>
- let studentData = {};
+  let studentData = {};
+
+  // Display error alerts within your form UI context fields
+  function showError(message) {
+    const errorAlert = document.getElementById('errorAlert');
+    if (errorAlert) {
+      errorAlert.textContent = message;
+      errorAlert.classList.add('show');
+      setTimeout(() => errorAlert.classList.remove('show'), 4000);
+    } else {
+      alert(message);
+    }
+  }
+
+  // Formatting tool helper for rendering timestamps visually
+  function formatDateToDisplay(dateString) {
+    if (!dateString) return '_________';
+    const [year, month, day] = dateString.split('-');
+    return `${day}/${month}/${year}`;
+  }
 
   async function loadStudentData() {
     const email = localStorage.getItem('studentEmail');
@@ -662,6 +698,7 @@
       return;
     }
 
+    // 1. Fetch student details from Supabase
     const { data: student, error: studentError } = await db
       .from('Student')
       .select('*')
@@ -680,8 +717,13 @@
       document.getElementById('avatarInitial').textContent = initial;
       document.getElementById('dropdownUserName').textContent = student.name;
       document.getElementById('dropdownUserEmail').textContent = student.email;
+      
+      if (student.gender && document.getElementById('studentGender')) {
+        document.getElementById('studentGender').value = student.gender;
+      }
     }
 
+    // 2. Fetch latest active reservation details to prefill inputs
     const { data: reservation, error: resError } = await db
       .from('reservations')
       .select('*')
@@ -696,6 +738,18 @@
       document.getElementById('roomNumber').value = currentReservation.room_number || '';
       document.getElementById('checkIn').value = currentReservation.check_in || '';
       document.getElementById('checkOut').value = currentReservation.check_out || '';
+      
+      if (currentReservation.college && document.getElementById('studentCollege')) {
+        document.getElementById('studentCollege').value = currentReservation.college;
+      }
+
+      // Update baseline signature visual text parameters dynamically on loading
+      if (currentReservation.check_in) {
+        document.getElementById('declarationCheckInText').textContent = formatDateToDisplay(currentReservation.check_in);
+      }
+      if (currentReservation.check_out) {
+        document.getElementById('declarationCheckOutText').textContent = formatDateToDisplay(currentReservation.check_out);
+      }
     }
 
     const today = new Date();
@@ -707,34 +761,38 @@
     document.getElementById('currentDate').textContent = formattedDate;
   }
 
+  // --- INTERACTION CONTROLS FOR DYNAMIC INPUT GROUPS ---
   const otherCheckbox = document.getElementById('otherCheckbox');
   const otherInput = document.getElementById('otherAppliance');
 
-  otherCheckbox.addEventListener('change', function() {
-    if (this.checked && !otherInput.value.trim()) {
-      otherInput.focus();
-    }
-  });
+  if (otherCheckbox && otherInput) {
+    otherCheckbox.addEventListener('change', function() {
+      if (this.checked && !otherInput.value.trim()) {
+        otherInput.focus();
+      }
+    });
 
-  otherInput.addEventListener('input', function() {
-    if (this.value.trim()) {
-      otherCheckbox.checked = true;
-    } else {
-      otherCheckbox.checked = false;
-    }
-  });
+    otherInput.addEventListener('input', function() {
+      if (this.value.trim()) {
+        otherCheckbox.checked = true;
+      } else {
+        otherCheckbox.checked = false;
+      }
+    });
+  }
 
   document.getElementById('backBtn').addEventListener('click', function() {
     window.location.href = 'dashboard.html';
   });
 
+  // --- FORM SUBMIT PIPELINE ---
   document.getElementById('submitBtn').addEventListener('click', async function() {
     const errorAlert = document.getElementById('errorAlert');
     const successAlert = document.getElementById('successAlert');
     const submitBtn = document.getElementById('submitBtn');
     
-    errorAlert.classList.remove('show');
-    successAlert.classList.remove('show');
+    if (errorAlert) errorAlert.classList.remove('show');
+    if (successAlert) successAlert.classList.remove('show');
     
     const isAcknowledged = document.getElementById('acknowledgementCheck')?.checked;
     if (!isAcknowledged) {
@@ -742,19 +800,25 @@
       return;
     }
 
-    console.log('Room Field:', document.getElementById('roomNumber'));
-    console.log('Check-In Field:', document.getElementById('checkIn'));
-    console.log('Check-Out Field:', document.getElementById('checkOut'));
-    console.log('Other Appliance Field:', document.getElementById('otherAppliance'));
-
+    const college = document.getElementById('studentCollege')?.value;
+    const gender = document.getElementById('studentGender')?.value;
     const roomNumber = document.getElementById('roomNumber')?.value.trim();
     const checkInDate = document.getElementById('checkIn')?.value;
     const checkOutDate = document.getElementById('checkOut')?.value;
 
+    // Field Completeness Validations
     if (!studentData.student_id || !studentData.name) {
       alert("Student profile data is missing. Please refresh the page.");
       return;
     } 
+    if (!college) {
+      alert("Please select your Residential College.");
+      return;
+    }
+    if (!gender) {
+      alert("Gender data is missing. Please select your gender option.");
+      return;
+    }
     if (!roomNumber) {
       alert("Please key in your Room Number.");
       return;
@@ -767,14 +831,22 @@
       alert("Please select a Check-Out Date.");
       return;
     }
+
+    // Chronological Range Verification Checks
+    const checkIn = new Date(checkInDate);
+    const checkOut = new Date(checkOutDate);
+    if (checkOut <= checkIn) {
+      alert("Check-Out Date cannot be earlier than or equal to the Check-In Date.");
+      return;
+    }
     
     const selectedAppliances = [];
     const checkboxes = document.querySelectorAll('.appliance-check');
     checkboxes.forEach(cb => {
       if (cb.checked) {
-        const appliance = cb.getAttribute('data-appliance');
-        if (appliance && appliance !== 'Other') {
-          selectedAppliances.push(appliance);
+        const appliances = cb.getAttribute('data-appliance');
+        if (appliances && appliances !== 'Other') {
+          selectedAppliances.push(appliances);
         }
       }
     });
@@ -793,12 +865,14 @@
       student_id: studentData.student_id,
       student_name: studentData.name, 
       contact_number: studentData.telephone || studentData.contact_number || 'No Contact Number', 
+      college: college, 
+      gender: gender,
       room_number: roomNumber, 
       check_in_date: checkInDate, 
       check_out_date: checkOutDate, 
-      appliances: selectedAppliances,
+      appliances: selectedAppliances.join(', '), 
       declaration_date: new Date().toISOString(),
-      status: 'Submitted'
+      status: 'Pending'
     };
     
     submitBtn.disabled = true;
@@ -810,6 +884,7 @@
 
     if (error) {
       console.error("Supabase Error Details:", error);
+      alert("Submission failed: " + error.message);
       submitBtn.disabled = false;
       submitBtn.innerHTML = '<i class="bi bi-check-circle"></i> Submit';
       return;
@@ -822,78 +897,45 @@
     setTimeout(() => {
       window.location.href = 'dashboard.html';
     }, 2000);
+  });
 
-    function showError(message) {
-      errorAlert.textContent = message;
-      errorAlert.classList.add('show');
-      setTimeout(() => errorAlert.classList.remove('show'), 4000);
+  // --- DYNAMIC LINK UPDATES FOR DECLARED DATES ---
+  document.getElementById('checkIn').addEventListener('input', function() {
+    const selectedDate = this.value;
+    const textSpan = document.getElementById('declarationCheckInText');
+    if (textSpan) {
+      textSpan.textContent = selectedDate ? formatDateToDisplay(selectedDate) : '_________';
     }
-    if (!checkInDate) { 
-      alert("Please select a Check-In Date.");
-      return;
+  });
+
+  document.getElementById('checkOut').addEventListener('input', function() {
+    const selectedDate = this.value;
+    const textSpan = document.getElementById('declarationCheckOutText');
+    if (textSpan) {
+      textSpan.textContent = selectedDate ? formatDateToDisplay(selectedDate) : '_________';
     }
-    if (!checkOutDate) { 
-      alert("Please select a Check-Out Date.");
-      return;
-    }
+  });
 
-    // ─── NEW DATE VALIDATION CHECK ────────────────────────────────────────
-    // Convert date strings into JavaScript Date objects for comparison
-    const checkIn = new Date(checkInDate);
-    const checkOut = new Date(checkOutDate);
-
-    if (checkOut <= checkIn) {
-      alert("Check-Out Date cannot be earlier than or equal to the Check-In Date.");
-      return; // Stops submission
-    }
-    // ──────────────────────────────────────────────────────────────────────
-});
-
-    function formatDateToDisplay(dateString) {
-      if (!dateString) return '_________';
-      const [year, month, day] = dateString.split('-');
-      return `${day}/${month}/${year}`;
-    }
-
-    document.getElementById('checkIn').addEventListener('input', function() {
-      const selectedDate = this.value;
-      const textSpan = document.getElementById('declarationCheckInText');
-      if (textSpan) {
-        textSpan.textContent = selectedDate ? formatDateToDisplay(selectedDate) : '_________';
-      }
-    });
-
-    document.getElementById('checkOut').addEventListener('input', function() {
-      const selectedDate = this.value;
-      const textSpan = document.getElementById('declarationCheckOutText');
-      if (textSpan) {
-        textSpan.textContent = selectedDate ? formatDateToDisplay(selectedDate) : '_________';
-      }
-    });
-  
-  loadStudentData();
-  
   document.getElementById('checkIn').addEventListener('change', function() {
     const checkInValue = this.value;
     const checkOutInput = document.getElementById('checkOut');
     
     if (checkInValue) {
-
       checkOutInput.min = checkInValue;
-      
       if (checkOutInput.value && new Date(checkOutInput.value) <= new Date(checkInValue)) {
         checkOutInput.value = '';
       }
     }
   });
 
-  document.getElementById('logoutBtn').addEventListener('click', function() {
+  document.getElementById('logoutBtn')?.addEventListener('click', function() {
     localStorage.removeItem('studentEmail');
     localStorage.removeItem('studentId');
     localStorage.removeItem('studentName');
     window.location.href = 'index.html';
   });
-</script>
 
+  loadStudentData();
+</script>
 </body>
 </html>

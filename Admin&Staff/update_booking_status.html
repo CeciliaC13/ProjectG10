@@ -466,20 +466,75 @@ select:disabled, button:disabled {
           studentName: item.student_name,
           college: item.college,
           roomType: item.room_type,
-          status: item.status || 'Pending Payment', 
+          status: item.status || 'Pending', // Default initial state is now 'Pending' evaluation
           createdAt: item.created_at,
-          receiptUrl: item.receipt_url || null 
+          receiptUrl: item.receipt_url || null,
+          checkInDate: item.check_in_date || null, 
+          checkOutDate: item.check_out_date || null
         };
       });
 
       renderBookings();
+      
+      await checkAndSendNotifications();
+
     } catch (err) {
       console.error('Error fetching data:', err.message);
     }
   }
 
+  async function checkAndSendNotifications() {
+    const now = new Date();
 
- function renderBookings() {
+    for (const item of bookings) {
+      const createdDate = new Date(item.createdAt);
+      const daysDiff = Math.ceil(Math.abs(now - createdDate) / (1000 * 60 * 60 * 24));
+      
+      // New Flow: Check if application was approved but student hasn't paid (no receipt uploaded yet)
+      if (item.status === 'Approved' && !item.receiptUrl && daysDiff >= 7) {
+        const overdueMessage = `Your approved booking (${item.bookingId}) is at risk! Payment has been missing for ${daysDiff} days. Please upload your receipt to avoid blockages for next semester.`;
+        await sendNotificationToStudent(item.studentId, 'Overdue Payment Alert', overdueMessage);
+      }
+
+      if (item.status === 'Approved' && item.checkInDate) {
+        const checkInTime = new Date(item.checkInDate);
+        const timeUntilCheckIn = checkInTime - now;
+        const daysUntilCheckIn = Math.ceil(timeUntilCheckIn / (1000 * 60 * 60 * 24));
+
+        if (daysUntilCheckIn > 0 && daysUntilCheckIn <= 3) {
+          const checkInMessage = `Get ready! Your check-in for room ${item.roomType} is in ${daysUntilCheckIn} day(s) (${item.checkInDate}).`;
+          await sendNotificationToStudent(item.studentId, 'Upcoming Check-In', checkInMessage);
+        }
+      }
+    }
+  }
+
+ async function sendNotificationToStudent(studentId, type, message) {
+  try {
+    await db
+      .from('notifications')
+      .delete()
+      .eq('student_id', studentId)
+      .eq('type', type);
+
+    const { error: insertError } = await db
+      .from('notifications')
+      .insert({
+        student_id: studentId,
+        type: type,
+        message: message,
+        read: false
+      });
+        
+    if (insertError) throw insertError;
+    
+    console.log(`Fresh notification replaced old tracking for ${studentId}`);
+  } catch (err) {
+    console.error('Failed to route notification setup:', err.message);
+  }
+}
+
+  function renderBookings() {
     const tbody = document.getElementById('bookingTableBody');
     const statusFilter = document.getElementById('statusFilter').value;
     const collegeFilter = document.getElementById('collegeFilter').value;
@@ -505,49 +560,31 @@ select:disabled, button:disabled {
       const createdDate = new Date(item.createdAt);
       const daysDiff = Math.ceil(Math.abs(now - createdDate) / (1000 * 60 * 60 * 24));
       
-      const isPendingPayment = (item.status === 'Pending Payment');
-      const isOverdue = (isPendingPayment && daysDiff >= 7);
+      const isUnpaidApproved = (item.status === 'Approved' && !item.receiptUrl);
+      const isOverdue = (isUnpaidApproved && daysDiff >= 7);
 
       let selectOptions = '';
-      let isDropdownDisabled = false;
-
-      if (isAdmin) {
-        selectOptions = `
-          <option value="Pending Payment" ${item.status === 'Pending Payment' ? 'selected' : ''}>Pending Payment</option>
-          <option value="Pending" ${item.status === 'Pending' ? 'selected' : ''}>Pending</option>
-          <option value="Approved" ${item.status === 'Approved' ? 'selected' : ''}>Approved</option>
-          <option value="Rejected" ${item.status === 'Rejected' ? 'selected' : ''}>Rejected</option>
-          <option value="Cancelled" ${item.status === 'Cancelled' ? 'selected' : ''}>Cancelled</option>
-        `;
-      } else {
-        if (isPendingPayment) {
-          isDropdownDisabled = true;
-          selectOptions = `<option value="Pending Payment" selected>Pending Payment</option>`;
-        } else {
-          selectOptions = `
-            <option value="Pending" ${item.status === 'Pending' ? 'selected' : ''}>Pending</option>
-            <option value="Approved" ${item.status === 'Approved' ? 'selected' : ''}>Approved</option>
-            <option value="Rejected" ${item.status === 'Rejected' ? 'selected' : ''}>Rejected</option>
-            <option value="Cancelled" ${item.status === 'Cancelled' ? 'selected' : ''}>Cancelled</option>
-          `;
-        }
-      }
+      
+      selectOptions = `
+        <option value="Pending" ${item.status === 'Pending' ? 'selected' : ''}>Pending</option>
+        <option value="Approved" ${item.status === 'Approved' ? 'selected' : ''}>Approved</option>
+        <option value="Rejected" ${item.status === 'Rejected' ? 'selected' : ''}>Rejected</option>
+        <option value="Cancelled" ${item.status === 'Cancelled' ? 'selected' : ''}>Cancelled</option>
+        <option value="Pending Payment" ${item.status === 'Pending Payment' ? 'selected' : ''}>Pending Payment</option>
+      `;
 
       let deleteButtonHtml = `<button class="delete-btn" onclick="deleteBooking(${realIndex})">Delete</button>`;
 
       let receiptButtonHtml = '';
-      if (isAdmin || !isPendingPayment) {
-        if (item.receiptUrl) {
-          receiptButtonHtml = `<button class="btn btn-sm btn-info" onclick="viewReceipt('${item.receiptUrl}')"><i class="bi bi-file-earmark-image"></i> View Receipt</button>`;
-        } else {
-          receiptButtonHtml = `<span class="text-muted">No uploaded file</span>`;
-        }
+      if (item.receiptUrl) {
+        receiptButtonHtml = `<button class="btn btn-sm btn-info" onclick="viewReceipt('${item.receiptUrl}')"><i class="bi bi-file-earmark-image"></i> View Receipt</button>`;
       } else {
-        receiptButtonHtml = `<span class="badge bg-secondary"><i class="bi bi-lock-fill"></i> Locked (Unpaid)</span>`;
+        receiptButtonHtml = `<span class="text-muted">No receipt uploaded</span>`;
       }
 
+      // Warning displays if they are holding an approved slot without paying
       const warningBadge = isOverdue 
-        ? `<div class="payment-warning"><i class="bi bi-exclamation-triangle-fill"></i> Unpaid for ${daysDiff} days!</div>` 
+        ? `<div class="payment-warning" style="color: red; font-weight: bold;"><i class="bi bi-exclamation-triangle-fill"></i> Unpaid (Approved Slot) for ${daysDiff} days! Blocked next sem.</div>` 
         : '';
 
       return `
@@ -563,19 +600,19 @@ select:disabled, button:disabled {
           <td>${item.roomType || 'N/A'}</td>
           <td><span class="status-badge ${getStatusClass(item.status)}">${item.status}</span></td>
           <td>
-            <select class="form-select form-select-sm" id="statusSelect${realIndex}" ${isDropdownDisabled ? 'disabled' : ''}>
+            <select class="form-select form-select-sm" id="statusSelect${realIndex}">
               ${selectOptions}
             </select>
           </td>
           <td>${receiptButtonHtml}</td>
           <td>
-            <button class="update-btn" ${isDropdownDisabled ? 'disabled' : ''} onclick="updateBookingStatus(${realIndex}, event)">Update</button>
+            <button class="update-btn" onclick="updateBookingStatus(${realIndex}, event)">Update</button>
             ${deleteButtonHtml}
           </td>
         </tr>
       `;
     }).join('');
-}
+  }
 
   function viewReceipt(url) {
     window.open(url, '_blank', 'width=600,height=800');
@@ -588,7 +625,6 @@ select:disabled, button:disabled {
     if (status === 'Pending Payment') return 'status-pending-payment';
     return 'status-pending';
   }
-
 
   async function updateBookingStatus(index, event) {
     const item = bookings[index];
@@ -624,7 +660,7 @@ select:disabled, button:disabled {
     try {
       const { error } = await db
         .from('reservations')
-        .delete()
+        .delete() // FIXED: Changed from .update({ status: newStatus }) to an actual .delete() operation
         .eq('reservation_id', item.bookingId);
 
       if (error) throw error;
@@ -647,3 +683,5 @@ select:disabled, button:disabled {
 
   fetchBookings();
 </script>
+</body>
+</html>
