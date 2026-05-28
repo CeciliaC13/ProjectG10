@@ -45,6 +45,8 @@
       text-align: center; font-size: 14px; vertical-align: middle;
     }
     .booking-table tr:hover { background: #fafafa; }
+    
+    /* Status Badges */
     .status-badge {
       display: inline-block; padding: 5px 12px;
       border-radius: 20px; font-size: 12px; font-weight: 700;
@@ -56,45 +58,89 @@
     .status-rejected        { background: #fee2e2; color: #991b1b; }
     .status-cancelled       { background: #e5e7eb; color: #374151; }
 
+    .action-btn-group {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      flex-wrap: nowrap;
+    }
+
+    /* Base Actions Styling Layout Setup */
+    .action-btn-group button, .btn-receipt {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      padding: 6px 14px;
+      font-size: 12px;
+      font-weight: 600;
+      border: 1px solid transparent;
+      border-radius: 8px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.2s ease;
+      margin: 0; /* Clear previous raw margins */
+    }
+
+    /* Specific Action Variants */
     .btn-approve {
-      background: #166534; color: white; border: none;
-      border-radius: 8px; padding: 6px 12px;
-      font-size: 12px; font-weight: 600; cursor: pointer; margin: 2px;
+      background: #166534;
+      color: white;
     }
-    .btn-approve:hover { background: #14532d; }
-    .btn-reject {
-      background: #991b1b; color: white; border: none;
-      border-radius: 8px; padding: 6px 12px;
-      font-size: 12px; font-weight: 600; cursor: pointer; margin: 2px;
-    }
-    .btn-reject:hover { background: #7f1d1d; }
+    .btn-approve:hover { background: #14532d; transform: translateY(-1px); }
+
     .btn-keyhanded {
-      background: #d97706; color: white; border: none;
-      border-radius: 8px; padding: 6px 12px;
-      font-size: 12px; font-weight: 600; cursor: pointer; margin: 2px;
-      display: inline-flex; align-items: center; gap: 5px;
+      background: #d97706;
+      color: white;
     }
-    .btn-keyhanded:hover { background: #b45309; }
+    .btn-keyhanded:hover { background: #b45309; transform: translateY(-1px); }
+
+    /* Fix: Subtle fallback layout design for negative secondary routing steps */
+    .btn-reject {
+      background: #e5f2ff;
+      color: #475569;
+      border: 1px solid #cbd5e1;
+    }
+    .btn-reject:hover {
+      background: #fee2e2;
+      color: #991b1b;
+      border-color: #fca5a5;
+    }
+
+    /* Fix: Compact visual layout footprint for structural delete processes */
     .btn-delete {
-      background: #dc2626; color: white; border: none;
-      border-radius: 8px; padding: 6px 12px;
-      font-size: 12px; font-weight: 600; cursor: pointer; margin: 2px;
+      background: #d2e1f6;
+      color: #000000;
+      padding: 6px 10px !important;
     }
-    .btn-delete:hover { background: #b91c1c; }
+    .btn-delete:hover {
+      background: #fee2e2;
+      color: #dc2626;
+    }
+
     .btn-receipt {
-      background: #17a2b8; color: white; border: none;
-      padding: 5px 10px; border-radius: 6px;
-      font-size: 12px; cursor: pointer;
+      background: #17a2b8;
+      color: white;
     }
     .btn-receipt:hover { background: #138496; }
 
-    .confirm-wrap { display: inline-flex; align-items: center; gap: 4px; flex-wrap: wrap; justify-content: center; }
+    /* Confirmation UI wrappers */
+    .confirm-wrap { 
+      display: inline-flex; 
+      align-items: center; 
+      gap: 6px; 
+      padding: 4px 8px;
+      background: #fdf2f2;
+      border: 1px solid #fecaca;
+      border-radius: 8px;
+    }
     .confirm-wrap span { font-size: 12px; color: #dc2626; font-weight: 600; }
     .btn-yes { background: #dc2626; color: white; border: none; border-radius: 6px; padding: 4px 10px; font-size: 12px; font-weight: 600; cursor: pointer; }
     .btn-no  { background: #e2e8f0; color: #1e293b; border: none; border-radius: 6px; padding: 4px 10px; font-size: 12px; font-weight: 600; cursor: pointer; }
 
-    .locked-label { color: #aaa; font-size: 12px; }
-    .paid-label   { color: #166534; font-size: 12px; font-weight: 600; }
+    .locked-label { color:rgb(109, 142, 188)8; font-size: 12px; display: inline-flex; align-items: center; gap: 4px; }
+    .paid-label   { color: #166534; font-size: 12px; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; }
 
     .message-box { display: none; padding: 12px; border-radius: 12px; margin-bottom: 18px; font-size: 14px; font-weight: 500; }
     .message-box.show { display: block; }
@@ -131,7 +177,7 @@
       color: white;
       pointer-events: none;
     }
-  </style>
+</style>
 </head>
 <body class="index-page">
 
@@ -367,256 +413,211 @@
     }
   }
 
-  // ── RENDER ─────────────────────────────────────────────────────────────────
-  function renderBookings() {
-    const tbody         = document.getElementById('bookingTableBody');
-    const statusFilter  = document.getElementById('statusFilter').value;
-    const collegeFilter = document.getElementById('collegeFilter').value;
+ // ── RENDER ─────────────────────────────────────────────────────────────────
+function renderBookings() {
+  const tbody         = document.getElementById('bookingTableBody');
+  const statusFilter  = document.getElementById('statusFilter').value;
+  const collegeFilter = document.getElementById('collegeFilter').value;
 
-    const filtered = bookings.filter(b =>
-      (statusFilter  === 'All' || b.status  === statusFilter) &&
-      (collegeFilter === 'All' || b.college === collegeFilter)
-    );
+  const filtered = bookings.filter(b =>
+    (statusFilter  === 'All' || b.status  === statusFilter) &&
+    (collegeFilter === 'All' || b.college === collegeFilter)
+  );
 
-    if (filtered.length === 0) {
-      tbody.innerHTML = `<tr><td colspan="9" style="text-align:center;padding:30px;color:#999;">No records found.</td></tr>`;
-      return;
-    }
-
-    const now = new Date();
-    tbody.innerHTML = filtered.map((item, index) => {
-      const daysDiff  = Math.floor((now - new Date(item.createdAt)) / 86400000);
-      const isOverdue = item.status === 'Pending Payment' && !item.receiptUrl && daysDiff >= 7;
-
-      const receiptCell = item.receiptUrl
-        ? `<button class="btn-receipt" onclick="viewReceipt('${escAttr(item.receiptUrl)}')">
-             <i class="bi bi-file-earmark-image"></i> View
-           </button>`
-        : `<span class="locked-label">None</span>`;
-
-      let actionButtons = '';
-      if (item.status === 'Pending') {
-        actionButtons = `
-          <button class="btn-approve" onclick="setStatus('${item.bookingId}','Approved',this)">
-            <i class="bi bi-check-lg"></i> Approve
-          </button>
-          <button class="btn-reject" onclick="setStatus('${item.bookingId}','Rejected',this)">
-            <i class="bi bi-x-lg"></i> Reject
-          </button>`;
-      } else if (item.status === 'Approved') {
-        actionButtons = `
-          <button class="btn-keyhanded" onclick="setStatus('${item.bookingId}','Pending Payment',this)">
-            <i class="bi bi-key-fill"></i> Key Handed
-          </button>
-          <button class="btn-reject" onclick="setStatus('${item.bookingId}','Rejected',this)">
-            <i class="bi bi-x-lg"></i> Reject
-          </button>`;
-      } else if (item.status === 'Pending Payment') {
-        actionButtons = `<span class="locked-label"><i class="bi bi-clock"></i> Awaiting student payment</span>`;
-      } else if (item.status === 'Paid') {
-        actionButtons = `<span class="paid-label"><i class="bi bi-check-circle-fill"></i> Complete</span>`;
-      } else {
-        actionButtons = `<span class="locked-label">—</span>`;
-      }
-
-      const deleteBtn = isAdmin && item.status !== 'Paid'
-        ? `<button class="btn-delete" style="margin-top:4px;" onclick="confirmDelete('${item.bookingId}',this)">
-             <i class="bi bi-trash"></i>
-           </button>`
-        : '';
-
-      const warningHtml = isOverdue
-        ? `<div class="payment-warning"><i class="bi bi-exclamation-triangle-fill"></i> Overdue ${daysDiff}d</div>`
-        : '';
-
-      return `
-        <tr class="${isOverdue ? 'row-overdue' : ''}">
-          <td>${index + 1}</td>
-          <td><strong>${item.bookingId || 'N/A'}</strong></td>
-          <td>${item.studentId   || 'N/A'}</td>
-          <td><strong>${item.studentName || 'N/A'}</strong>${warningHtml}</td>
-          <td>${item.college  || 'N/A'}</td>
-          <td>${item.roomType || 'N/A'}</td>
-          <td><span class="status-badge ${getStatusClass(item.status)}">${item.status}</span></td>
-          <td>${receiptCell}</td>
-          <td>${actionButtons}${deleteBtn}</td>
-        </tr>`;
-    }).join('');
+  if (filtered.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="9" style="text-align:center;padding:30px;color:#999;">No records found.</td></tr>`;
+    return;
   }
 
-  // ── SET STATUS ─────────────────────────────────────────────────────────────
-  async function setStatus(bookingId, newStatus, btn) {
-    const item = bookings.find(b => b.bookingId === bookingId);
-    if (!item) return;
+  const now = new Date();
+  tbody.innerHTML = filtered.map((item, index) => {
+    const daysDiff  = Math.floor((now - new Date(item.createdAt)) / 86400000);
+    const isOverdue = item.status === 'Pending Payment' && !item.receiptUrl && daysDiff >= 7;
 
-    // ── 1. Capture OLD status BEFORE any mutation ──────────────────────────
-    const oldStatus = item.status;
+    const receiptCell = item.receiptUrl
+      ? `<button class="btn-receipt" onclick="viewReceipt('${escAttr(item.receiptUrl)}')">
+           <i class="bi bi-file-earmark-image"></i> View
+         </button>`
+      : `<span class="locked-label">None</span>`;
 
-    // ── 2. Guard: only allow valid transitions ─────────────────────────────
-    const allowed = {
-      'Pending':         ['Approved', 'Rejected'],
-      'Approved':        ['Pending Payment', 'Rejected'],
-      'Pending Payment': [],
-      'Paid':            [],
-    };
-    if (!(allowed[oldStatus] || []).includes(newStatus)) {
-      showMessage('This status change is not allowed.', 'error');
-      return;
+    let actionButtons = '';
+    if (item.status === 'Pending') {
+      actionButtons = `
+        <button class="btn-approve" onclick="setStatus('${item.bookingId}','Approved',this)">
+          <i class="bi bi-check-lg"></i> Approve
+        </button>
+        <button class="btn-reject" onclick="setStatus('${item.bookingId}','Rejected',this)">
+          <i class="bi bi-x-lg"></i> Reject
+        </button>`;
+    } else if (item.status === 'Approved') {
+      actionButtons = `
+        <button class="btn-keyhanded" onclick="setStatus('${item.bookingId}','Pending Payment',this)">
+          <i class="bi bi-key-fill"></i> Key Handed
+        </button>
+        <button class="btn-reject" onclick="setStatus('${item.bookingId}','Rejected',this)">
+          <i class="bi bi-x-lg"></i> Reject
+        </button>`;
+    } else if (item.status === 'Pending Payment') {
+      actionButtons = `<span class="locked-label"><i class="bi bi-clock"></i> Awaiting payment</span>`;
+    } else if (item.status === 'Paid') {
+      actionButtons = `<span class="paid-label"><i class="bi bi-check-circle-fill"></i> Complete</span>`;
+    } else {
+      actionButtons = `<span class="locked-label">—</span>`;
     }
 
-    btn.disabled = true;
-    const orig = btn.innerHTML;
-    btn.innerHTML = '<i class="bi bi-hourglass-split"></i> Saving...';
+    // Modernized delete button placement (No break tag/margin top hack needed)
+    const deleteBtn = isAdmin && item.status !== 'Paid'
+      ? `<button class="btn-delete" title="Delete Record" onclick="confirmDelete('${item.bookingId}',this)">
+           <i class="bi bi-trash"></i>
+         </button>`
+      : '';
 
-    try {
-      // ── 3. Update reservation status in Supabase ───────────────────────
-      const { error: resError } = await db
-        .from('reservations')
-        .update({ status: newStatus })
-        .eq('reservation_id', bookingId);
-      if (resError) throw resError;
+    const warningHtml = isOverdue
+      ? `<div class="payment-warning"><i class="bi bi-exclamation-triangle-fill"></i> Overdue ${daysDiff}d</div>`
+      : '';
 
-      // ── 4. Determine room availability direction ───────────────────────
-      //   Pending  → Approved  : DEDUCT 1 room (student occupying a slot)
-      //   Approved → Rejected  : RESTORE 1 room (slot freed back up)
-      //   anything else        : no room change
-      let direction = null;
-      if (oldStatus === 'Pending' && newStatus === 'Approved') {
-        direction = 'deduct';
-      } else if (oldStatus === 'Approved' && newStatus === 'Rejected') {
-        direction = 'restore';
-      }
+    return `
+      <tr class="${isOverdue ? 'row-overdue' : ''}">
+        <td>${index + 1}</td>
+        <td><strong>${item.bookingId || 'N/A'}</strong></td>
+        <td>${item.studentId   || 'N/A'}</td>
+        <td><strong>${item.studentName || 'N/A'}</strong>${warningHtml}</td>
+        <td>${item.college  || 'N/A'}</td>
+        <td>${item.roomType || 'N/A'}</td>
+        <td><span class="status-badge ${getStatusClass(item.status)}">${item.status}</span></td>
+        <td>${receiptCell}</td>
+        <td>
+          <div class="action-btn-group">
+            ${actionButtons}
+            ${deleteBtn}
+          </div>
+        </td>
+      </tr>`;
+  }).join('');
+}
 
-      // ── 5. Adjust room availability if needed ──────────────────────────
-      if (direction) {
-        roomAdjustDirection[bookingId] = direction;
-        await adjustRoomAvailability(item.college, item.roomType, bookingId);
-      }
+// ── SET STATUS ─────────────────────────────────────────────────────────────
+async function setStatus(bookingId, newStatus, btn) {
+  const item = bookings.find(b => b.bookingId === bookingId);
+  if (!item) return;
 
-      // ── 6. Update local cache & re-render ─────────────────────────────
-      item.status = newStatus;
-      renderBookings();
-      showMessage(`Booking ${bookingId} updated to "${newStatus}".`);
+  const oldStatus = item.status;
+  const allowed = {
+    'Pending':         ['Approved', 'Rejected'],
+    'Approved':        ['Pending Payment', 'Rejected'],
+    'Pending Payment': ['Paid'], 
+    'Paid':            [],
+  };
+  if (!(allowed[oldStatus] || []).includes(newStatus)) {
+    showMessage('This status change is not allowed.', 'error');
+    return;
+  }
 
-      // ── 7. Send notification to student ───────────────────────────────
-      if (item.studentId) {
-        const messages = {
-          'Approved':        `Your booking (${bookingId}) has been approved. Please wait for key handover before making payment.`,
-          'Pending Payment': `You have collected your room key for booking (${bookingId}). Please log in to complete your payment.`,
-          'Rejected':        `Your booking (${bookingId}) has been declined. Please contact the housing office for more information.`,
-        };
-        if (messages[newStatus]) {
-          await sendNotification(item.studentId.trim(), 'Booking Status Update', messages[newStatus], bookingId);
-        }
-      }
+  btn.disabled = true;
+  const orig = btn.innerHTML;
+  btn.innerHTML = '<i class="bi bi-hourglass-split"></i> Saving...';
 
-    } catch (err) {
-      showMessage('Update failed: ' + err.message, 'error');
-      btn.disabled = false;
-      btn.innerHTML = orig;
+  try {
+    const { error: resError } = await db
+      .from('reservations')
+      .update({ status: newStatus })
+      .eq('reservation_id', bookingId);
+    if (resError) throw resError;
+
+    let direction = null;
+    if (oldStatus === 'Pending' && newStatus === 'Approved') {
+      direction = 'deduct';
+    } else if (oldStatus === 'Approved' && newStatus === 'Rejected') {
+      direction = 'restore';
     }
-  }
 
-  // ── ADJUST ROOM AVAILABILITY ───────────────────────────────────────────────
-  // Reads direction from roomAdjustDirection[bookingId] ('deduct' or 'restore')
-  // Matches College_Room row using COLLEGE_ID_MAP + ROOM_ID_MAP
-  async function adjustRoomAvailability(college, roomType, bookingId) {
-    const direction = roomAdjustDirection[bookingId];
-    if (!direction) return;
-
-    try {
-      // Resolve College_id and Room_id from the maps
-      const collegeId = COLLEGE_ID_MAP[college];
-      const roomId    = ROOM_ID_MAP[roomType];
-
-      if (!collegeId || !roomId) {
-        console.warn('[Room] No mapping for:', { college, roomType });
-        showRoomToast(
-          `⚠ No mapping for "${college} / ${roomType}". Room count NOT updated.`, true
-        );
-        return;
-      }
-
-      // Fetch the matching College_Room row
-      const { data: row, error: fetchErr } = await db
-        .from('College_Room')
-        .select('id, Room_available, Room_total')
-        .eq('College_id', collegeId)
-        .eq('Room_id', roomId)
-        .single();
-
-      if (fetchErr || !row) {
-        console.warn('[Room] Row not found:', { collegeId, roomId });
-        showRoomToast(
-          `⚠ College_Room row not found for ${collegeId} / ${roomId}. Room count NOT updated.`, true
-        );
-        return;
-      }
-
-      const current = row.Room_available;
-      let updated;
-
-      if (direction === 'deduct') {
-        if (current <= 0) {
-          showRoomToast(`⚠ ${college} / ${roomType} is already at 0 available rooms.`, true);
-          return;
-        }
-        updated = current - 1;
-      } else {
-        // restore — cap at Room_total
-        updated = Math.min(row.Room_total, current + 1);
-      }
-
-      const { error: updateErr } = await db
-        .from('College_Room')
-        .update({ Room_available: updated })
-        .eq('id', row.id);
-
-      if (updateErr) throw updateErr;
-
-      const verb = direction === 'deduct' ? 'Deducted' : 'Restored';
-      console.log(`[Room] ${verb}: ${collegeId}/${roomId} ${current} → ${updated}`);
-      showRoomToast(`✓ ${verb} room: ${college} / ${roomType}  (${current} → ${updated})`);
-
-    } catch (err) {
-      console.error('[Room Availability] Error:', err.message);
-      showRoomToast(`⚠ Room update failed: ${err.message}`, true);
-    } finally {
-      delete roomAdjustDirection[bookingId];
+    if (direction) {
+      roomAdjustDirection[bookingId] = direction;
+      await adjustRoomAvailability(item.college, item.roomType, bookingId);
     }
-  }
 
-  // ── DELETE (admin only) ────────────────────────────────────────────────────
-  function confirmDelete(bookingId, btn) {
-    if (!isAdmin) return;
-    btn.style.display = 'none';
-    const wrap = document.createElement('div');
-    wrap.className = 'confirm-wrap';
-    wrap.style.marginTop = '4px';
-    wrap.innerHTML = `
-      <span>Delete?</span>
-      <button class="btn-yes" onclick="executeDelete('${bookingId}',this)">Yes</button>
-      <button class="btn-no"  onclick="renderBookings()">No</button>`;
-    btn.parentNode.appendChild(wrap);
-  }
+    item.status = newStatus;
+    renderBookings();
+    showMessage(`Booking ${bookingId} updated to "${newStatus}".`);
 
-  async function executeDelete(bookingId, btn) {
-    if (!isAdmin) return;
-    btn.disabled = true;
-    try {
-      const { error } = await db
-        .from('reservations')
-        .delete()
-        .eq('reservation_id', bookingId);
-      if (error) throw error;
-      bookings = bookings.filter(b => b.bookingId !== bookingId);
-      renderBookings();
-      showMessage('Record deleted.');
-    } catch (err) {
-      showMessage('Delete failed: ' + err.message, 'error');
-      renderBookings();
+    if (item.studentId) {
+      const messages = {
+        'Approved':        `Your booking (${bookingId}) has been approved. Please wait for key handover before making payment.`,
+        'Pending Payment': `You have collected your room key for booking (${bookingId}). Please log in to complete your payment.`,
+        'Paid':            `Payment received! Your booking (${bookingId}) is officially secured. Thank you.`,
+        'Rejected':        `Your booking (${bookingId}) has been declined. Please contact the housing office for more information.`,
+      };
+      
+      if (messages[newStatus]) {
+        await sendNotification(item.studentId.trim(), 'Booking Status Update', messages[newStatus], bookingId);
+      }
     }
+
+  } catch (err) {
+    showMessage('Update failed: ' + err.message, 'error');
+    btn.disabled = false;
+    btn.innerHTML = orig;
   }
+}
+
+// ── DELETE (admin only) ────────────────────────────────────────────────────
+async function executeDelete(bookingId, btn) {
+  if (!isAdmin) return;
+  btn.disabled = true;
+  
+  // Find item before deletion to grab student details for notification
+  const item = bookings.find(b => b.bookingId === bookingId);
+  
+  try {
+    const { error } = await db
+      .from('reservations')
+      .delete()
+      .eq('reservation_id', bookingId);
+    if (error) throw error;
+
+    // Send a cancellation/deletion notice to the student if relevant
+    if (item && item.studentId) {
+      await sendNotification(
+        item.studentId.trim(), 
+        'Booking Cancellation', 
+        `Your booking (${bookingId}) has been removed or canceled by the admin team. Please contact administration if you think this is a mistake.`, 
+        bookingId
+      );
+    }
+
+    bookings = bookings.filter(b => b.bookingId !== bookingId);
+    renderBookings();
+    showMessage('Record deleted.');
+  } catch (err) {
+    showMessage('Delete failed: ' + err.message, 'error');
+    renderBookings();
+  }
+}
+
+// ── NOTIFICATIONS GENERATOR ───────────────────────────────────────────────
+async function sendNotification(studentId, type, message, bookingId) {
+  try {
+    const dedupKey = `${type}__${bookingId}`;
+    
+    // Clear out old notifications matching this type and booking ID to minimize clutter
+    await db.from('notifications')
+      .delete()
+      .eq('student_id', studentId)
+      .eq('type', dedupKey);
+      
+    // Insert the clean notification
+    await db.from('notifications').insert({
+      student_id: studentId,
+      type:       dedupKey,
+      message,
+      read:       false,
+      created_at: new Date().toISOString(),
+    });
+    console.log(`[Notification Sent] To: ${studentId} | Type: ${type}`);
+  } catch (err) {
+    console.error('Notification error:', err.message);
+  }
+}
 
   // ── PASSIVE NOTIFICATIONS (overdue payment reminders) ─────────────────────
   let notifChecked = false;
