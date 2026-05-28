@@ -20,26 +20,10 @@
   <link href="../vendor/aos/aos.css" rel="stylesheet">
   <link href="../vendor/swiper/swiper-bundle.min.css" rel="stylesheet">
 
+  <link href="../notification.css" rel="stylesheet">
   <link href="../main.css" rel="stylesheet">
   
   <style>
-    .notification-wrapper {
-      position: relative;
-    }
-    .notification-dropdown {
-      position: absolute;
-      top: 45px;
-      right: 0;
-      width: 320px;
-      background: white;
-      border-radius: 12px;
-      box-shadow: 0 5px 25px rgba(0,0,0,0.15);
-      z-index: 1000;
-      display: none;
-    }
-    .notification-dropdown.show {
-      display: block;
-    }
     .user-profile {
       position: relative;
       cursor: pointer;
@@ -96,14 +80,6 @@
       gap: 20px;
       margin-left: auto;
     }
-    .notification-btn {
-      background: none;
-      border: none;
-      font-size: 22px;
-      color: #2c3e50;
-      cursor: pointer;
-      position: relative;
-    }
   </style>
 </head>
 
@@ -134,20 +110,28 @@
       </div>
 
     <div class="notification-wrapper">
-      <button class="notification-btn" id="notificationBtn" title="Notifications">
-        <i class="bi bi-bell-fill"></i>
-        <span class="notification-badge" id="notificationBadge" onclick="markAllNotificationsAsRead(); event.stopPropagation();"style="display: none;">0</span>
-      </button>
+    <button class="notification-btn" id="notificationBtn" title="Notifications">
+    <i class="bi bi-bell-fill"></i>
+    <span class="notification-badge" 
+          id="notificationBadge" 
+          style="display: none;">0</span>
+    </button>
+  
+    <div class="notification-dropdown" id="notificationDropdown">
+    <div class="notification-dropdown-header">
+      <h4><i class="bi bi-bell-fill"></i> Notifications</h4>
       
-      <div class="notification-dropdown" id="notificationDropdown">
-        <div class="notification-dropdown-header" onclick="markNotificationAsRead();">
-          <h4><i class="bi bi-bell-fill"></i> Notifications</h4>
-          <a href="#" class="mark-all-link" id="markAllNotifications">Mark all as read</a>
-        </div>
-        <div class="notification-list" id="notificationList"></div>
-      </div>
+      <a href="#" 
+         class="mark-all-link" 
+         id="markAllNotifications" 
+         onclick="event.preventDefault(); markAllNotificationsAsRead();">
+         Mark all as read
+      </a>
     </div>
-
+    
+    <div class="notification-list" id="notificationList"></div>
+  </div>
+</div>
       <div class="user-profile">
         <div class="user-avatar">
           <div class="avatar-placeholder" id="avatarInitial">S</div>
@@ -288,6 +272,7 @@
 <script src="../vendor/swiper/swiper-bundle.min.js"></script>
 <script src="../vendor/purecounter/purecounter_vanilla.js"></script>
 
+<script src="../notification.js" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="../supabase.js"></script>
 <script src="../main.js"></script>
@@ -412,157 +397,6 @@
     renderCollegeCards();
     renderPictures();
 
-document.addEventListener('DOMContentLoaded', function() {
-  const notifBtn = document.getElementById('notificationBtn');
-  const notifDropdown = document.getElementById('notificationDropdown');
-  const markAllLink = document.getElementById('markAllNotifications');
-
-  // Set the initial hidden state explicitly via JS since we aren't modifying CSS
-  if (notifDropdown) {
-    notifDropdown.style.display = 'none';
-  }
-
-  if (notifBtn && notifDropdown) {
-    // 1. Handle Bell Click Toggle via direct inline styles
-    notifBtn.addEventListener('click', function(e) {
-      e.stopPropagation(); // Prevents the document click event from closing it instantly
-      
-      if (notifDropdown.style.display === 'none') {
-        notifDropdown.style.display = 'block';
-        loadStudentNotifications(); // Fetch fresh data from Supabase
-      } else {
-        notifDropdown.style.display = 'none';
-      }
-    });
-
-    // 2. Hide dropdown if the user clicks anywhere else on the document
-    document.addEventListener('click', function() {
-      notifDropdown.style.display = 'none';
-    });
-
-    // 3. Prevent the dropdown from self-closing when clicking internal elements
-    notifDropdown.style.display = 'none';
-    notifDropdown.addEventListener('click', function(e) {
-      e.stopPropagation();
-    });
-  }
-
-  if (markAllLink) {
-    markAllLink.addEventListener('click', async function(e) {
-      e.preventDefault();
-      await markAllNotificationsAsRead();
-    });
-  }
-});
-
-window.notifications = window.notifications || [];
-
-async function loadStudentNotifications() {
-  const badge = document.getElementById('notificationBadge');
-  const listContainer = document.getElementById('notificationList');
-  const studentId = localStorage.getItem('studentId') || localStorage.getItem('currentStudentId') || 'A21DW0000'; 
-
-  try {
-    if (typeof db === 'undefined') return;
-
-    const { data: notifications, error } = await db
-      .from('notifications')
-      .select('*')
-      .eq('student_id', studentId.trim())
-      .order('created_at', { ascending: false });
-
-    if (error) throw error;
-
-    const count = notifications ? notifications.length : 0;
-    if (badge) {
-      badge.textContent = count;
-      badge.style.display = count > 0 ? 'inline-block' : 'none';
-    }
-
-    if (!listContainer) return;
-    
-    if (!notifications || notifications.length === 0) {
-      listContainer.innerHTML = `<div style="padding: 15px; text-align: center; color: #888;">No notifications found.</div>`;
-      return;
-    }
-
-    // Clean notification item cards with NO confusing sub-buttons inside them anymore
-    listContainer.innerHTML = notifications.map(notif => {
-      const typeText = notif.type || 'Notification';
-      const messageText = notif.message || 'No description provided.';
-      
-      return `
-        <div style="padding: 15px; border-bottom: 1px solid #eee; background: #fff;" id="notif-${notif.id}">
-          <div style="display: flex; align-items: center; gap: 5px; margin-bottom: 5px; color: #b91c1c; font-weight: bold;">
-            <span>📌</span> <span>${typeText}</span>
-          </div>
-          <p style="margin: 0; font-size: 13px; color: #555; line-height: 1.4;">${messageText}</p>
-        </div>
-      `;
-    }).join('');
-
-  } catch (err) {
-    console.error('Failed to load notifications:', err.message);
-  }
-}
-
-// Single bulk delete action function
-async function markAllNotificationsAsRead() {
-  const studentId = localStorage.getItem('studentId') || localStorage.getItem('currentStudentId') || 'A21DW0000';
-  
-  try {
-    if (typeof db === 'undefined') throw new Error("Database reference missing.");
-
-    // 1. Wipe out everything for this student ID from Supabase
-    const { error } = await db
-      .from('notifications')
-      .delete()
-      .eq('student_id', studentId.trim());
-
-    if (error) throw error;
-    
-    // 2. Clear UI instantly
-    const listContainer = document.getElementById('notificationList');
-    if (listContainer) {
-      listContainer.innerHTML = `<div style="padding: 15px; text-align: center; color: #888;">No notifications found.</div>`;
-    }
-
-    const badge = document.getElementById('notificationBadge');
-    if (badge) {
-      badge.textContent = '0';
-      badge.style.display = 'none';
-    }
-
-    console.log("Database notifications completely cleared via badge click.");
-  } catch (err) {
-    console.error('Failed processing bulk purge actions:', err.message);
-  }
-}
-
-// Expose functions to layout window global context scopes safely
-window.loadStudentNotifications = loadStudentNotifications;
-window.markAllNotificationsAsRead = markAllNotificationsAsRead;
-
-if (typeof db !== 'undefined') {
-  loadStudentNotifications();
-}
-async function checkAndSendNotifications() {
-  console.log("Checking notifications pipeline for", bookings.length, "bookings...");
-  const now = new Date();
-
-  for (const item of bookings) {
-    const createdDate = new Date(item.createdAt);
-    const daysDiff = Math.ceil(Math.abs(now - createdDate) / (1000 * 60 * 60 * 24));
-    
-    console.log(`Booking ${item.bookingId}: Status = ${item.status}, Days Unpaid = ${daysDiff}`);
-    
-    if (item.status === 'Pending Payment' && daysDiff >= 7) {
-      const overdueMessage = `Your booking (${item.bookingId}) is overdue! Payment has been pending for ${daysDiff} days.`;
-      console.log(`Triggering overdue insert for student: ${item.studentId}`);
-      await sendNotificationToStudent(item.studentId, 'Overdue Payment', overdueMessage);
-    }
-  }
-}
     const userProfile = document.querySelector('.user-profile');
     const userDropdown = document.getElementById('userDropdown');
     if (userProfile && userDropdown) {

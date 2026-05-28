@@ -1,0 +1,26 @@
+.notification-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.notification-dropdown {
+  display: none; 
+  position: absolute;
+  right: 0;
+  top: 100%;
+  margin-top: 8px; /* Adds a clean gap below the bell icon */
+  width: 320px;
+  max-height: 400px;
+  background-color: #ffffff;
+  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.15);
+  border-radius: 8px;
+  z-index: 10000; /* Bumped up to stay on top of dashboard widgets */
+  overflow-y: auto; /* Changed to auto so you can scroll through many notifications */
+}
+
+/* 💥 This rule forces visibility when toggled by JavaScript */
+.notification-dropdown.show {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
