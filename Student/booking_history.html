@@ -1,165 +1,323 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="utf-8">
   <meta content="width=device-width, initial-scale=1.0" name="viewport">
   <title>My Booking History - UTMSPACE College Booking</title>
+
   <link href="../img/favicon.png" rel="icon">
   <link href="../img/apple-touch-icon.png" rel="apple-touch-icon">
+
   <link href="https://fonts.googleapis.com" rel="preconnect">
   <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&family=Montserrat:wght@400;500;600;700;800;900&family=Raleway:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
   <link href="../vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
   <link href="../vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
   <link href="../vendor/aos/aos.css" rel="stylesheet">
   <link href="../vendor/swiper/swiper-bundle.min.css" rel="stylesheet">
   <link href="../main.css" rel="stylesheet">
+
   <style>
-    .booking-history-page { padding: 60px 0; background: #f8f9fa; min-height: 100vh; }
+    .booking-history-page {
+      padding: 60px 0;
+      background: #f8f9fa;
+      min-height: 100vh;
+    }
+
     .page-header-box {
       background: linear-gradient(135deg, #6b092a, #8b0e35);
-      color: white; border-radius: 22px; padding: 35px;
-      margin-bottom: 35px; box-shadow: 0 8px 25px rgba(0,0,0,0.12);
+      color: white;
+      border-radius: 22px;
+      padding: 35px;
+      margin-bottom: 35px;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.12);
     }
-    .page-header-box h1 { color: white; font-weight: 700; margin-bottom: 10px; }
-    .page-header-box p  { margin: 0; color: rgba(255,255,255,0.85); }
+
+    .page-header-box h1 {
+      color: white;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+
+    .page-header-box p {
+      margin: 0;
+      color: rgba(255,255,255,0.85);
+    }
+
     .back-link-btn {
-      display: inline-flex; align-items: center; gap: 8px;
-      color: white; background: rgba(255,255,255,0.18);
-      padding: 8px 16px; border-radius: 30px;
-      text-decoration: none; font-weight: 600; margin-bottom: 18px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: white;
+      background: rgba(255,255,255,0.18);
+      padding: 8px 16px;
+      border-radius: 30px;
+      text-decoration: none;
+      font-weight: 600;
+      margin-bottom: 18px;
     }
-    .back-link-btn:hover { color: white; background: rgba(255,255,255,0.28); }
-    .filter-box, .table-box {
-      background: white; border-radius: 18px; padding: 25px;
-      box-shadow: 0 8px 25px rgba(0,0,0,0.08); margin-bottom: 30px;
+
+    .back-link-btn:hover {
+      color: white;
+      background: rgba(255,255,255,0.28);
     }
-    .booking-table { width: 100%; border-collapse: collapse; min-width: 1000px; }
-    .table-wrapper { overflow-x: auto; }
+
+    .filter-box,
+    .table-box {
+      background: white;
+      border-radius: 18px;
+      padding: 25px;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+      margin-bottom: 30px;
+    }
+
+    .booking-table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 1000px;
+    }
+
+    .table-wrapper {
+      overflow-x: auto;
+    }
+
     .booking-table th {
-      background: #6b092a; color: white; padding: 14px;
-      font-weight: 600; text-align: center;
+      background: #6b092a;
+      color: white;
+      padding: 14px;
+      font-weight: 600;
+      text-align: center;
     }
+
     .booking-table td {
-      padding: 14px; border-bottom: 1px solid #eee;
-      text-align: center; font-size: 14px; vertical-align: middle;
+      padding: 14px;
+      border-bottom: 1px solid #eee;
+      text-align: center;
+      font-size: 14px;
+      vertical-align: middle;
     }
-    .booking-table tr:hover { background: #fafafa; }
+
+    .booking-table tr:hover {
+      background: #fafafa;
+    }
+
     .status-badge {
-      display: inline-block; padding: 6px 14px;
-      border-radius: 20px; font-size: 12px; font-weight: 700;
+      display: inline-block;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 700;
     }
-    .status-pending         { background: #fff3cd; color: #856404; }
-    .status-approved        { background: #dbeafe; color: #1e40af; }
-    .status-pending-payment { background: #fef3c7; color: #d97706; }
-    .status-paid            { background: #dcfce7; color: #166534; }
-    .status-cancelled       { background: #fee2e2; color: #991b1b; }
+
+    .status-confirmed {
+      background: #dcfce7;
+      color: #166534;
+    }
+
+    .status-pending {
+      background: #fff3cd;
+      color: #856404;
+    }
+
+    .status-cancelled {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    .status-completed {
+      background: #e0e7ff;
+      color: #3730a3;
+    }
+
+    .view-btn {
+      background: #2c5a7a;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      padding: 7px 14px;
+      font-size: 13px;
+      font-weight: 600;
+      margin: 2px;
+      cursor: pointer;
+    }
+
+    .view-btn:hover {
+      background: #1a3c5e;
+    }
+
+    .cancel-btn {
+      background: #dc2626;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      padding: 7px 14px;
+      font-size: 13px;
+      font-weight: 600;
+      margin: 2px;
+      cursor: pointer;
+    }
+
+    .cancel-btn:hover {
+      background: #b91c1c;
+    }
+
+    .cancel-btn:disabled {
+      background: #9ca3af;
+      cursor: not-allowed;
+    }
 
     .stats-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-      gap: 20px; margin-bottom: 30px;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+      margin-bottom: 30px;
     }
+
     .stat-card {
-      background: white; border-radius: 16px; padding: 20px;
-      text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-    }
-    .stat-card i       { font-size: 35px; color: #6b092a; margin-bottom: 10px; display: block; }
-    .stat-number       { font-size: 32px; font-weight: 700; color: #1a3c5e; }
-    .stat-label        { font-size: 13px; color: #666; margin-top: 5px; }
-    .empty-state       { text-align: center; padding: 60px; color: #999; }
-    .empty-state i     { font-size: 64px; margin-bottom: 20px; display: block; }
-
-    /* Pay Now — only rendered for Pending Payment status */
-    .pay-now-btn {
-      background: linear-gradient(135deg, #d97706, #b45309);
-      color: white; border: none; border-radius: 10px;
-      padding: 8px 16px; font-size: 13px; font-weight: 600;
-      cursor: pointer; display: inline-flex; align-items: center;
-      gap: 6px; transition: all 0.2s ease;
-    }
-    .pay-now-btn:hover {
-      background: linear-gradient(135deg, #b45309, #92400e);
-      color: white; transform: translateY(-1px);
+      background: white;
+      border-radius: 16px;
+      padding: 20px;
+      text-align: center;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.05);
     }
 
-    /* Status-specific payment cell messages */
-    .payment-locked { color: #aaa; font-size: 12px; font-weight: 500; display: inline-flex; align-items: center; gap: 4px; }
-    .payment-done   { color: #166534; font-size: 13px; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; }
-    .payment-wait   { color: #1e40af; font-size: 12px; font-weight: 500; display: inline-flex; align-items: center; gap: 4px; }
+    .stat-card i {
+      font-size: 35px;
+      color: #6b092a;
+      margin-bottom: 10px;
+    }
 
-    /* Status info banner shown above table */
-    .status-info-banner {
-      display: flex; align-items: flex-start; gap: 10px;
-      background: #eff6ff; border: 1px solid #bfdbfe;
-      border-radius: 12px; padding: 14px 18px;
-      margin-bottom: 20px; font-size: 13px; color: #1e40af;
+    .stat-number {
+      font-size: 32px;
+      font-weight: 700;
+      color: #1a3c5e;
     }
-    .status-info-banner i { font-size: 18px; margin-top: 1px; flex-shrink: 0; }
 
-    /* Payment Modal */
-    .payment-modal-overlay {
-      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0,0,0,0.5); backdrop-filter: blur(3px);
-      display: flex; align-items: center; justify-content: center;
-      z-index: 9999; visibility: hidden; opacity: 0; transition: all 0.2s ease;
+    .stat-label {
+      font-size: 13px;
+      color: #666;
+      margin-top: 5px;
     }
-    .payment-modal-overlay.active { visibility: visible; opacity: 1; }
-    .payment-modal {
-      background: white; max-width: 480px; width: 90%;
-      border-radius: 24px; padding: 35px; text-align: center;
-      transform: scale(0.96); transition: transform 0.2s;
+
+    .empty-state {
+      text-align: center;
+      padding: 60px;
+      color: #999;
     }
-    .active .payment-modal { transform: scale(1); }
-    .payment-modal .modal-icon {
-      width: 80px; height: 80px;
-      background: linear-gradient(135deg, #d97706, #b45309);
-      border-radius: 50%; display: flex; align-items: center;
-      justify-content: center; margin: 0 auto 20px;
+
+    .empty-state i {
+      font-size: 64px;
+      margin-bottom: 20px;
     }
-    .payment-modal .modal-icon i { font-size: 36px; color: white; }
-    .payment-modal h3 { font-size: 22px; font-weight: 700; color: #1a3c5e; margin-bottom: 5px; }
-    .payment-summary {
-      background: #f8f9fa; border-radius: 14px;
-      padding: 18px; margin: 20px 0; text-align: left;
+
+    /* Custom Cancel Confirmation Modal */
+    .cancel-popup-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(4px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10000;
+      visibility: hidden;
+      opacity: 0;
+      transition: all 0.3s ease;
     }
-    .payment-summary-row {
-      display: flex; justify-content: space-between;
-      padding: 6px 0; font-size: 14px; border-bottom: 1px solid #eee;
+
+    .cancel-popup-overlay.active {
+      visibility: visible;
+      opacity: 1;
     }
-    .payment-summary-row:last-child { border-bottom: none; }
-    .payment-summary-row .label { color: #666; }
-    .payment-summary-row .value { font-weight: 600; color: #1a3c5e; }
-    .payment-summary-row.total .value { color: #d97706; font-size: 18px; }
-    .payment-modal-actions { display: flex; gap: 12px; justify-content: center; margin-top: 20px; }
-    .btn-cancel-pay {
-      padding: 10px 24px; border-radius: 40px; font-weight: 600;
-      cursor: pointer; border: none; background: #e2e8f0; color: #1e293b;
+
+    .cancel-popup {
+      background: white;
+      max-width: 400px;
+      width: 90%;
+      border-radius: 24px;
+      text-align: center;
+      padding: 35px 30px;
+      transform: scale(0.9);
+      transition: transform 0.3s ease;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
     }
-    .btn-proceed-pay {
-      padding: 10px 24px; border-radius: 40px; font-weight: 600;
-      cursor: pointer; border: none;
-      background: linear-gradient(135deg, #d97706, #b45309); color: white;
+
+    .cancel-popup-overlay.active .cancel-popup {
+      transform: scale(1);
     }
-    .btn-proceed-pay:hover   { background: linear-gradient(135deg, #b45309, #92400e); }
-    .btn-proceed-pay:disabled { opacity: 0.6; cursor: not-allowed; }
-    .spinner {
-      display: none; width: 16px; height: 16px;
-      border: 2px solid rgba(255,255,255,0.3); border-top-color: white;
-      border-radius: 50%; animation: spin 0.8s linear infinite; margin-left: 6px;
+
+    .cancel-popup i {
+      font-size: 60px;
+      color: #dc2626;
+      margin-bottom: 20px;
     }
-    @keyframes spin { to { transform: rotate(360deg); } }
-    .toyyibpay-logo { font-size: 12px; color: #999; margin-top: 12px; }
-    .toyyibpay-logo strong { color: #6b092a; }
+
+    .cancel-popup h3 {
+      font-size: 22px;
+      font-weight: 700;
+      color: #1a3c5e;
+      margin-bottom: 12px;
+    }
+
+    .cancel-popup p {
+      font-size: 14px;
+      color: #666;
+      margin-bottom: 25px;
+      line-height: 1.6;
+    }
+
+    .cancel-popup-actions {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+    }
+
+    .cancel-popup-actions button {
+      padding: 10px 24px;
+      border-radius: 40px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+    }
+
+    .btn-no {
+      background: #e2e8f0;
+      color: #1e293b;
+    }
+
+    .btn-yes {
+      background: #dc2626;
+      color: white;
+    }
+
+    .btn-yes:hover {
+      background: #b91c1c;
+    }
+
+    .action-cell {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
   </style>
 </head>
+
 <body class="index-page">
 
 <header id="header" class="logo d-flex align-items-center" style="margin-right: auto;">
   <div class="container position-relative d-flex align-items-center">
+
     <a href="dashboard.html" class="logo d-flex align-items-center">
-      <img src="../img/spacelogo.png" alt="UTM Space Logo" style="height:50px;width:auto;max-height:60px;">
+      <img src="../img/spacelogo.png" alt="UTM Space Logo" style="height: 50px; width: auto; max-height:60px;">
     </a>
+
     <nav id="navmenu" class="navmenu">
       <ul>
         <li><a href="dashboard.html">Home</a></li>
@@ -170,13 +328,18 @@
       </ul>
       <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>
     </nav>
+
     <div class="header-actions">
+
       <div class="header-social-links">
-        <a href="https://www.facebook.com/utmspace/" target="_blank" rel="noopener noreferrer"><i class="bi bi-facebook"></i></a>
-        <a href="https://www.instagram.com/spaceutm_official/?hl=en" target="_blank" rel="noopener noreferrer"><i class="bi bi-instagram"></i></a>
+        <a href="https://www.facebook.com/utmspace/" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><i class="bi bi-facebook"></i></a>
+        <a href="https://www.instagram.com/spaceutm_official/?hl=en" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><i class="bi bi-instagram"></i></a>
       </div>
+
       <div class="notification-wrapper">
-        <button class="notification-btn" id="notificationBtn" title="Notifications"><i class="bi bi-bell-fill"></i></button>
+        <button class="notification-btn" id="notificationBtn" title="Notifications">
+          <i class="bi bi-bell-fill"></i>
+        </button>
         <div class="notification-dropdown" id="notificationDropdown">
           <div class="notification-dropdown-header">
             <h4><i class="bi bi-bell-fill"></i> Notifications</h4>
@@ -185,23 +348,30 @@
           <div class="notification-list" id="notificationList"></div>
         </div>
       </div>
+
       <div class="user-profile">
-        <div class="user-avatar"><div class="avatar-placeholder" id="avatarInitial">S</div></div>
+        <div class="user-avatar">
+          <div class="avatar-placeholder" id="avatarInitial">S</div>
+        </div>
+
         <div class="user-dropdown">
           <div class="dropdown-header">
             <div class="user-info">
-              <div class="user-name"  id="dropdownUserName">Student name</div>
-              <div class="user-role"  id="dropdownUserRole">Student</div>
-              <div class="user-email" id="dropdownUserEmail">email@graduate.utm.my</div>
+              <div class="user-name" id="dropdownUserName">Student name</div>
+              <div class="user-role" id="dropdownUserRole">Student</div>
+              <div class="user-email" id="dropdownUserEmail">Their email@gmail.com</div>
             </div>
           </div>
+
           <ul class="dropdown-menu-list">
             <li><a href="userprofile_student.html"><i class="bi bi-person-circle"></i> Profile</a></li>
             <li><a href="index.html" id="logoutBtn"><i class="bi bi-box-arrow-right"></i> Logout</a></li>
           </ul>
         </div>
       </div>
+
     </div>
+
   </div>
 </header>
 
@@ -213,34 +383,29 @@
         <i class="bi bi-arrow-left"></i> Back to Profile
       </a>
       <h1><i class="bi bi-clock-history"></i> My Booking History</h1>
-      <p>Track your booking status and make payment after key collection.</p>
+      <p>View all your room booking records and track their status</p>
     </div>
 
     <div class="stats-grid" id="statsGrid">
       <div class="stat-card">
         <i class="bi bi-calendar-check"></i>
-        <div class="stat-number" id="statTotal">0</div>
+        <div class="stat-number" id="totalBookings">0</div>
         <div class="stat-label">Total Bookings</div>
       </div>
       <div class="stat-card">
+        <i class="bi bi-check-circle-fill"></i>
+        <div class="stat-number" id="confirmedBookings">0</div>
+        <div class="stat-label">Confirmed</div>
+      </div>
+      <div class="stat-card">
         <i class="bi bi-hourglass-split"></i>
-        <div class="stat-number" id="statPending">0</div>
-        <div class="stat-label">Pending Review</div>
+        <div class="stat-number" id="pendingBookings">0</div>
+        <div class="stat-label">Pending</div>
       </div>
       <div class="stat-card">
-        <i class="bi bi-check-circle"></i>
-        <div class="stat-number" id="statApproved">0</div>
-        <div class="stat-label">Approved</div>
-      </div>
-      <div class="stat-card">
-        <i class="bi bi-key-fill"></i>
-        <div class="stat-number" id="statPendingPayment">0</div>
-        <div class="stat-label">Pending Payment</div>
-      </div>
-      <div class="stat-card">
-        <i class="bi bi-credit-card-fill"></i>
-        <div class="stat-number" id="statPaid">0</div>
-        <div class="stat-label">Paid</div>
+        <i class="bi bi-x-circle-fill"></i>
+        <div class="stat-number" id="cancelledBookings">0</div>
+        <div class="stat-label">Cancelled</div>
       </div>
     </div>
 
@@ -248,40 +413,30 @@
       <div class="row gy-3">
         <div class="col-md-6">
           <label class="form-label fw-semibold">Filter by Status</label>
-          <select class="form-select" id="statusFilter" onchange="renderBookings()">
+          <select class="form-select" id="statusFilter" onchange="filterBookings()">
             <option value="All">All Status</option>
+            <option value="Confirmed">Confirmed</option>
             <option value="Pending">Pending</option>
-            <option value="Approved">Approved</option>
             <option value="Pending Payment">Pending Payment</option>
-            <option value="Paid">Paid</option>
-            <option value="Rejected">Rejected</option>
             <option value="Cancelled">Cancelled</option>
           </select>
         </div>
+
         <div class="col-md-6">
           <label class="form-label fw-semibold">Filter by College</label>
-          <select class="form-select" id="collegeFilter" onchange="renderBookings()">
+          <select class="form-select" id="collegeFilter" onchange="filterBookings()">
             <option value="All">All Colleges</option>
-            <option value="KP">Perdana Residence (KP)</option>
+            <option value="Perdana Residence Block U7">Perdana Residence Block U7</option>
             <option value="Kolej 9">Kolej 9</option>
             <option value="Kolej 10">Kolej 10</option>
-            <option value="KLG">KLG Campus Residence</option>
+            <option value="KLG Campus Residence">KLG Campus Residence</option>
           </select>
         </div>
       </div>
     </div>
 
     <div class="table-box">
-      <h3 class="mb-3">Your Booking Records</h3>
-
-      <!-- Info banner explaining the flow to students -->
-      <div class="status-info-banner">
-        <i class="bi bi-info-circle-fill"></i>
-        <div>
-          <strong>How it works:</strong> Submit booking → Admin approves → Collect your room key →
-          Admin marks "Key Handed" → Pay Now button unlocks → Complete payment.
-        </div>
-      </div>
+      <h3 class="mb-4">Your Booking Records</h3>
 
       <div class="table-wrapper">
         <table class="booking-table">
@@ -295,17 +450,10 @@
               <th>Check-Out</th>
               <th>Total Amount</th>
               <th>Status</th>
-              <th>Payment</th>
+              <th>Action</th>
             </tr>
           </thead>
-          <tbody id="bookingTableBody">
-            <tr>
-              <td colspan="9" class="empty-state">
-                <i class="bi bi-hourglass-split"></i>
-                <p>Loading your bookings...</p>
-              </td>
-            </tr>
-          </tbody>
+          <tbody id="bookingTableBody"></tbody>
         </table>
       </div>
     </div>
@@ -313,48 +461,32 @@
   </div>
 </main>
 
-<!-- Payment Confirmation Modal -->
-<div id="paymentModal" class="payment-modal-overlay">
-  <div class="payment-modal">
-    <div class="modal-icon"><i class="bi bi-key-fill"></i></div>
-    <h3>Complete Payment</h3>
-    <p style="color:#666;font-size:14px;">You will be redirected to ToyyibPay to complete your payment.</p>
-    <div class="payment-summary">
-      <div class="payment-summary-row">
-        <span class="label">Booking ID</span>
-        <span class="value" id="modal-reservation-id">-</span>
+<!-- Cancel Confirmation Popup -->
+<div class="cancel-popup-overlay" id="cancelPopup">
+  <div class="cancel-popup">
+    <i class="bi bi-exclamation-triangle-fill"></i>
+    <h3>Cancel Reservation?</h3>
+    <p id="cancelMessage">Are you sure you want to cancel this reservation? This action cannot be undone.</p>
+    <div class="cancel-popup-actions">
+      <button class="btn-no" id="cancelNoBtn">No, Go Back</button>
+      <button class="btn-yes" id="cancelYesBtn">Yes, Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- Booking Details Modal -->
+<div class="modal fade" id="bookingModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title"><i class="bi bi-file-earmark-text"></i> Booking Details</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
-      <div class="payment-summary-row">
-        <span class="label">College</span>
-        <span class="value" id="modal-college">-</span>
-      </div>
-      <div class="payment-summary-row">
-        <span class="label">Room Type</span>
-        <span class="value" id="modal-room-type">-</span>
-      </div>
-      <div class="payment-summary-row">
-        <span class="label">Check-In</span>
-        <span class="value" id="modal-checkin">-</span>
-      </div>
-      <div class="payment-summary-row">
-        <span class="label">Check-Out</span>
-        <span class="value" id="modal-checkout">-</span>
-      </div>
-      <div class="payment-summary-row total">
-        <span class="label" style="font-weight:700;">Total Amount</span>
-        <span class="value" id="modal-amount">RM 0</span>
+      <div class="modal-body" id="bookingDetails"></div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
       </div>
     </div>
-    <div class="payment-modal-actions">
-      <button class="btn-cancel-pay" id="cancelPayBtn">Cancel</button>
-      <button class="btn-proceed-pay" id="proceedPayBtn">
-        <i class="bi bi-lock-fill"></i> Pay Now
-        <span class="spinner" id="paySpinner"></span>
-      </button>
-    </div>
-    <p class="toyyibpay-logo">
-      <i class="bi bi-shield-check"></i> Secured by <strong>ToyyibPay</strong> — FPX Online Banking
-    </p>
   </div>
 </div>
 
@@ -368,8 +500,8 @@
           </a>
           <p class="tagline">Transforming the way colleges book, manage, and connect — with modern simplicity.</p>
           <div class="social-links mt-4">
-            <a href="https://www.facebook.com/utmspace/" target="_blank" rel="noopener noreferrer"><i class="bi bi-facebook"></i></a>
-            <a href="https://www.instagram.com/spaceutm_official/?hl=en" target="_blank" rel="noopener noreferrer"><i class="bi bi-instagram"></i></a>
+            <a href="https://www.facebook.com/utmspace/" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><i class="bi bi-facebook"></i></a>
+            <a href="https://www.instagram.com/spaceutm_official/?hl=en" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><i class="bi bi-instagram"></i></a>
           </div>
         </div>
       </div>
@@ -389,7 +521,13 @@
   </div>
   <div class="footer-bottom">
     <div class="container">
-      <p class="mb-0">© <strong>UTMSPACE</strong>. All rights reserved.</p>
+      <div class="row">
+        <div class="col-12">
+          <div class="footer-bottom-content">
+            <p class="mb-0">© <strong>UTMSPACE</strong>. All rights reserved.</p>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </footer>
@@ -397,326 +535,294 @@
 <a href="#" id="scroll-top" class="scroll-top d-flex align-items-center justify-content-center">
   <i class="bi bi-arrow-up-short"></i>
 </a>
+
 <div id="preloader"></div>
 
 <script src="../vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="../vendor/php-email-form/validate.js"></script>
 <script src="../vendor/aos/aos.js"></script>
 <script src="../vendor/swiper/swiper-bundle.min.js"></script>
 <script src="../vendor/purecounter/purecounter_vanilla.js"></script>
+
 <script src="../main.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="../supabase.js"></script>
 
 <script>
-  // ── TOYYIBPAY CONFIG ───────────────────────────────────────────────────────
-  const TOYYIBPAY_URL          = 'https://dev.toyyibpay.com'; // sandbox
-  // const TOYYIBPAY_URL       = 'https://toyyibpay.com';     // live
-  const TOYYIBPAY_SECRET_KEY   = 'YOUR_SANDBOX_SECRET_KEY';
-  const TOYYIBPAY_CATEGORY_CODE = 'YOUR_CATEGORY_CODE';
+  let bookings = [];
+  let studentId = null;
+  let pendingCancelId = null;
 
-  // ── STATE ──────────────────────────────────────────────────────────────────
-  let bookings       = [];
-  let studentId      = null;
-  let studentEmail   = null;
-  let studentName    = null;
-  let studentPhone   = null;
-  let selectedBooking = null; // keyed by reservation_id, never array index
+  function getStatusClass(status) {
+    const lowerStatus = (status || '').toLowerCase();
+    if (lowerStatus === 'confirmed' || lowerStatus === 'approved') return 'status-confirmed';
+    if (lowerStatus === 'cancelled' || lowerStatus === 'rejected') return 'status-cancelled';
+    if (lowerStatus === 'completed') return 'status-completed';
+    return 'status-pending';
+  }
 
-  // ── INIT ───────────────────────────────────────────────────────────────────
   async function loadStudentInfo() {
     const email = localStorage.getItem('studentEmail');
-    if (!email) { window.location.href = 'index.html'; return; }
-    studentEmail = email;
+    if (!email) {
+      window.location.href = 'index.html';
+      return;
+    }
 
     const { data, error } = await db
       .from('Student')
-      .select('student_id, name, telephone')
+      .select('student_id, name')
       .eq('email', email)
       .single();
 
-    if (error || !data) { console.error('Student load error:', error); return; }
+    if (error || !data) {
+      console.error('Error loading student:', error);
+      return;
+    }
 
-    studentId    = data.student_id;
-    studentName  = data.name;
-    studentPhone = data.telephone;
-
-    document.getElementById('avatarInitial').textContent     = (data.name || 'S').charAt(0).toUpperCase();
-    document.getElementById('dropdownUserName').textContent  = data.name;
+    studentId = data.student_id;
+    
+    const initial = data.name ? data.name.charAt(0).toUpperCase() : 'S';
+    document.getElementById('avatarInitial').textContent = initial;
+    document.getElementById('dropdownUserName').textContent = data.name;
     document.getElementById('dropdownUserEmail').textContent = email;
-    document.getElementById('dropdownUserRole').textContent  = 'Student';
+    document.getElementById('dropdownUserRole').textContent = 'Student';
 
     await fetchBookings();
   }
 
-  // ── FETCH ──────────────────────────────────────────────────────────────────
   async function fetchBookings() {
     if (!studentId) return;
+
     try {
       const { data, error } = await db
         .from('reservations')
         .select('*')
         .eq('student_id', studentId)
         .order('created_at', { ascending: false });
+
       if (error) throw error;
+
       bookings = data || [];
       updateStats();
       renderBookings();
     } catch (err) {
-      console.error('Fetch error:', err.message);
-      document.getElementById('bookingTableBody').innerHTML =
-        `<tr><td colspan="9" class="empty-state">
-          <i class="bi bi-exclamation-triangle-fill"></i>
-          <p>Error loading bookings. Please try again.</p>
-        </td></tr>`;
+      console.error('Error fetching bookings:', err.message);
+      document.getElementById('bookingTableBody').innerHTML = `
+        <tr>
+          <td colspan="9" class="empty-state">
+            <i class="bi bi-exclamation-triangle-fill"></i>
+            <p>Error loading your bookings. Please try again later.</p>
+          </td>
+        </tr>
+      `;
     }
   }
 
-  // ── STATS ──────────────────────────────────────────────────────────────────
   function updateStats() {
-    document.getElementById('statTotal').textContent          = bookings.length;
-    document.getElementById('statPending').textContent        = bookings.filter(b => b.status === 'Pending').length;
-    document.getElementById('statApproved').textContent       = bookings.filter(b => b.status === 'Approved').length;
-    document.getElementById('statPendingPayment').textContent = bookings.filter(b => b.status === 'Pending Payment').length;
-    document.getElementById('statPaid').textContent           = bookings.filter(b => b.status === 'Paid').length;
+    const total = bookings.length;
+    const confirmed = bookings.filter(b => b.status === 'Confirmed' || b.status === 'Approved').length;
+    const pending = bookings.filter(b => b.status === 'Pending' || b.status === 'Pending Payment').length;
+    const cancelled = bookings.filter(b => b.status === 'Cancelled' || b.status === 'Rejected').length;
+
+    document.getElementById('totalBookings').textContent = total;
+    document.getElementById('confirmedBookings').textContent = confirmed;
+    document.getElementById('pendingBookings').textContent = pending;
+    document.getElementById('cancelledBookings').textContent = cancelled;
   }
 
-  // ── RENDER ─────────────────────────────────────────────────────────────────
   function renderBookings() {
-    const tbody         = document.getElementById('bookingTableBody');
-    const statusFilter  = document.getElementById('statusFilter').value;
+    const tbody = document.getElementById('bookingTableBody');
+    const statusFilter = document.getElementById('statusFilter').value;
     const collegeFilter = document.getElementById('collegeFilter').value;
 
     let filtered = bookings;
-    if (statusFilter  !== 'All') filtered = filtered.filter(b => b.status  === statusFilter);
-    if (collegeFilter !== 'All') filtered = filtered.filter(b => b.college === collegeFilter);
+
+    if (statusFilter !== 'All') {
+      filtered = filtered.filter(b => b.status === statusFilter);
+    }
+
+    if (collegeFilter !== 'All') {
+      filtered = filtered.filter(b => b.college === collegeFilter);
+    }
 
     if (filtered.length === 0) {
-      tbody.innerHTML = `<tr><td colspan="9" class="empty-state">
-        <i class="bi bi-inbox"></i><p>No bookings found.</p></td></tr>`;
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="9" class="empty-state">
+            <i class="bi bi-inbox"></i>
+            <p>No bookings found.</p>
+          </td>
+        </tr>
+      `;
       return;
     }
 
     tbody.innerHTML = filtered.map((booking, index) => {
-      const checkIn  = booking.check_in  ? booking.check_in.substring(0, 10)  : '-';
+      const checkIn = booking.check_in ? booking.check_in.substring(0, 10) : '-';
       const checkOut = booking.check_out ? booking.check_out.substring(0, 10) : '-';
-      const amount   = booking.total_amount
-        ? `RM ${parseFloat(booking.total_amount).toFixed(2)}` : '-';
-
-      // ── Payment cell — strict gate on Pending Payment only ──
-      //
-      // Pending        → locked (awaiting admin approval)
-      // Approved       → locked (key not yet handed over)
-      // Pending Payment→ PAY NOW button (key handed, payment due)
-      // Paid           → done
-      // Rejected/Cancel→ not available
-
-      let paymentCell = '';
-      switch (booking.status) {
-        case 'Pending':
-          paymentCell = `<span class="payment-locked">
-            <i class="bi bi-lock-fill"></i> Awaiting approval</span>`;
-          break;
-
-        case 'Approved':
-          paymentCell = `<span class="payment-wait">
-            <i class="bi bi-key"></i> Awaiting key handover</span>`;
-          break;
-
-        case 'Pending Payment':
-          // This is the only status where Pay Now is shown
-          paymentCell = `
-            <button class="pay-now-btn"
-              onclick="openPaymentModal('${booking.reservation_id}')">
-              <i class="bi bi-credit-card-fill"></i> Pay Now
-            </button>`;
-          break;
-
-        case 'Paid':
-          paymentCell = `<span class="payment-done">
-            <i class="bi bi-check-circle-fill"></i> Paid</span>`;
-          break;
-
-        default:
-          paymentCell = `<span class="payment-locked">Not available</span>`;
-      }
+      const totalAmount = booking.total_amount ? `RM ${booking.total_amount}` : 'RM 0';
+      const canCancel = booking.status === 'Pending' || booking.status === 'Pending Payment';
 
       return `
-        <tr>
-          <td>${index + 1}</td>
-          <td><strong>${booking.reservation_id || 'N/A'}</strong></td>
-          <td>${booking.college   || '-'}</td>
-          <td>${booking.room_type || '-'}</td>
-          <td>${checkIn}</td>
-          <td>${checkOut}</td>
-          <td><strong>${amount}</strong></td>
-          <td><span class="status-badge ${getStatusClass(booking.status)}">${booking.status || 'Pending'}</span></td>
-          <td>${paymentCell}</td>
-        </tr>`;
+      <tr>
+        <td>${index + 1}</td>
+        <td><strong>${booking.reservation_id || 'N/A'}</strong></td>
+        <td>${booking.college || '-'}</td>
+        <td>${booking.room_type || '-'}</td>
+        <td>${checkIn}</td>
+        <td>${checkOut}</td>
+        <td>${totalAmount}</td>
+        <td><span class="status-badge ${getStatusClass(booking.status)}">${booking.status || 'Pending'}</span></td>
+        <td class="action-cell">
+          <button class="view-btn" onclick="viewBookingDetails(${bookings.indexOf(booking)})">
+            <i class="bi bi-eye"></i> View
+          </button>
+          ${canCancel ? `<button class="cancel-btn" onclick="openCancelPopup('${booking.reservation_id}')">
+            <i class="bi bi-x-circle"></i> Cancel
+          </button>` : ''}
+        </td>
+      </tr>
+      `;
     }).join('');
   }
 
-  function renderBookings_filter() { renderBookings(); } // alias for onchange
+  function viewBookingDetails(index) {
+    const booking = bookings[index];
+    
+    const checkIn = booking.check_in ? booking.check_in.substring(0, 10) : '-';
+    const checkOut = booking.check_out ? booking.check_out.substring(0, 10) : '-';
+    
+    document.getElementById('bookingDetails').innerHTML = `
+      <div class="row">
+        <div class="col-6">
+          <p><strong><i class="bi bi-upc-scan"></i> Booking ID:</strong></p>
+          <p><strong><i class="bi bi-building"></i> College:</strong></p>
+          <p><strong><i class="bi bi-door-open"></i> Room Type:</strong></p>
+          <p><strong><i class="bi bi-calendar-check"></i> Check-In Date:</strong></p>
+          <p><strong><i class="bi bi-calendar-x"></i> Check-Out Date:</strong></p>
+          <p><strong><i class="bi bi-currency-ringgit"></i> Total Amount:</strong></p>
+          <p><strong><i class="bi bi-info-circle"></i> Status:</strong></p>
+          <p><strong><i class="bi bi-clock"></i> Booking Date:</strong></p>
+        </div>
+        <div class="col-6">
+          <p>${booking.reservation_id || 'N/A'}</p>
+          <p>${booking.college || '-'}</p>
+          <p>${booking.room_type || '-'}</p>
+          <p>${checkIn}</p>
+          <p>${checkOut}</p>
+          <p><strong>RM ${booking.total_amount || 0}</strong></p>
+          <p><span class="status-badge ${getStatusClass(booking.status)}">${booking.status || 'Pending'}</span></p>
+          <p>${booking.created_at ? booking.created_at.substring(0, 10) : '-'}</p>
+        </div>
+      </div>
+    `;
 
-  // ── PAYMENT MODAL ──────────────────────────────────────────────────────────
-  // FIX: keyed on reservation_id — safe with any active filter
-  function openPaymentModal(reservationId) {
-    selectedBooking = bookings.find(b => b.reservation_id === reservationId);
-    if (!selectedBooking) return;
-
-    // Hard gate — must be Pending Payment
-    if (selectedBooking.status !== 'Pending Payment') {
-      alert('Payment is only available after your room key has been handed over.');
-      return;
-    }
-
-    document.getElementById('modal-reservation-id').textContent = selectedBooking.reservation_id || '-';
-    document.getElementById('modal-college').textContent        = selectedBooking.college    || '-';
-    document.getElementById('modal-room-type').textContent      = selectedBooking.room_type  || '-';
-    document.getElementById('modal-checkin').textContent        = selectedBooking.check_in
-      ? selectedBooking.check_in.substring(0, 10) : '-';
-    document.getElementById('modal-checkout').textContent       = selectedBooking.check_out
-      ? selectedBooking.check_out.substring(0, 10) : '-';
-    document.getElementById('modal-amount').textContent         =
-      `RM ${parseFloat(selectedBooking.total_amount || 0).toFixed(2)}`;
-
-    document.getElementById('paymentModal').classList.add('active');
+    new bootstrap.Modal(document.getElementById('bookingModal')).show();
   }
 
-  function closePaymentModal() {
-    document.getElementById('paymentModal').classList.remove('active');
-    selectedBooking = null;
-    document.getElementById('paySpinner').style.display = 'none';
-    document.getElementById('proceedPayBtn').disabled   = false;
+  function openCancelPopup(reservationId) {
+    pendingCancelId = reservationId;
+    const popup = document.getElementById('cancelPopup');
+    popup.classList.add('active');
   }
 
-  // ── PROCESS PAYMENT ────────────────────────────────────────────────────────
-  async function processPayment() {
-    if (!selectedBooking) return;
+  function closeCancelPopup() {
+    const popup = document.getElementById('cancelPopup');
+    popup.classList.remove('active');
+    pendingCancelId = null;
+  }
 
-    // Re-validate status before contacting ToyyibPay
-    if (selectedBooking.status !== 'Pending Payment') {
-      alert('This booking is not eligible for payment.');
-      closePaymentModal();
-      return;
-    }
-
-    const spinner = document.getElementById('paySpinner');
-    const btn     = document.getElementById('proceedPayBtn');
-    spinner.style.display = 'inline-block';
-    btn.disabled = true;
+  async function confirmCancel() {
+    if (!pendingCancelId) return;
 
     try {
-      const amountInCents = Math.round(parseFloat(selectedBooking.total_amount || 0) * 100);
+      const { error } = await db
+        .from('reservations')
+        .update({ status: 'Cancelled' })
+        .eq('reservation_id', pendingCancelId);
 
-      const formData = new FormData();
-      formData.append('userSecretKey',           TOYYIBPAY_SECRET_KEY);
-      formData.append('categoryCode',            TOYYIBPAY_CATEGORY_CODE);
-      formData.append('billName',                'UTMSPACE Room Booking');
-      formData.append('billDescription',         `Payment for ${selectedBooking.room_type} at ${selectedBooking.college} — Booking: ${selectedBooking.reservation_id}`);
-      formData.append('billPriceSetting',        1);
-      formData.append('billPayorInfo',           1);
-      formData.append('billAmount',              amountInCents);
-      formData.append('billReturnUrl',           `${window.location.origin}/student/payment_success.html?reservation_id=${selectedBooking.reservation_id}`);
-      formData.append('billCallbackUrl',         `${window.location.origin}/student/payment_callback.html`);
-      formData.append('billExternalReferenceNo', selectedBooking.reservation_id);
-      formData.append('billTo',                  studentName  || selectedBooking.student_name);
-      formData.append('billEmail',               studentEmail || selectedBooking.email);
-      formData.append('billPhone',               studentPhone || selectedBooking.phone);
-      formData.append('billSplitPayment',        0);
-      formData.append('billSplitPaymentArgs',    '');
-      formData.append('billPaymentChannel',      0);
-      formData.append('billContentEmail',        `Thank you. Your booking reference is ${selectedBooking.reservation_id}.`);
+      if (error) throw error;
 
-      const response = await fetch(`${TOYYIBPAY_URL}/index.php/api/createBill`, {
-        method: 'POST', body: formData
-      });
-      const result = await response.json();
-
-      if (result && result[0] && result[0].BillCode) {
-        const billCode = result[0].BillCode;
-        // Save bill URL for admin reference
-        await db.from('reservations')
-          .update({ receipt_url: `${TOYYIBPAY_URL}/${billCode}` })
-          .eq('reservation_id', selectedBooking.reservation_id);
-        window.location.href = `${TOYYIBPAY_URL}/${billCode}`;
-      } else {
-        throw new Error('Could not create bill. Check your ToyyibPay API keys.');
-      }
+      // Refresh the bookings list
+      await fetchBookings();
+      
+      // Show success message
+      alert('Your reservation has been cancelled successfully.');
+      
     } catch (err) {
-      console.error('Payment error:', err);
-      alert('Payment failed: ' + err.message);
-      spinner.style.display = 'none';
-      btn.disabled = false;
+      console.error('Error cancelling reservation:', err);
+      alert('Failed to cancel reservation. Please try again.');
+    } finally {
+      closeCancelPopup();
     }
   }
 
-  // ── PAYMENT RETURN ─────────────────────────────────────────────────────────
-  function checkPaymentReturn() {
-    const params        = new URLSearchParams(window.location.search);
-    const status        = params.get('status_id');
-    const reservationId = params.get('reservation_id');
+  function filterBookings() {
+    renderBookings();
+  }
 
-    if (status === '1' && reservationId) {
-      db.from('reservations')
-        .update({ status: 'Paid' })
-        .eq('reservation_id', reservationId)
-        .then(({ error }) => {
-          if (!error) {
-            alert('Payment successful! Your booking is now confirmed.');
-            window.history.replaceState({}, document.title, window.location.pathname);
-            fetchBookings();
-          }
-        });
-    } else if (status === '3' && reservationId) {
-      alert('Payment was cancelled. Your booking is still active — you can pay anytime.');
-      window.history.replaceState({}, document.title, window.location.pathname);
+  async function loadHeaderProfile() {
+    const email = localStorage.getItem('studentEmail');
+    if (!email) return;
+
+    if (typeof db !== 'undefined' && db) {
+      const { data, error } = await db
+        .from('Student')
+        .select('name, email')
+        .eq('email', email)
+        .single();
+
+      if (!error && data) {
+        const initial = data.name ? data.name.charAt(0).toUpperCase() : 'S';
+        const avatarInitial = document.getElementById('avatarInitial');
+        const dropdownUserName = document.getElementById('dropdownUserName');
+        const dropdownUserEmail = document.getElementById('dropdownUserEmail');
+        
+        if (avatarInitial) avatarInitial.textContent = initial;
+        if (dropdownUserName) dropdownUserName.textContent = data.name;
+        if (dropdownUserEmail) dropdownUserEmail.textContent = data.email;
+      }
     }
   }
 
-  // ── HELPERS ────────────────────────────────────────────────────────────────
-  function getStatusClass(status) {
-    const map = {
-      'Pending':         'status-pending',
-      'Approved':        'status-approved',
-      'Pending Payment': 'status-pending-payment',
-      'Paid':            'status-paid',
-      'Rejected':        'status-cancelled',
-      'Cancelled':       'status-cancelled',
-    };
-    return map[status] || 'status-pending';
-  }
-
-  // ── DROPDOWNS ──────────────────────────────────────────────────────────────
   function initDropdowns() {
-    const notifBtn      = document.getElementById('notificationBtn');
+    const notifBtn = document.getElementById('notificationBtn');
     const notifDropdown = document.getElementById('notificationDropdown');
-    if (notifBtn) {
-      notifBtn.addEventListener('click', e => {
+    if (notifBtn && notifDropdown) {
+      notifBtn.addEventListener('click', function(e) {
         e.stopPropagation();
         notifDropdown.classList.toggle('show');
       });
+      document.addEventListener('click', function() {
+        notifDropdown?.classList.remove('show');
+      });
+      notifDropdown?.addEventListener('click', function(e) {
+        e.stopPropagation();
+      });
     }
-    const userProfile  = document.querySelector('.user-profile');
+
+    const userProfile = document.querySelector('.user-profile');
     const userDropdown = document.querySelector('.user-dropdown');
-    if (userProfile) {
-      userProfile.addEventListener('click', e => {
+    if (userProfile && userDropdown) {
+      userProfile.addEventListener('click', function(e) {
         e.stopPropagation();
         userDropdown.classList.toggle('show');
       });
+      document.addEventListener('click', function() {
+        userDropdown?.classList.remove('show');
+      });
+      userDropdown?.addEventListener('click', function(e) {
+        e.stopPropagation();
+      });
     }
-    document.addEventListener('click', () => {
-      notifDropdown?.classList.remove('show');
-      userDropdown?.classList.remove('show');
-    });
   }
 
-  // ── EVENTS ─────────────────────────────────────────────────────────────────
-  document.getElementById('cancelPayBtn').addEventListener('click', closePaymentModal);
-  document.getElementById('proceedPayBtn').addEventListener('click', processPayment);
-  window.addEventListener('click', e => {
-    if (e.target === document.getElementById('paymentModal')) closePaymentModal();
-  });
-  document.getElementById('logoutBtn').addEventListener('click', e => {
+  // Cancel popup button listeners
+  document.getElementById('cancelNoBtn').addEventListener('click', closeCancelPopup);
+  document.getElementById('cancelYesBtn').addEventListener('click', confirmCancel);
+
+  // Logout
+  document.getElementById('logoutBtn').addEventListener('click', function(e) {
     e.preventDefault();
     localStorage.removeItem('studentEmail');
     localStorage.removeItem('studentId');
@@ -724,11 +830,13 @@
     window.location.href = 'index.html';
   });
 
-  document.addEventListener('DOMContentLoaded', () => {
+  // Initialize
+  document.addEventListener('DOMContentLoaded', function() {
     initDropdowns();
     loadStudentInfo();
-    checkPaymentReturn();
+    loadHeaderProfile();
   });
 </script>
+
 </body>
 </html>

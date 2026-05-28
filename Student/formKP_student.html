@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-  <title>Room Reservation | UTM Space - Pradana Residence U7</title>
+  <title>Room Reservation | UTM Space - Perdana Residence U7</title>
   
   <link href="https://fonts.googleapis.com" rel="preconnect">
   <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
@@ -284,6 +284,82 @@
       display: block;
     }
 
+    /* Custom Popup Modal */
+    .custom-popup-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(4px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10000;
+      visibility: hidden;
+      opacity: 0;
+      transition: all 0.3s ease;
+    }
+
+    .custom-popup-overlay.active {
+      visibility: visible;
+      opacity: 1;
+    }
+
+    .custom-popup {
+      background: white;
+      max-width: 450px;
+      width: 90%;
+      border-radius: 24px;
+      text-align: center;
+      padding: 35px 30px;
+      transform: scale(0.9);
+      transition: transform 0.3s ease;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+    }
+
+    .custom-popup-overlay.active .custom-popup {
+      transform: scale(1);
+    }
+
+    .custom-popup i {
+      font-size: 70px;
+      color: #22c55e;
+      margin-bottom: 20px;
+    }
+
+    .custom-popup h3 {
+      font-size: 24px;
+      font-weight: 700;
+      color: #1a3c5e;
+      margin-bottom: 12px;
+    }
+
+    .custom-popup p {
+      font-size: 14px;
+      color: #666;
+      margin-bottom: 25px;
+      line-height: 1.6;
+    }
+
+    .custom-popup .popup-btn {
+      background: linear-gradient(135deg, #1a3c5e 0%, #2c5a7a 100%);
+      color: white;
+      border: none;
+      padding: 12px 30px;
+      border-radius: 40px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .custom-popup .popup-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(44, 90, 122, 0.3);
+    }
+
     @media (max-width: 576px) {
       .form-container {
         padding: 20px;
@@ -296,6 +372,18 @@
       
       .page-title h1 {
         font-size: 24px;
+      }
+      
+      .custom-popup {
+        padding: 25px 20px;
+      }
+      
+      .custom-popup i {
+        font-size: 50px;
+      }
+      
+      .custom-popup h3 {
+        font-size: 20px;
       }
     }
   </style>
@@ -368,7 +456,7 @@
 <main class="reservation-main">
   <div class="container">
     <div class="page-title">
-      <h1>🏠 Perdana Residence UV</h1>
+      <h1>🏠 Perdana Residence U7</h1>
       <p>Book your comfortable stay at UTM's premier student accommodation</p>
     </div>
 
@@ -458,6 +546,16 @@
   </div>
 </main>
 
+<!-- Custom Popup Modal -->
+<div class="custom-popup-overlay" id="successPopup">
+  <div class="custom-popup">
+    <i class="bi bi-check-circle-fill"></i>
+    <h3>Reservation Submitted!</h3>
+    <p>Your room reservation has been successfully submitted.<br><br>Please wait for admin approval. You will be notified once your booking is confirmed.</p>
+    <button class="popup-btn" id="popupCloseBtn">OK</button>
+  </div>
+</div>
+
 <footer id="footer" class="footer position-relative light-background">
   <div class="container">
     <div class="row gy-5">
@@ -512,9 +610,6 @@
 <script src="../supabase.js"></script>
 <script>
 
-document.getElementById('reservationForm').addEventListener('submit', async function(e) {
-    });
-
   let selectedPrice = 0;
   let selectedUnit = 'day';
   let selectedRoomName = '';
@@ -524,45 +619,55 @@ document.getElementById('reservationForm').addEventListener('submit', async func
     window.location.href = 'kp_student.html';
   }
 
+  // Show popup and redirect function
+  function showSuccessPopupAndRedirect() {
+    const popup = document.getElementById('successPopup');
+    popup.classList.add('active');
+    
+    // Close popup and redirect when OK button is clicked
+    document.getElementById('popupCloseBtn').onclick = function() {
+      popup.classList.remove('active');
+      window.location.href = 'dashboard.html';
+    };
+  }
+
   const roomDetailsMap = {
     'Single Bed Fan Room': 'Private Room with Single Bed, Fan, Wardrobe, Study Table & Chair',
     'Single Bed AC Room': 'Private Room with Single Bed, Air-conditioner, Wardrobe, Study Table & Chair',
     'Twin Bed Fan Room': 'Shared Room with 2 Single Beds, Fan, Wardrobe, Study Table & Chair'
   };
-  // Room type pricing configuration dictionary
-const roomPriceConfig = {
-  'Single Bed Fan Room': { price: 30, unit: 'day' },
-  'Single Bed AC Room': { price: 35, unit: 'day' },
-  'Twin Bed Fan Room': { price: 25, unit: 'day' }
-};
-
-// Room type selection event handler
-document.getElementById('roomType').addEventListener('change', function() {
-  const selectedValue = this.value; // Will be "Single Bed Fan Room", etc.
-  const roomDetailsDiv = document.getElementById('roomDetails');
-  const roomDetailsText = document.getElementById('roomDetailsText');
   
-  if (selectedValue && roomPriceConfig[selectedValue]) {
-    // Look up data dynamically from configuration map
-    selectedRoomName = selectedValue;
-    selectedPrice = roomPriceConfig[selectedValue].price;
-    selectedUnit = roomPriceConfig[selectedValue].unit;
+  // Room type pricing configuration dictionary
+  const roomPriceConfig = {
+    'Single Bed Fan Room': { price: 30, unit: 'day' },
+    'Single Bed AC Room': { price: 35, unit: 'day' },
+    'Twin Bed Fan Room': { price: 25, unit: 'day' }
+  };
+
+  // Room type selection event handler
+  document.getElementById('roomType').addEventListener('change', function() {
+    const selectedValue = this.value;
+    const roomDetailsDiv = document.getElementById('roomDetails');
+    const roomDetailsText = document.getElementById('roomDetailsText');
     
-    // Render room details panel text
-    roomDetailsText.innerHTML = `<strong>${selectedRoomName}</strong> - ${roomDetailsMap[selectedRoomName] || 'Includes all basic amenities'}`;
-    roomDetailsDiv.classList.add('show');
-    
-    // Recalculate total pricing window instantly
-    calculateTotal();
-  } else {
-    roomDetailsDiv.classList.remove('show');
-    selectedRoomName = '';
-    selectedPrice = 0;
-    selectedUnit = 'day';
-    if (document.getElementById('totalPriceDisplay')) document.getElementById('totalPriceDisplay').style.display = 'none';
-    document.getElementById('durationDisplay').innerHTML = '<i class="bi bi-calendar"></i> Select dates to see duration';
-  }
-});
+    if (selectedValue && roomPriceConfig[selectedValue]) {
+      selectedRoomName = selectedValue;
+      selectedPrice = roomPriceConfig[selectedValue].price;
+      selectedUnit = roomPriceConfig[selectedValue].unit;
+      
+      roomDetailsText.innerHTML = `<strong>${selectedRoomName}</strong> - ${roomDetailsMap[selectedRoomName] || 'Includes all basic amenities'}`;
+      roomDetailsDiv.classList.add('show');
+      
+      calculateTotal();
+    } else {
+      roomDetailsDiv.classList.remove('show');
+      selectedRoomName = '';
+      selectedPrice = 0;
+      selectedUnit = 'day';
+      if (document.getElementById('totalPriceDisplay')) document.getElementById('totalPriceDisplay').style.display = 'none';
+      document.getElementById('durationDisplay').innerHTML = '<i class="bi bi-calendar"></i> Select dates to see duration';
+    }
+  });
 
   // Date inputs event listeners
   document.getElementById('checkIn').addEventListener('change', calculateTotal);
@@ -613,7 +718,8 @@ document.getElementById('roomType').addEventListener('change', function() {
       totalPriceDisplay.style.display = 'none';
     }
   }
-  // Form submission - redirect to Dashboard page
+  
+  // Form submission
   document.getElementById('reservationForm').addEventListener('submit', async function(e) {
     e.preventDefault();
     
@@ -700,12 +806,12 @@ document.getElementById('roomType').addEventListener('change', function() {
         student_id: studentId,
         email: email,
         phone: phone,
-        college: 'KP', 
+        college: 'Perdana Residence Block U7',
         room_type: selectedRoomName,
         check_in: checkIn,
         check_out: checkOut,
         total_amount: total,
-        status: 'Pending Payment',
+        status: 'Pending',
         created_at: new Date().toISOString()
     };
 
@@ -721,12 +827,11 @@ document.getElementById('roomType').addEventListener('change', function() {
     
         localStorage.setItem('currentReservation', JSON.stringify(reservationData));
     
-        submitBtn.disabled = true;
-        submitBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Redirecting to Dashboard...';
-    
-        setTimeout(() => {
-          window.location.href = 'DashBoard.html'; 
-        }, 500);
+        submitBtn.innerHTML = '<i class="bi bi-check-circle"></i> Reservation Complete!';
+        
+        // Show success popup instead of redirecting immediately
+        showSuccessPopupAndRedirect();
+        
       } catch (err) {
         console.error('Submit failed:', err.message);
         alert('Submit failed, please try again: ' + err.message);
@@ -749,24 +854,24 @@ document.getElementById('roomType').addEventListener('change', function() {
     }
   });
 
-    document.addEventListener("DOMContentLoaded", function () {
-  autofillStudentDetails();
+  document.addEventListener("DOMContentLoaded", function () {
+    autofillStudentDetails();
 
-  const urlParams = new URLSearchParams(window.location.search);
-  const roomParam = urlParams.get('roomType');
+    const urlParams = new URLSearchParams(window.location.search);
+    const roomParam = urlParams.get('roomType');
 
-  if (roomParam) {
-    const roomName = roomParam.split('|')[0].trim();
-    const roomSelectElement = document.getElementById('roomType');
-    
-    if (roomSelectElement) {
-      roomSelectElement.value = roomName;
-      roomSelectElement.dispatchEvent(new Event('change'));
+    if (roomParam) {
+      const roomName = roomParam.split('|')[0].trim();
+      const roomSelectElement = document.getElementById('roomType');
+      
+      if (roomSelectElement) {
+        roomSelectElement.value = roomName;
+        roomSelectElement.dispatchEvent(new Event('change'));
+      }
     }
-  }
-});
+  });
 
-// Auto-fill student info from localStorage
+  // Auto-fill student info from localStorage
   async function loadStudentInfo() {
     const email = localStorage.getItem('studentEmail');
     if (email) {
