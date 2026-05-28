@@ -540,6 +540,7 @@
 
       issues = data.map(item => ({
         issueId: item.report_id,
+        studentId: item.student_id, // 💡 Ensure this property maps correctly from your schema
         studentName: item.student_name || 'Unknown Student',
         college: item.college || 'N/A', 
         roomNumber: item.room_number || 'N/A',
@@ -563,12 +564,14 @@
 
     const priorityFilter = document.getElementById('priorityFilter')?.value || 'All';
     const collegeFilter = document.getElementById('collegeFilter')?.value || 'All';
+    const statusFilter = document.getElementById('statusFilter')?.value || 'All';
 
     const filtered = issues.filter(function(item) {
       const priorityMatch = priorityFilter === 'All' || item.priority === priorityFilter;
       const collegeMatch = collegeFilter === 'All' || item.college === collegeFilter;
+      const statusMatch = statusFilter === 'All' || item.status === statusFilter;
       
-      return priorityMatch && collegeMatch;
+      return priorityMatch && collegeMatch && statusMatch;
     });
 
     updateStats(filtered);
@@ -576,8 +579,8 @@
     if (filtered.length === 0) {
       tbody.innerHTML = `
         <tr>
-          <td colspan="10" class="text-center text-muted py-4">
-            No matching issue records found for the selected priority filters.
+          <td colspan="9" class="text-center text-muted py-4">
+            No matching issue records found for the selected filters.
           </td>
         </tr>
       `;
@@ -593,7 +596,7 @@
           <td>${index + 1}</td>
           <td><strong>${item.issueId}</strong></td>
           <td>${item.studentName}</td>
-          <td>${item.college} (Room Number:<br />${item.roomNumber})</td>
+          <td>${item.college} (Room:<br />${item.roomNumber})</td>
           <td>${priorityBadge}</td>
           <td>${item.issueType}</td>
           <td>${item.date}</td>
@@ -607,9 +610,11 @@
               <button class="btn btn-sm btn-outline-primary px-2" style="font-size:13px; border-radius:8px;" onclick="viewIssue(${realIndex})">
                 <i class="bi bi-eye"></i> View
               </button>
-              <button class="btn btn-sm btn-outline-warning px-2" style="font-size:13px; border-radius:8px;" onclick="updateIssue(${realIndex})">
+              
+              <button class="btn btn-sm btn-outline-warning px-2" style="font-size:13px; border-radius:8px;" onclick="updateReportStatus(${realIndex}, event)">
                 <i class="bi bi-arrow-repeat"></i> Status
               </button>
+              
               <button class="btn btn-sm btn-outline-danger px-2" style="font-size:13px; border-radius:8px;" onclick="deleteIssue(${realIndex})">
                 <i class="bi bi-trash"></i> Delete
               </button>
@@ -620,15 +625,14 @@
     }).join('');
   }
 
-  // CHANGED: Event listener re-mapped from statusFilter to priorityFilter
+  // Filters Event Hooks
   document.getElementById('priorityFilter')?.addEventListener('change', renderIssues);
   document.getElementById('collegeFilter')?.addEventListener('change', renderIssues);
+  document.getElementById('statusFilter')?.addEventListener('change', renderIssues);
 
-  // Display detail row parameters cleanly inside your details panel modal
   function viewIssue(index) {
     const item = issues[index];
 
-    // ADDED: Detailed layout updates showing Room Number and Priority Status explicitly
     document.getElementById('issueDetails').innerHTML = `
       <p><strong>Issue ID:</strong> ${item.issueId}</p>
       <p><strong>Student Name:</strong> ${item.studentName}</p>
@@ -644,46 +648,105 @@
     new bootstrap.Modal(document.getElementById('issueModal')).show();
   }
 
-  // Cycles issue status row updates directly upstream onto remote database state
-  async function updateIssue(index) {
+  // ✅ FIX 2: Optimized, cyclical tracking status and notification routing worker
+  async function updateReportStatus(index, event) {
     const item = issues[index];
-    let nextStatus = 'Pending';
+    let newStatus = 'Pending';
 
+    // Set up status toggle switching path
     if (item.status === 'Pending') {
-      nextStatus = 'In Progress';
+      newStatus = 'In Progress';
     } else if (item.status === 'In Progress') {
-      nextStatus = 'Resolved';
+      newStatus = 'Resolved';
     } else {
-      nextStatus = 'Pending';
+      newStatus = 'Pending';
     }
 
     try {
-      const { error } = await db
+      const btn = event.target;
+      btn.disabled = true;
+      btn.innerHTML = "Saving...";
+
+      if (typeof db === 'undefined') throw new Error("Database configuration context missing.");
+
+      // 1. Update the Report table using the matching schema target primary key (report_id)
+      const { error: reportError } = await db
         .from('Report')
-        .update({ status: nextStatus })
+        .update({ status: newStatus })
         .eq('report_id', item.issueId);
 
-      if (error) throw error;
+      if (reportError) throw reportError;
+      console.log(`✅ Report ${item.issueId} table updated to: ${newStatus}`);
 
-      item.status = nextStatus;
+      // Update local memory data status array right away
+      item.status = newStatus;
+
+      // 2. Clear out older notifications and dispatch a fresh alert to the student
+      if (item.studentId) {
+        const cleanStudentId = item.studentId.toString().trim();
+        const notificationType = 'Report Status Update';
+        let statusMessage = '';
+
+        switch (newStatus) {
+          case 'In Progress':
+            statusMessage = `Your issue report (Ref: ${item.issueId}) status has been shifted to IN PROGRESS. Staff are currently investigating.`;
+            break;
+          case 'Resolved':
+            statusMessage = `Good news! Your report (Ref: ${item.issueId}) has been marked as RESOLVED. Please verify the resolution.`;
+            break;
+          case 'Pending':
+            statusMessage = `Your submitted report (Ref: ${item.issueId}) has been set back to pending review status.`;
+            break;
+          default:
+            statusMessage = `The tracking status for your submitted report (Ref: ${item.issueId}) was updated to: ${newStatus}.`;
+        }
+
+        // Wipe matching stale notifications to avoid spamming the database
+        await db
+          .from('notifications')
+          .delete()
+          .eq('student_id', cleanStudentId)
+          .eq('type', notificationType);
+
+        // Inject the fresh notice card payload
+        const { error: notificationError } = await db
+          .from('notifications')
+          .insert({
+            student_id: cleanStudentId,
+            type: notificationType,
+            message: statusMessage,
+            read: false,
+            created_at: new Date().toISOString()
+          });
+
+        if (notificationError) throw notificationError;
+        console.log(`📡 Notification distributed successfully to student: ${cleanStudentId}`);
+      } else {
+        console.warn(`⚠️ Skipping notification: No student_id found linked to report ${item.issueId}`);
+      }
+
+      // Re-render UI to update view badges and status counts
       renderIssues();
 
     } catch (err) {
-      alert('Failed to update status: ' + err.message);
+      console.error('Report processing dropped:', err.message);
+      alert('Failed to process status change: ' + err.message);
+    } finally {
+      if (event && event.target) {
+        event.target.disabled = false;
+        event.target.innerHTML = `<i class="bi bi-arrow-repeat"></i> Status`;
+      }
     }
   }
 
-  // NEW FUNCTION: Handles secure database deletion row item tracking requests
   async function deleteIssue(index) {
     const item = issues[index];
     
-    // Safety prompt before erasing an entry completely
     if (!confirm(`Are you absolutely sure you want to delete report ${item.issueId} submitted by ${item.studentName}?`)) {
       return; 
     }
 
     try {
-      // Execute the remote delete target row filter pipeline via Supabase
       const { error } = await db
         .from('Report')
         .delete()
@@ -691,7 +754,6 @@
 
       if (error) throw error;
 
-      // Remove the entry locally from your screen array and update layout counts
       issues.splice(index, 1);
       renderIssues();
       alert('Report deleted successfully!');
@@ -701,22 +763,19 @@
     }
   }
 
-  document.getElementById('statusFilter')?.addEventListener('change', renderIssues);
-  document.getElementById('collegeFilter')?.addEventListener('change', renderIssues);
-
-  fetchIssuesFromSupabase();
   function toggleScrolled() {
-  const selectHeader = document.querySelector('#header');
-  
-  // 🌟 ADD THIS SAFETY CHECK LINE:
-  if (!selectHeader) return; 
+    const selectHeader = document.querySelector('#header');
+    if (!selectHeader) return; 
 
-  if (window.scrollY > 100) {
-    selectHeader.classList.add('header-scrolled');
-  } else {
-    selectHeader.classList.remove('header-scrolled');
+    if (window.scrollY > 100) {
+      selectHeader.classList.add('header-scrolled');
+    } else {
+      selectHeader.classList.remove('header-scrolled');
+    }
   }
-}
+
+  // Initial Execution
+  fetchIssuesFromSupabase();
 </script>
 </body>
 </html>
