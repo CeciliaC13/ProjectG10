@@ -14,51 +14,101 @@ async function loadGlobalNotifications() {
   try {
     if (typeof db === 'undefined') return;
 
-    const { data: notifications, error } = await db
-      .from('notifications')
-      .select('*')
-      .eq('student_id', studentId.trim())
-      .order('created_at', { ascending: false });
+    // ── 1. Concurrent Fetch: Grab Notifications AND Broadcasts ──
+    const [notifResult, broadcastResult] = await Promise.all([
+      db.from('notifications')
+        .select('*')
+        .eq('student_id', studentId.trim()),
+      db.from('broadcasts')
+        .select('*')
+    ]);
 
-    if (error) throw error;
+    if (notifResult.error) throw notifResult.error;
+    if (broadcastResult.error) throw broadcastResult.error;
 
-    const count = notifications ? notifications.length : 0;
+    // ── 2. Standardize & Merge Both Tables ──
+    const standardNotifications = (notifResult.data || []).map(n => ({
+      ...n,
+      isBroadcast: false
+    }));
+
+    const convertedBroadcasts = (broadcastResult.data || []).map(b => ({
+      id: b.id,
+      type: 'System Announcement', // Identifiable type string
+      message: b.message,
+      title: b.title, // Preserving broadcast specific title
+      created_at: b.created_at,
+      isBroadcast: true // Flag to hide individual dismiss cross controls
+    }));
+
+    // Combine and sort chronologically (Newest first)
+    const combinedData = [...standardNotifications, ...convertedBroadcasts].sort((a, b) => {
+      return new Date(b.created_at) - new Date(a.created_at);
+    });
+
+    // ── 3. Manage The Unread Status Badge Count ──
+    // Note: Broadcast entries do not carry an unread state column, so we count unread standard rows
+    const unreadCount = standardNotifications.filter(n => !n.read).length;
     if (badge) {
-      badge.textContent = count;
-      badge.style.display = count > 0 ? 'inline-block' : 'none';
+      badge.textContent = unreadCount;
+      badge.style.display = unreadCount > 0 ? 'inline-block' : 'none';
     }
 
     if (!listContainer) return;
     
-    if (!notifications || notifications.length === 0) {
+    if (combinedData.length === 0) {
       listContainer.innerHTML = `<div style="padding: 15px; text-align: center; color: #888; font-size: 13px;">No notifications found.</div>`;
       return;
     }
 
-    listContainer.innerHTML = notifications.map(notif => {
-      const typeText = notif.type || 'Alert Notice';
-      const messageText = notif.message || 'Update details processed.';
+    // ── 4. Render Merged Feeds ──
+    listContainer.innerHTML = combinedData.map(item => {
+      const isBroadcastItem = item.isBroadcast;
       
-      // 🎨 Dynamic Icon Picker based on notification types
+      // Separate out dynamic context text values
+      let typeText = item.type || 'Alert Notice';
+      let messageText = item.message || 'Update details processed.';
+      
+      // If it's a broadcast tracking object, inject the actual title string
+      if (isBroadcastItem && item.title) {
+        typeText = `Broadcast: ${item.title}`;
+      }
+
+      // Format timestamp text
+      const timeStr = item.created_at 
+        ? new Date(item.created_at).toLocaleDateString('en-MY', {
+            month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
+          })
+        : 'Just now';
+      
+      // 🎨 Dynamic Icon Picker matched to your notification styling rules
       let icon = '📌';
-      let iconColor = '#b91c1c'; // Red for general alerts
+      let iconColor = '#b91c1c'; // Maroon/Red alert profile default
       
-      if (typeText === 'Report Status Update') {
+      if (item.type === 'Report Status Update') {
         icon = '🛠️';
-        iconColor = '#0284c7'; // Blue for issues/maintenance
-      } else if (typeText === 'Booking Status Update') {
+        iconColor = '#0284c7'; 
+      } else if (item.type === 'Booking Status Update') {
         icon = '📅';
-        iconColor = '#16a34a'; // Green for bookings
+        iconColor = '#16a34a'; 
+      } else if (isBroadcastItem) {
+        icon = '📢';
+        iconColor = '#6b092a'; // Distinct color matching your app theme header
       }
       
+      // Render individual dismiss button asset conditionally (Hide on broadcasts)
+      const actionButtonHtml = !isBroadcastItem 
+        ? `<button onclick="dismissSingleNotification('${item.id}', event)" style="position: absolute; top: 10px; right: 10px; background: none; border: none; color: #ccc; cursor: pointer; font-size: 14px;" title="Dismiss">&times;</button>`
+        : '';
+
       return `
-        <div style="padding: 12px 15px; border-bottom: 1px solid #eee; background: #fff; position: relative;">
+        <div style="padding: 12px 15px; border-bottom: 1px solid #eee; background: ${isBroadcastItem ? '#fffafb' : '#fff'}; position: relative; border-left: 3px solid ${iconColor};">
           <div style="display: flex; align-items: center; gap: 5px; margin-bottom: 4px; color: ${iconColor}; font-weight: bold; font-size: 13px;">
             <span>${icon}</span> <span>${typeText}</span>
           </div>
           <p style="margin: 0; padding-right: 20px; font-size: 12px; color: #555; line-height: 1.4; white-space: normal;">${messageText}</p>
-          
-          <button onclick="dismissSingleNotification('${notif.id}', event)" style="position: absolute; top: 10px; right: 10px; background: none; border: none; color: #ccc; cursor: pointer; font-size: 14px;">&times;</button>
+          <div style="font-size: 10px; color: #aaa; margin-top: 4px;"><i class="bi bi-clock"></i> ${timeStr}</div>
+          ${actionButtonHtml}
         </div>
       `;
     }).join('');
@@ -68,7 +118,7 @@ async function loadGlobalNotifications() {
   }
 }
 
-// 💥 New helper feature to clear individual notifications
+// Helper to clear individual standard notifications
 async function dismissSingleNotification(notifId, event) {
   if (event) event.stopPropagation();
   try {
@@ -81,13 +131,13 @@ async function dismissSingleNotification(notifId, event) {
 
     if (error) throw error;
     
-    // Reload state seamlessly
     loadGlobalNotifications();
   } catch (err) {
     console.error('Failed clearing notification item:', err.message);
   }
 }
 
+// Bulk purge execution target for standard notices (leaves global broadcasts untouched)
 async function markAllNotificationsAsRead() {
   const studentId = localStorage.getItem('studentId') || localStorage.getItem('currentStudentId');
   if (!studentId) return;
@@ -95,6 +145,7 @@ async function markAllNotificationsAsRead() {
   try {
     if (typeof db === 'undefined') return;
 
+    // Remove personal notifications assigned to the user
     const { error } = await db
       .from('notifications')
       .delete()
@@ -102,16 +153,8 @@ async function markAllNotificationsAsRead() {
 
     if (error) throw error;
     
-    const listContainer = document.getElementById('notificationList');
-    if (listContainer) {
-      listContainer.innerHTML = `<div style="padding: 15px; text-align: center; color: #888; font-size: 13px;">No notifications found.</div>`;
-    }
-
-    const badge = document.getElementById('notificationBadge');
-    if (badge) {
-      badge.textContent = '0';
-      badge.style.display = 'none';
-    }
+    // Refresh the component UI view state to display remaining global announcements
+    loadGlobalNotifications();
 
     const dropdown = document.getElementById('notificationDropdown');
     if (dropdown) dropdown.classList.remove('show');
@@ -121,7 +164,7 @@ async function markAllNotificationsAsRead() {
   }
 }
 
-// Single initialization orchestration loop wrapper
+// Orchestrated single execution listener loop setup initialization closure
 (function initializeNotificationSystem() {
   const setupUI = () => {
     const btn = document.getElementById('notificationBtn');
