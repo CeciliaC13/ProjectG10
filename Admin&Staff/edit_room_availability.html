@@ -290,6 +290,9 @@
         <div class="col-lg-5">
           <div class="form-box">
             <h3 id="rm-formTitle">Room Availability Form</h3>
+            <div id="editBanner" class="message-box message-success" style="display:none;">
+              <i class="bi bi-pencil-fill me-1"></i> You are editing an existing record.
+            </div>
 
             <div class="message-box" id="messageBox"></div>
 
@@ -345,6 +348,7 @@
 
             <button class="save-btn" id="saveBtn" onclick="saveRoom()">Save Room</button>
             <button class="clear-btn" onclick="clearForm()">Clear</button>
+            <button class="clear-btn" id="cancelBtn" style="display:none;" onclick="clearForm()">Cancel</button>
           </div>
         </div>
 
@@ -482,10 +486,12 @@
   // ── Edit mode UI ──────────────────────────────────────────
  
   function setEditMode(isEdit) {
-    document.getElementById('editBanner').classList.toggle('show', isEdit);
-    document.getElementById('cancelBtn').style.display = isEdit ? 'inline-block' : 'none';
-    document.getElementById('rm-formTitle').textContent = isEdit ? 'Edit Room Availability' : 'Room Availability Form';
-  }
+  const banner    = document.getElementById('editBanner');
+  const cancelBtn = document.getElementById('cancelBtn');
+  if (banner)    banner.classList.toggle('show', isEdit);
+  if (cancelBtn) cancelBtn.style.display = isEdit ? 'inline-block' : 'none';
+  document.getElementById('rm-formTitle').textContent = isEdit ? 'Edit Room Availability' : 'Room Availability Form';
+}
  
   // ── Live availability preview ─────────────────────────────
  
