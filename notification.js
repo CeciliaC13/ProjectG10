@@ -1,3 +1,5 @@
+// ── STUDENT NOTIFICATIONS ENGINE (WITH LOCAL EXCLUSION FOR DISMISSED BROADCASTS) ──
+
 async function loadGlobalNotifications() {
   const badge = document.getElementById('notificationBadge');
   const listContainer = document.getElementById('notificationList');
@@ -14,7 +16,7 @@ async function loadGlobalNotifications() {
   try {
     if (typeof db === 'undefined') return;
 
-    // ── 1. Concurrent Fetch: Grab Notifications AND Broadcasts ──
+    // ── 1. Concurrent Fetch: Grab Personal Notifications AND Global Broadcasts ──
     const [notifResult, broadcastResult] = await Promise.all([
       db.from('notifications')
         .select('*')
@@ -26,19 +28,26 @@ async function loadGlobalNotifications() {
     if (notifResult.error) throw notifResult.error;
     if (broadcastResult.error) throw broadcastResult.error;
 
-    // ── 2. Standardize & Merge Both Tables ──
+    // ── 2. Filter Broadcasts Locally Using Student's Unique Dismiss Cache ──
+    const dismissedKey = `dismissed_broadcasts_${studentId.trim()}`;
+    const dismissedIds = JSON.parse(localStorage.getItem(dismissedKey)) || [];
+    
+    // Keep only broadcasts that this specific student hasn't hidden
+    const activeBroadcasts = (broadcastResult.data || []).filter(b => !dismissedIds.includes(String(b.id)));
+
+    // ── 3. Standardize & Merge Both Tables ──
     const standardNotifications = (notifResult.data || []).map(n => ({
       ...n,
       isBroadcast: false
     }));
 
-    const convertedBroadcasts = (broadcastResult.data || []).map(b => ({
+    const convertedBroadcasts = activeBroadcasts.map(b => ({
       id: b.id,
-      type: 'System Announcement', // Identifiable type string
+      type: 'System Announcement',
       message: b.message,
-      title: b.title, // Preserving broadcast specific title
+      title: b.title,
       created_at: b.created_at,
-      isBroadcast: true // Flag to hide individual dismiss cross controls
+      isBroadcast: true 
     }));
 
     // Combine and sort chronologically (Newest first)
@@ -46,8 +55,7 @@ async function loadGlobalNotifications() {
       return new Date(b.created_at) - new Date(a.created_at);
     });
 
-    // ── 3. Manage The Unread Status Badge Count ──
-    // Note: Broadcast entries do not carry an unread state column, so we count unread standard rows
+    // ── 4. Manage The Unread Status Badge Count ──
     const unreadCount = standardNotifications.filter(n => !n.read).length;
     if (badge) {
       badge.textContent = unreadCount;
@@ -61,29 +69,25 @@ async function loadGlobalNotifications() {
       return;
     }
 
-    // ── 4. Render Merged Feeds ──
+    // ── 5. Render Merged Feeds ──
     listContainer.innerHTML = combinedData.map(item => {
       const isBroadcastItem = item.isBroadcast;
       
-      // Separate out dynamic context text values
       let typeText = item.type || 'Alert Notice';
       let messageText = item.message || 'Update details processed.';
       
-      // If it's a broadcast tracking object, inject the actual title string
       if (isBroadcastItem && item.title) {
         typeText = `Broadcast: ${item.title}`;
       }
 
-      // Format timestamp text
       const timeStr = item.created_at 
         ? new Date(item.created_at).toLocaleDateString('en-MY', {
             month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
           })
         : 'Just now';
       
-      // 🎨 Dynamic Icon Picker matched to your notification styling rules
       let icon = '📌';
-      let iconColor = '#b91c1c'; // Maroon/Red alert profile default
+      let iconColor = '#b91c1c';
       
       if (item.type === 'Report Status Update') {
         icon = '🛠️';
@@ -93,13 +97,13 @@ async function loadGlobalNotifications() {
         iconColor = '#16a34a'; 
       } else if (isBroadcastItem) {
         icon = '📢';
-        iconColor = '#6b092a'; // Distinct color matching your app theme header
+        iconColor = '#6b092a'; 
       }
       
-      // Render individual dismiss button asset conditionally (Hide on broadcasts)
-      const actionButtonHtml = !isBroadcastItem 
-        ? `<button onclick="dismissSingleNotification('${item.id}', event)" style="position: absolute; top: 10px; right: 10px; background: none; border: none; color: #ccc; cursor: pointer; font-size: 14px;" title="Dismiss">&times;</button>`
-        : '';
+      // Route the click event conditionally: Database delete for alerts, Local storage hide for broadcasts
+      const clickAction = isBroadcastItem 
+        ? `dismissSingleBroadcast('${item.id}', event)`
+        : `dismissSingleNotification('${item.id}', event)`;
 
       return `
         <div style="padding: 12px 15px; border-bottom: 1px solid #eee; background: ${isBroadcastItem ? '#fffafb' : '#fff'}; position: relative; border-left: 3px solid ${iconColor};">
@@ -108,7 +112,7 @@ async function loadGlobalNotifications() {
           </div>
           <p style="margin: 0; padding-right: 20px; font-size: 12px; color: #555; line-height: 1.4; white-space: normal;">${messageText}</p>
           <div style="font-size: 10px; color: #aaa; margin-top: 4px;"><i class="bi bi-clock"></i> ${timeStr}</div>
-          ${actionButtonHtml}
+          <button onclick="${clickAction}" style="position: absolute; top: 10px; right: 10px; background: none; border: none; color: #ccc; cursor: pointer; font-size: 14px;" title="Dismiss">&times;</button>
         </div>
       `;
     }).join('');
@@ -118,7 +122,24 @@ async function loadGlobalNotifications() {
   }
 }
 
-// Helper to clear individual standard notifications
+// ── NEW FEATURE: DISMISS A SINGLE BROADCAST INDIVIDUALLY FOR THIS STUDENT ──
+function dismissSingleBroadcast(broadcastId, event) {
+  if (event) event.stopPropagation();
+  const studentId = localStorage.getItem('studentId') || localStorage.getItem('currentStudentId');
+  if (!studentId) return;
+
+  const dismissedKey = `dismissed_broadcasts_${studentId.trim()}`;
+  let dismissedIds = JSON.parse(localStorage.getItem(dismissedKey)) || [];
+  
+  if (!dismissedIds.includes(String(broadcastId))) {
+    dismissedIds.push(String(broadcastId));
+    localStorage.setItem(dismissedKey, JSON.stringify(dismissedIds));
+  }
+
+  loadGlobalNotifications(); // Instantly update view
+}
+
+// Helper to clear individual standard notifications from database
 async function dismissSingleNotification(notifId, event) {
   if (event) event.stopPropagation();
   try {
@@ -137,7 +158,7 @@ async function dismissSingleNotification(notifId, event) {
   }
 }
 
-// Bulk purge execution target for standard notices (leaves global broadcasts untouched)
+// ── FIXED: MARK ALL AS READ CLEARS ALERTS FROM DB AND HIDES BROADCASTS LOCALLY ──
 async function markAllNotificationsAsRead() {
   const studentId = localStorage.getItem('studentId') || localStorage.getItem('currentStudentId');
   if (!studentId) return;
@@ -145,7 +166,7 @@ async function markAllNotificationsAsRead() {
   try {
     if (typeof db === 'undefined') return;
 
-    // Remove personal notifications assigned to the user
+    // 1. Delete personal notifications assigned to the user from Supabase
     const { error } = await db
       .from('notifications')
       .delete()
@@ -153,7 +174,15 @@ async function markAllNotificationsAsRead() {
 
     if (error) throw error;
     
-    // Refresh the component UI view state to display remaining global announcements
+    // 2. Fetch all current broadcast IDs from the database to save them as hidden
+    const { data: currentBroadcasts } = await db.from('broadcasts').select('id');
+    if (currentBroadcasts) {
+      const dismissedKey = `dismissed_broadcasts_${studentId.trim()}`;
+      const allBroadcastIds = currentBroadcasts.map(b => String(b.id));
+      localStorage.setItem(dismissedKey, JSON.stringify(allBroadcastIds));
+    }
+
+    // Refresh UI smoothly
     loadGlobalNotifications();
 
     const dropdown = document.getElementById('notificationDropdown');
@@ -204,6 +233,180 @@ async function markAllNotificationsAsRead() {
   }, 200);
 })();
 
+
+// ── ADMINISTRATIVE BROADCAST OPERATIONS (UNCHANGED & SCOPED TO ADMIN VIEW) ──
+
+let broadcastItemsData = [];
+
+function formatBroadcastTime(isoString) {
+  if (!isoString) return "Just now";
+  const date = new Date(isoString);
+  return date.toLocaleDateString('en-MY', {
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  });
+}
+
+function renderBroadcasts() {
+  const list = document.getElementById('broadcastList');
+  if (!list) return;
+
+  if (broadcastItemsData.length === 0) {
+    list.innerHTML = `
+      <div class="notification-empty" style="text-align: center; padding: 30px; color: #94a3b8;">
+        <i class="bi bi-bell-slash" style="font-size: 28px;"></i>
+        <p style="margin-top: 8px; font-size: 13px;">No broadcast history found.</p>
+      </div>
+    `;
+    return;
+  }
+
+  list.innerHTML = broadcastItemsData.map(function(item) {
+    const timeStr = formatBroadcastTime(item.created_at);
+    const typeText = `Broadcast: ${item.title || 'Announcement'}`;
+    const iconColor = '#6b092a';
+
+    return `
+      <div class="notification-item read" 
+           data-id="${item.id}" 
+           style="padding: 12px 15px; border-bottom: 1px solid #eee; background: #fffafb; position: relative; border-left: 3px solid ${iconColor}; border-radius: 8px; margin-bottom: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.01); text-align: left;">
+        
+        <div class="broadcast-actions" style="position: absolute; top: 12px; right: 12px; display: flex; align-items: center; gap: 6px;">
+          <button class="btn-delete" 
+                  title="Delete Broadcast" 
+                  onclick="confirmDeleteBroadcast('${item.id}', this)"
+                  style="background: transparent; color: #94a3b8; border: none; cursor: pointer; padding: 4px 8px; border-radius: 6px; font-size: 14px; transition: all 0.2s ease;">
+            <i class="bi bi-trash"></i>
+          </button>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 5px; margin-bottom: 4px; color: ${iconColor}; font-weight: bold; font-size: 13px;">
+          <span>📢</span> <span>${typeText}</span>
+        </div>
+        <p style="margin: 0; padding-right: 35px; font-size: 12px; color: #555; line-height: 1.4; white-space: normal;">${item.message || ''}</p>
+        <div style="font-size: 10px; color: #aaa; margin-top: 4px; display: inline-flex; align-items: center; gap: 4px;">
+          <i class="bi bi-clock"></i> ${timeStr}
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+async function fetchAdminBroadcastsOnly() {
+  if (typeof db === 'undefined' || !db) return;
+
+  try {
+    const { data, error } = await db
+      .from('broadcasts')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+
+    broadcastItemsData = data || [];
+    renderBroadcasts();
+  } catch (err) {
+    console.error('Failed fetching broadcasts from Supabase:', err.message);
+  }
+}
+
+async function sendBroadcast() {
+  const title = document.getElementById('broadcastTitle').value.trim();
+  const message = document.getElementById('broadcastMessage').value.trim();
+  const btn = document.getElementById('sendBroadcastBtn');
+
+  if (!title || !message) {
+    alert('Please fill in both the title and message fields.');
+    return;
+  }
+
+  if (typeof db === 'undefined' || !db) {
+    alert('Database connection error. Please try again later.');
+    return;
+  }
+
+  btn.disabled = true;
+  const originalHtml = btn.innerHTML;
+  btn.innerHTML = '<i class="bi bi-hourglass-split"></i> Sending...';
+
+  try {
+    const { error } = await db
+      .from('broadcasts')
+      .insert([{ title, message }]);
+
+    if (error) throw error;
+
+    document.getElementById('broadcastTitle').value = '';
+    document.getElementById('broadcastMessage').value = '';
+    
+    await fetchAdminBroadcastsOnly();
+
+    const successBox = document.getElementById('successBox');
+    if (successBox) {
+      successBox.style.display = 'block';
+      setTimeout(function() { successBox.style.display = 'none'; }, 2500);
+    }
+
+  } catch (err) {
+    alert('Broadcast transmission failed: ' + err.message);
+    console.error(err);
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = originalHtml;
+  }
+}
+
+function confirmDeleteBroadcast(broadcastId, btn) {
+  btn.style.display = 'none';
+  
+  const wrap = document.createElement('div');
+  wrap.style.cssText = "display: inline-flex; align-items: center; gap: 4px; padding: 4px 8px; background: #fdf2f2; border: 1px solid #fecaca; border-radius: 6px; font-size: 11px;";
+  wrap.innerHTML = `
+    <span style="color: #dc2626; font-weight: 600;">Delete?</span>
+    <button style="background: #dc2626; color: white; border: none; border-radius: 4px; padding: 2px 6px; font-size: 10px; font-weight: 600; cursor: pointer;" onclick="executeDeleteBroadcast('${broadcastId}', this)">Yes</button>
+    <button style="background: #e2e8f0; color: #1e293b; border: none; border-radius: 4px; padding: 2px 6px; font-size: 10px; font-weight: 600; cursor: pointer;" onclick="renderBroadcasts()">No</button>
+  `;
+  btn.parentNode.appendChild(wrap);
+}
+
+async function executeDeleteBroadcast(broadcastId, btn) {
+  if (typeof db === 'undefined' || !db) return;
+  btn.disabled = true;
+
+  try {
+    const { error } = await db
+      .from('broadcasts')
+      .delete()
+      .eq('id', broadcastId);
+
+    if (error) throw error;
+
+    await fetchAdminBroadcastsOnly();
+  } catch (err) {
+    alert('Deletion execution failed: ' + err.message);
+    renderBroadcasts();
+  }
+}
+
+(function initBroadcastHistorySystem() {
+  let checkAttempts = 0;
+  const registryCheck = setInterval(() => {
+    checkAttempts++;
+    const isDbReady = (typeof db !== 'undefined');
+    const isUiReady = document.getElementById('broadcastList') !== null;
+
+    if (isDbReady && isUiReady) {
+      clearInterval(registryCheck);
+      fetchAdminBroadcastsOnly();
+    }
+    if (checkAttempts > 30) clearInterval(registryCheck);
+  }, 200);
+})();
+
+// ── GLOBAL REGISTRY MAPPING ──
 window.loadGlobalNotifications = loadGlobalNotifications;
 window.markAllNotificationsAsRead = markAllNotificationsAsRead;
 window.dismissSingleNotification = dismissSingleNotification;
+window.dismissSingleBroadcast = dismissSingleBroadcast;

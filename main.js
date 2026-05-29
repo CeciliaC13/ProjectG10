@@ -390,4 +390,11 @@ window.addEventListener('load', () => {
         updateNotificationBadge();
     }
 }
-})(); // End of main IIFE
+  // =========================================================================
+  // EXPOSE FUNCTIONS TO THE GLOBAL WINDOW SCOPE (ADD THIS BEFORE THE IIFE ENDS)
+  // =========================================================================
+  window.loadGlobalNotifications = loadNotificationData; 
+  window.markAllNotificationsAsRead = markAllAsRead;
+  window.dismissSingleNotification = markAsRead; 
+
+})(); 
