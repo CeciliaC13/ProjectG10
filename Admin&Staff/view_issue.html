@@ -7,22 +7,20 @@
 
   <title>View Issue - UTMSPACE College Booking</title>
 
-  <link href="img/favicon.png" rel="icon">
+  <link href="../img/favicon.png" rel="icon">
+  <link href="../img/apple-touch-icon.png" rel="apple-touch-icon">
+
   <link href="https://fonts.googleapis.com" rel="preconnect">
   <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Montserrat:wght@600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900&family=Montserrat:wght@100;200;300;400;500;600;700;800;900&family=Raleway:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
-  
-    <link href="../vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+  <link href="../vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
   <link href="../vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
   <link href="../vendor/aos/aos.css" rel="stylesheet">
   <link href="../vendor/swiper/swiper-bundle.min.css" rel="stylesheet">
   <link href="../vendor/glightbox/css/glightbox.min.css" rel="stylesheet">
   <link href="../main.css" rel="stylesheet">
-  </header>
+
   <style>
     body {
       background: #f5f7fb;
@@ -232,35 +230,42 @@
     }
   </style>
 </head>
-<body>
+<body class="index-page">
 
 <header id="header" class="logo d-flex align-items-center" style="margin-right: auto;">
   <div class="container position-relative d-flex align-items-center">
+
     <a href="admin_staff_dashboard.html" class="logo d-flex align-items-center">
       <img src="../img/spacelogo.png" alt="UTM Space Logo" style="height: 50px; width: auto; max-height:60px;">
     </a>
+
     <nav id="navmenu" class="navmenu">
       <ul>
         <li><a href="admin_staff_dashboard.html">Home</a></li>
         <li><a href="room_availability.html">Room Availability</a></li>
         <li><a href="view_approval.html">Approvals</a></li>
         <li><a href="update_booking_status.html">Update Status</a></li>
-        <li><a href="view_issue.html"class="active">Issue</a></li>
+        <li><a href="view_issue.html" class="active">Issue</a></li>
       </ul>
       <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>
     </nav>
+
     <div class="header-actions">
+
       <div class="header-social-links">
-        <a href="https://www.facebook.com/utmspace/" target="_blank" rel="noopener noreferrer"><i class="bi bi-facebook"></i></a>
-        <a href="https://www.instagram.com/spaceutm_official/?hl=en" target="_blank" rel="noopener noreferrer"><i class="bi bi-instagram"></i></a>
+        <a href="https://www.facebook.com/utmspace/" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><i class="bi bi-facebook"></i></a>
+        <a href="https://www.instagram.com/spaceutm_official/?hl=en" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><i class="bi bi-instagram"></i></a>
       </div>
+
       <a href="notification.html" class="notification-btn" title="Notifications">
         <i class="bi bi-bell-fill"></i>
       </a>
+
       <div class="user-profile">
         <div class="user-avatar">
           <div class="avatar-placeholder" id="avatarInitial">A</div>
         </div>
+
         <div class="user-dropdown">
           <div class="dropdown-header">
             <div class="user-info">
@@ -269,13 +274,16 @@
               <div class="user-email" id="dropdownUserEmail">user@utmspace.my</div>
             </div>
           </div>
+
           <ul class="dropdown-menu-list">
             <li><a href="userprofile_admin_staff.html"><i class="bi bi-person-circle"></i> Profile</a></li>
-            <li><a href="#" id="logoutBtn"><i class="bi bi-box-arrow-right"></i> Logout</a></li>
+            <li><a href="logout.html" id="logoutBtn"><i class="bi bi-box-arrow-right"></i> Logout</a></li>
           </ul>
         </div>
       </div>
+
     </div>
+
   </div>
 </header>
 
@@ -339,7 +347,7 @@
             <option value="Low">🟢 Low Priority</option>
           </select>
         </div>
-        
+
         <div class="col-md-6">
           <label for="collegeFilter" class="filter-label" style="font-weight: 600; margin-bottom: 8px; display: block; color: #333333;">Filter by College:</label>
           <select class="form-select" id="collegeFilter">
@@ -475,6 +483,7 @@
 <div id="preloader"></div>
 
 <script src="../vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="../vendor/php-email-form/validate.js"></script>
 <script src="../vendor/aos/aos.js"></script>
 <script src="../vendor/swiper/swiper-bundle.min.js"></script>
 <script src="../vendor/purecounter/purecounter_vanilla.js"></script>
@@ -483,31 +492,56 @@
 <script src="../supabase.js"></script>
 
 <script>
+  // ── Header loader (same as dashboard) ──────────────────────────────────────
+  async function loadAdminStaffHeader() {
+    const role  = localStorage.getItem('staffAdminRole') || localStorage.getItem('userRole');
+    const email = localStorage.getItem('staffAdminEmail');
+    const name  = localStorage.getItem('staffAdminName');
+
+    if (!role && !email) {
+      window.location.href = 'admin_staff_login.html';
+      return;
+    }
+
+    const roleText = (role === 'admin' || role === 'Admin') ? 'Admin' : 'Staff';
+
+    document.getElementById('dropdownUserRole').textContent  = roleText;
+    document.getElementById('dropdownUserName').textContent  = name  || roleText + ' User';
+    document.getElementById('dropdownUserEmail').textContent = email || 'user@utmspace.my';
+    document.getElementById('avatarInitial').textContent     = roleText.charAt(0);
+  }
+
+  document.getElementById('logoutBtn').addEventListener('click', function (e) {
+    e.preventDefault();
+
+    localStorage.removeItem('staffAdminRole');
+    localStorage.removeItem('staffAdminEmail');
+    localStorage.removeItem('staffAdminName');
+    localStorage.removeItem('staffAdminId');
+    localStorage.removeItem('userRole');
+    localStorage.removeItem('currentUser');
+
+    window.location.href = 'admin_staff_login.html';
+  });
+
+  loadAdminStaffHeader();
+
+  // ── Issue page logic ────────────────────────────────────────────────────────
   let issues = [];
 
   function getStatusClass(status) {
-    if (status === 'Resolved') return 'status-resolved';
+    if (status === 'Resolved')   return 'status-resolved';
     if (status === 'In Progress') return 'status-progress';
     return 'status-pending';
   }
 
   function updateStats(filteredIssues) {
-    document.getElementById('totalIssues').textContent = filteredIssues.length;
-    
-    document.getElementById('pendingIssues').textContent = filteredIssues.filter(
-      item => item.status === 'Pending'
-    ).length;
-
-    document.getElementById('progressIssues').textContent = filteredIssues.filter(
-      item => item.status === 'In Progress'
-    ).length;
-
-    document.getElementById('resolvedIssues').textContent = filteredIssues.filter(
-      item => item.status === 'Resolved'
-    ).length;
+    document.getElementById('totalIssues').textContent    = filteredIssues.length;
+    document.getElementById('pendingIssues').textContent  = filteredIssues.filter(i => i.status === 'Pending').length;
+    document.getElementById('progressIssues').textContent = filteredIssues.filter(i => i.status === 'In Progress').length;
+    document.getElementById('resolvedIssues').textContent = filteredIssues.filter(i => i.status === 'Resolved').length;
   }
 
-  // Fetch live reports straight from your Supabase 'Report' table
   async function fetchIssuesFromSupabase() {
     if (typeof db === 'undefined' || !db) {
       console.error('Supabase DB instance is not loaded or missing config links.');
@@ -516,23 +550,23 @@
 
     try {
       const { data, error } = await db
-        .from('Report') 
+        .from('Report')
         .select('*')
-        .order('report_id', { ascending: false }); 
+        .order('report_id', { ascending: false });
 
       if (error) throw error;
 
       issues = data.map(item => ({
-        issueId: item.report_id,
-        studentId: item.student_id, // 💡 Ensure this property maps correctly from your schema
+        issueId:     item.report_id,
+        studentId:   item.student_id,
         studentName: item.student_name || 'Unknown Student',
-        college: item.college || 'N/A', 
-        roomNumber: item.room_number || 'N/A',
-        priority: item.priority || 'Low',
-        issueType: item.issue_category,
+        college:     item.college      || 'N/A',
+        roomNumber:  item.room_number  || 'N/A',
+        priority:    item.priority     || 'Low',
+        issueType:   item.issue_category,
         description: item.description,
-        date: item.created_at ? item.created_at.substring(0, 10) : 'N/A', 
-        status: item.status || 'Pending'
+        date:        item.created_at   ? item.created_at.substring(0, 10) : 'N/A',
+        status:      item.status       || 'Pending'
       }));
 
       renderIssues();
@@ -547,14 +581,13 @@
     if (!tbody) return;
 
     const priorityFilter = document.getElementById('priorityFilter')?.value || 'All';
-    const collegeFilter = document.getElementById('collegeFilter')?.value || 'All';
-    const statusFilter = document.getElementById('statusFilter')?.value || 'All';
+    const collegeFilter  = document.getElementById('collegeFilter')?.value  || 'All';
+    const statusFilter   = document.getElementById('statusFilter')?.value   || 'All';
 
-    const filtered = issues.filter(function(item) {
+    const filtered = issues.filter(function (item) {
       const priorityMatch = priorityFilter === 'All' || item.priority === priorityFilter;
-      const collegeMatch = collegeFilter === 'All' || item.college === collegeFilter;
-      const statusMatch = statusFilter === 'All' || item.status === statusFilter;
-      
+      const collegeMatch  = collegeFilter  === 'All' || item.college  === collegeFilter;
+      const statusMatch   = statusFilter   === 'All' || item.status   === statusFilter;
       return priorityMatch && collegeMatch && statusMatch;
     });
 
@@ -571,8 +604,8 @@
       return;
     }
 
-    tbody.innerHTML = filtered.map(function(item, index) {
-      const realIndex = issues.indexOf(item);
+    tbody.innerHTML = filtered.map(function (item, index) {
+      const realIndex    = issues.indexOf(item);
       const priorityBadge = item.priority === 'High' ? '🔴 High' : item.priority === 'Medium' ? '🟠 Medium' : '🟢 Low';
 
       return `
@@ -594,11 +627,9 @@
               <button class="btn btn-sm btn-outline-primary px-2" style="font-size:13px; border-radius:8px;" onclick="viewIssue(${realIndex})">
                 <i class="bi bi-eye"></i> View
               </button>
-              
               <button class="btn btn-sm btn-outline-warning px-2" style="font-size:13px; border-radius:8px;" onclick="updateReportStatus(${realIndex}, event)">
                 <i class="bi bi-arrow-repeat"></i> Status
               </button>
-              
               <button class="btn btn-sm btn-outline-danger px-2" style="font-size:13px; border-radius:8px;" onclick="deleteIssue(${realIndex})">
                 <i class="bi bi-trash"></i> Delete
               </button>
@@ -609,10 +640,8 @@
     }).join('');
   }
 
-  // Filters Event Hooks
   document.getElementById('priorityFilter')?.addEventListener('change', renderIssues);
   document.getElementById('collegeFilter')?.addEventListener('change', renderIssues);
-  document.getElementById('statusFilter')?.addEventListener('change', renderIssues);
 
   function viewIssue(index) {
     const item = issues[index];
@@ -632,19 +661,13 @@
     new bootstrap.Modal(document.getElementById('issueModal')).show();
   }
 
-  // ✅ FIX 2: Optimized, cyclical tracking status and notification routing worker
   async function updateReportStatus(index, event) {
     const item = issues[index];
     let newStatus = 'Pending';
 
-    // Set up status toggle switching path
-    if (item.status === 'Pending') {
-      newStatus = 'In Progress';
-    } else if (item.status === 'In Progress') {
-      newStatus = 'Resolved';
-    } else {
-      newStatus = 'Pending';
-    }
+    if (item.status === 'Pending')      newStatus = 'In Progress';
+    else if (item.status === 'In Progress') newStatus = 'Resolved';
+    else                                newStatus = 'Pending';
 
     try {
       const btn = event.target;
@@ -653,21 +676,17 @@
 
       if (typeof db === 'undefined') throw new Error("Database configuration context missing.");
 
-      // 1. Update the Report table using the matching schema target primary key (report_id)
       const { error: reportError } = await db
         .from('Report')
         .update({ status: newStatus })
         .eq('report_id', item.issueId);
 
       if (reportError) throw reportError;
-      console.log(`✅ Report ${item.issueId} table updated to: ${newStatus}`);
 
-      // Update local memory data status array right away
       item.status = newStatus;
 
-      // 2. Clear out older notifications and dispatch a fresh alert to the student
       if (item.studentId) {
-        const cleanStudentId = item.studentId.toString().trim();
+        const cleanStudentId   = item.studentId.toString().trim();
         const notificationType = 'Report Status Update';
         let statusMessage = '';
 
@@ -685,31 +704,25 @@
             statusMessage = `The tracking status for your submitted report (Ref: ${item.issueId}) was updated to: ${newStatus}.`;
         }
 
-        // Wipe matching stale notifications to avoid spamming the database
         await db
           .from('notifications')
           .delete()
           .eq('student_id', cleanStudentId)
           .eq('type', notificationType);
 
-        // Inject the fresh notice card payload
         const { error: notificationError } = await db
           .from('notifications')
           .insert({
             student_id: cleanStudentId,
-            type: notificationType,
-            message: statusMessage,
-            read: false,
+            type:       notificationType,
+            message:    statusMessage,
+            read:       false,
             created_at: new Date().toISOString()
           });
 
         if (notificationError) throw notificationError;
-        console.log(`📡 Notification distributed successfully to student: ${cleanStudentId}`);
-      } else {
-        console.warn(`⚠️ Skipping notification: No student_id found linked to report ${item.issueId}`);
       }
 
-      // Re-render UI to update view badges and status counts
       renderIssues();
 
     } catch (err) {
@@ -725,10 +738,8 @@
 
   async function deleteIssue(index) {
     const item = issues[index];
-    
-    if (!confirm(`Are you absolutely sure you want to delete report ${item.issueId} submitted by ${item.studentName}?`)) {
-      return; 
-    }
+
+    if (!confirm(`Are you absolutely sure you want to delete report ${item.issueId} submitted by ${item.studentName}?`)) return;
 
     try {
       const { error } = await db
@@ -747,18 +758,6 @@
     }
   }
 
-  function toggleScrolled() {
-    const selectHeader = document.querySelector('#header');
-    if (!selectHeader) return; 
-
-    if (window.scrollY > 100) {
-      selectHeader.classList.add('header-scrolled');
-    } else {
-      selectHeader.classList.remove('header-scrolled');
-    }
-  }
-
-  // Initial Execution
   fetchIssuesFromSupabase();
 </script>
 </body>
