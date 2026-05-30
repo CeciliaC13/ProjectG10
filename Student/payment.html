@@ -1,0 +1,1081 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <title>Payment - UTMSPACE College Booking</title>
+
+  <link href="../img/favicon.png" rel="icon">
+  <link href="../img/apple-touch-icon.png" rel="apple-touch-icon">
+
+  <link href="https://fonts.googleapis.com" rel="preconnect">
+  <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&family=Montserrat:wght@400;500;600;700;800;900&family=Raleway:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <link href="../vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+  <link href="../vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
+  <link href="../main.css" rel="stylesheet">
+
+  <style>
+    :root {
+      --maroon: #6b092a;
+      --maroon-dark: #4a0619;
+      --maroon-light: #8b0e35;
+      --navy: #1a3c5e;
+      --gold: #c9a84c;
+      --gold-light: #f0d080;
+      --success: #166534;
+      --success-bg: #dcfce7;
+      --danger: #991b1b;
+      --danger-bg: #fee2e2;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      background: #f0f2f5;
+      font-family: 'Raleway', sans-serif;
+      min-height: 100vh;
+    }
+
+    /* ── PAGE WRAPPER ── */
+    .payment-page {
+      min-height: 100vh;
+      padding: 40px 0 60px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .payment-page::before {
+      content: '';
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 260px;
+      background: linear-gradient(135deg, var(--maroon-dark), var(--maroon-light));
+      z-index: 0;
+    }
+
+    .payment-page::after {
+      content: '';
+      position: fixed;
+      top: 160px; left: -60px;
+      width: 320px; height: 320px;
+      background: rgba(255,255,255,0.04);
+      border-radius: 50%;
+      z-index: 0;
+    }
+
+    .container { position: relative; z-index: 1; }
+
+    /* ── TOP BAR ── */
+    .top-bar {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+
+    .back-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: rgba(255,255,255,0.9);
+      background: rgba(255,255,255,0.15);
+      border: 1px solid rgba(255,255,255,0.25);
+      padding: 9px 18px;
+      border-radius: 40px;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 14px;
+      transition: all 0.2s;
+    }
+
+    .back-btn:hover {
+      color: white;
+      background: rgba(255,255,255,0.25);
+    }
+
+    .page-title {
+      color: white;
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 700;
+      font-size: 22px;
+      margin: 0;
+    }
+
+    /* ── MAIN CARD ── */
+    .payment-card {
+      background: white;
+      border-radius: 24px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.12);
+      overflow: hidden;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    .card-header-band {
+      background: linear-gradient(135deg, var(--maroon), var(--maroon-light));
+      padding: 28px 32px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .card-header-band .header-icon {
+      width: 52px; height: 52px;
+      background: rgba(255,255,255,0.18);
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      color: white;
+      flex-shrink: 0;
+    }
+
+    .card-header-band h2 {
+      color: white;
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 700;
+      font-size: 20px;
+      margin: 0 0 4px;
+    }
+
+    .card-header-band p {
+      color: rgba(255,255,255,0.8);
+      font-size: 13px;
+      margin: 0;
+    }
+
+    .card-body-inner {
+      padding: 32px;
+    }
+
+    /* ── BOOKING SUMMARY ── */
+    .summary-title {
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: #999;
+      margin-bottom: 16px;
+    }
+
+    .summary-rows {
+      background: #f8f9fa;
+      border-radius: 14px;
+      overflow: hidden;
+      margin-bottom: 24px;
+    }
+
+    .summary-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 13px 18px;
+      font-size: 14px;
+      border-bottom: 1px solid #eee;
+    }
+
+    .summary-row:last-child { border-bottom: none; }
+
+    .summary-row .label {
+      color: #777;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .summary-row .label i { color: var(--maroon); font-size: 15px; }
+
+    .summary-row .value {
+      font-weight: 600;
+      color: #222;
+      text-align: right;
+    }
+
+    /* ── AMOUNT BOX ── */
+    .amount-box {
+      background: linear-gradient(135deg, var(--navy), #2c5a7a);
+      border-radius: 16px;
+      padding: 22px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 28px;
+      color: white;
+    }
+
+    .amount-box .amount-label {
+      font-size: 13px;
+      color: rgba(255,255,255,0.75);
+      margin-bottom: 4px;
+    }
+
+    .amount-box .amount-value {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 32px;
+      font-weight: 800;
+      color: white;
+      letter-spacing: -1px;
+    }
+
+    .amount-box .amount-value span {
+      font-size: 16px;
+      font-weight: 600;
+      opacity: 0.8;
+      margin-right: 4px;
+    }
+
+    .amount-box .currency-badge {
+      background: rgba(255,255,255,0.15);
+      border: 1px solid rgba(255,255,255,0.25);
+      border-radius: 10px;
+      padding: 8px 14px;
+      font-size: 13px;
+      font-weight: 700;
+      color: rgba(255,255,255,0.9);
+    }
+
+    /* ── NOTICE ── */
+    .notice-bar {
+      background: #fffbeb;
+      border: 1px solid #fde68a;
+      border-radius: 10px;
+      padding: 12px 16px;
+      font-size: 13px;
+      color: #92400e;
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      margin-bottom: 24px;
+    }
+
+    .notice-bar i { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+
+    /* ── PAY BUTTON ── */
+    .pay-now-btn {
+      width: 100%;
+      background: linear-gradient(135deg, var(--maroon), var(--maroon-light));
+      color: white;
+      border: none;
+      border-radius: 14px;
+      padding: 16px;
+      font-family: 'Montserrat', sans-serif;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      transition: all 0.25s;
+      letter-spacing: 0.5px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .pay-now-btn::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: rgba(255,255,255,0);
+      transition: background 0.2s;
+    }
+
+    .pay-now-btn:hover::after { background: rgba(255,255,255,0.08); }
+
+    .pay-now-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 30px rgba(107,9,42,0.4);
+    }
+
+    .pay-now-btn:active { transform: translateY(0); }
+
+    .pay-now-btn:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    .btn-spinner {
+      width: 18px; height: 18px;
+      border: 2px solid rgba(255,255,255,0.4);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      display: none;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── SECURITY NOTE ── */
+    .security-note {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      margin-top: 14px;
+      font-size: 12px;
+      color: #aaa;
+    }
+
+    /* ── SUCCESS STATE ── */
+    .state-view {
+      display: none;
+      padding: 40px 32px;
+      text-align: center;
+    }
+
+    .state-view.active { display: block; }
+
+    .state-icon-circle {
+      width: 90px; height: 90px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 24px;
+      font-size: 42px;
+    }
+
+    .state-icon-circle.success {
+      background: var(--success-bg);
+      color: var(--success);
+      animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
+    }
+
+    .state-icon-circle.failed {
+      background: var(--danger-bg);
+      color: var(--danger);
+      animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
+    }
+
+    @keyframes popIn {
+      from { transform: scale(0); opacity: 0; }
+      to   { transform: scale(1); opacity: 1; }
+    }
+
+    .state-view h2 {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 24px;
+      font-weight: 800;
+      color: #1a1a1a;
+      margin-bottom: 10px;
+    }
+
+    .state-view p {
+      color: #666;
+      font-size: 15px;
+      line-height: 1.6;
+      margin-bottom: 28px;
+    }
+
+    /* ── SUCCESS RECEIPT ── */
+    .receipt-box {
+      background: #f8f9fa;
+      border-radius: 14px;
+      padding: 20px;
+      text-align: left;
+      margin-bottom: 28px;
+    }
+
+    .receipt-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 14px;
+      padding: 8px 0;
+      border-bottom: 1px dashed #ddd;
+    }
+
+    .receipt-row:last-child { border-bottom: none; }
+    .receipt-row .r-label { color: #777; }
+    .receipt-row .r-value { font-weight: 600; color: #222; }
+
+    .receipt-total {
+      background: var(--success-bg);
+      border-radius: 10px;
+      padding: 14px 18px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 12px;
+      font-weight: 700;
+    }
+
+    .receipt-total .r-label { color: var(--success); font-size: 14px; }
+    .receipt-total .r-value { color: var(--success); font-size: 20px; font-family: 'Montserrat', sans-serif; }
+
+    /* ── ACTION BUTTONS ── */
+    .action-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 28px;
+      border-radius: 40px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      border: none;
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+
+    .btn-primary-maroon {
+      background: linear-gradient(135deg, var(--maroon), var(--maroon-light));
+      color: white;
+    }
+
+    .btn-primary-maroon:hover {
+      color: white;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(107,9,42,0.35);
+    }
+
+    .btn-outline-maroon {
+      background: transparent;
+      color: var(--maroon);
+      border: 2px solid var(--maroon);
+    }
+
+    .btn-outline-maroon:hover {
+      background: var(--maroon);
+      color: white;
+    }
+
+    .btn-outline-navy {
+      background: transparent;
+      color: var(--navy);
+      border: 2px solid var(--navy);
+    }
+
+    .btn-outline-navy:hover {
+      background: var(--navy);
+      color: white;
+    }
+
+    /* ── LOADING STATE ── */
+    #loadingView {
+      padding: 60px 32px;
+      text-align: center;
+    }
+
+    .loading-spinner-lg {
+      width: 52px; height: 52px;
+      border: 4px solid #eee;
+      border-top-color: var(--maroon);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto 20px;
+    }
+
+    /* ── TOYYIBPAY LOGO ── */
+    .toyyibpay-badge {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 12px;
+      font-size: 12px;
+      color: #bbb;
+    }
+
+    .toyyibpay-badge strong { color: #888; }
+
+    /* ── STATUS BADGE ── */
+    .status-pill {
+      display: inline-block;
+      padding: 4px 14px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .status-pill.pending-pay { background: #fff3cd; color: #856404; }
+    .status-pill.paid        { background: var(--success-bg); color: var(--success); }
+
+    /* ── SANDBOX BANNER ── */
+    .sandbox-banner {
+      background: #fef3c7;
+      border: 1px solid #fcd34d;
+      border-radius: 8px;
+      padding: 8px 14px;
+      font-size: 12px;
+      font-weight: 600;
+      color: #92400e;
+      text-align: center;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    @media (max-width: 576px) {
+      .card-body-inner { padding: 24px 20px; }
+      .card-header-band { padding: 22px 20px; }
+      .amount-box .amount-value { font-size: 26px; }
+    }
+  </style>
+</head>
+
+<body>
+
+<header id="header" class="logo d-flex align-items-center" style="margin-right: auto;">
+  <div class="container position-relative d-flex align-items-center">
+ 
+    <a href="dashboard.html" class="logo d-flex align-items-center">
+      <img src="../img/spacelogo.png" alt="UTM Space Logo" style="height: 50px; width: auto; max-height:60px;">
+    </a>
+ 
+    <nav id="navmenu" class="navmenu">
+      <ul>
+        <li><a href="dashboard.html">Home</a></li>
+        <li><a href="booking_history.html" >History</a></li>
+        <li><a href="applianceform_student.html">Appliance Form</a></li>
+        <li><a href="reportform_student.html">Report</a></li>
+        <li><a href="contact.html">Contact</a></li>
+      </ul>
+      <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>
+    </nav>
+ 
+    <div class="header-actions">
+ 
+      <div class="header-social-links">
+        <a href="https://www.facebook.com/utmspace/" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><i class="bi bi-facebook"></i></a>
+        <a href="https://www.instagram.com/spaceutm_official/?hl=en" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><i class="bi bi-instagram"></i></a>
+      </div>
+ 
+     <div class="notification-wrapper">
+    <button class="notification-btn" id="notificationBtn" title="Notifications">
+    <i class="bi bi-bell-fill"></i>
+    <span class="notification-badge" 
+          id="notificationBadge" 
+          style="display: none;">0</span>
+    </button>
+  
+    <div class="notification-dropdown" id="notificationDropdown">
+    <div class="notification-dropdown-header">
+      <h4><i class="bi bi-bell-fill"></i> Notifications</h4>
+      
+      <a href="#" 
+         class="mark-all-link" 
+         id="markAllNotifications" 
+         onclick="event.preventDefault(); markAllNotificationsAsRead();">
+         Mark all as read
+      </a>
+    </div>
+    
+    <div class="notification-list" id="notificationList"></div>
+      </div>
+    </div>
+ 
+      <div class="user-profile">
+        <div class="user-avatar">
+          <div class="avatar-placeholder" id="avatarInitial">S</div>
+        </div>
+ 
+        <div class="user-dropdown">
+          <div class="dropdown-header">
+            <div class="user-info">
+              <div class="user-name" id="dropdownUserName">Student name</div>
+              <div class="user-role" id="dropdownUserRole">Student</div>
+              <div class="user-email" id="dropdownUserEmail">Their email@gmail.com</div>
+            </div>
+          </div>
+ 
+          <ul class="dropdown-menu-list">
+            <li><a href="userprofile_student.html"><i class="bi bi-person-circle"></i> Profile</a></li>
+            <li><a href="index.html" id="logoutBtn"><i class="bi bi-box-arrow-right"></i> Logout</a></li>
+          </ul>
+        </div>
+      </div>
+ 
+    </div>
+ 
+  </div>
+</header>
+
+<main class="payment-page">
+  <div class="container">
+
+    <div class="top-bar">
+      <a href="booking_history.html" class="back-btn">
+        <i class="bi bi-arrow-left"></i> Back to History
+      </a>
+      <h1 class="page-title">Payment</h1>
+    </div>
+
+    <div class="payment-card">
+
+      <!-- ══════════════════════════════════
+           LOADING VIEW
+      ══════════════════════════════════ -->
+      <div id="loadingView">
+        <div class="loading-spinner-lg"></div>
+        <p style="color:#999; font-size:15px;">Loading booking details...</p>
+      </div>
+
+      <!-- ══════════════════════════════════
+           SUMMARY VIEW
+      ══════════════════════════════════ -->
+      <div id="summaryView" style="display:none;">
+        <div class="card-header-band">
+          <div class="header-icon"><i class="bi bi-credit-card-2-front"></i></div>
+          <div>
+            <h2>Payment Summary</h2>
+            <p>Review your booking before proceeding</p>
+          </div>
+        </div>
+
+        <div class="card-body-inner">
+
+          <!-- Sandbox Banner -->
+          <div class="sandbox-banner">
+            <i class="bi bi-cone-striped"></i>
+            SANDBOX / TEST MODE — No real money will be charged
+          </div>
+
+          <p class="summary-title">Booking Details</p>
+
+          <div class="summary-rows">
+            <div class="summary-row">
+              <span class="label"><i class="bi bi-upc-scan"></i> Booking ID</span>
+              <span class="value" id="sumBookingId">—</span>
+            </div>
+            <div class="summary-row">
+              <span class="label"><i class="bi bi-building"></i> College</span>
+              <span class="value" id="sumCollege">—</span>
+            </div>
+            <div class="summary-row">
+              <span class="label"><i class="bi bi-door-open"></i> Room Type</span>
+              <span class="value" id="sumRoomType">—</span>
+            </div>
+            <div class="summary-row">
+              <span class="label"><i class="bi bi-calendar-check"></i> Check-In</span>
+              <span class="value" id="sumCheckIn">—</span>
+            </div>
+            <div class="summary-row">
+              <span class="label"><i class="bi bi-calendar-x"></i> Check-Out</span>
+              <span class="value" id="sumCheckOut">—</span>
+            </div>
+            <div class="summary-row">
+              <span class="label"><i class="bi bi-info-circle"></i> Status</span>
+              <span class="value"><span class="status-pill pending-pay">Pending Payment</span></span>
+            </div>
+          </div>
+
+          <!-- Amount -->
+          <div class="amount-box">
+            <div>
+              <div class="amount-label">Total Amount Due</div>
+              <div class="amount-value" id="sumAmount">
+                <span>RM</span>0.00
+              </div>
+            </div>
+            <div class="currency-badge">MYR</div>
+          </div>
+
+          <!-- Notice -->
+          <div class="notice-bar">
+            <i class="bi bi-info-circle-fill"></i>
+            <span>You will be redirected to <strong>ToyyibPay</strong> to complete your payment securely. Do not close the window during the process.</span>
+          </div>
+
+          <!-- Pay Button -->
+          <button class="pay-now-btn" id="payNowBtn" onclick="initiatePayment()">
+            <div class="btn-spinner" id="btnSpinner"></div>
+            <i class="bi bi-lock-fill" id="btnIcon"></i>
+            <span id="btnText">Proceed to Pay</span>
+          </button>
+
+          <div class="security-note">
+            <i class="bi bi-shield-check"></i>
+            Secured by ToyyibPay · SSL Encrypted
+          </div>
+
+          <div class="toyyibpay-badge">
+            Powered by <strong>ToyyibPay</strong>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════════
+           SUCCESS VIEW
+      ══════════════════════════════════ -->
+      <div id="successView" class="state-view">
+        <div class="state-icon-circle success">
+          <i class="bi bi-check-lg"></i>
+        </div>
+        <h2>Payment Successful! 🎉</h2>
+        <p>Your room booking payment has been received. Your reservation is now confirmed and active.</p>
+
+        <div class="receipt-box">
+          <p style="font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#999;margin-bottom:12px;">Payment Receipt</p>
+          <div class="receipt-row">
+            <span class="r-label">Booking ID</span>
+            <span class="r-value" id="rcpBookingId">—</span>
+          </div>
+          <div class="receipt-row">
+            <span class="r-label">College</span>
+            <span class="r-value" id="rcpCollege">—</span>
+          </div>
+          <div class="receipt-row">
+            <span class="r-label">Room Type</span>
+            <span class="r-value" id="rcpRoomType">—</span>
+          </div>
+          <div class="receipt-row">
+            <span class="r-label">Check-In</span>
+            <span class="r-value" id="rcpCheckIn">—</span>
+          </div>
+          <div class="receipt-row">
+            <span class="r-label">Check-Out</span>
+            <span class="r-value" id="rcpCheckOut">—</span>
+          </div>
+          <div class="receipt-row">
+            <span class="r-label">Payment Status</span>
+            <span class="r-value"><span class="status-pill paid">✓ Paid</span></span>
+          </div>
+          <div class="receipt-total">
+            <span class="r-label">Amount Paid</span>
+            <span class="r-value" id="rcpAmount">RM 0.00</span>
+          </div>
+        </div>
+
+        <div style="display:flex; gap:12px; justify-content:center; flex-wrap:wrap;">
+          <a href="booking_history.html" class="action-btn btn-primary-maroon">
+            <i class="bi bi-clock-history"></i> View Booking History
+          </a>
+          <a href="dashboard.html" class="action-btn btn-outline-navy">
+            <i class="bi bi-house"></i> Go to Dashboard
+          </a>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════════
+           FAILED VIEW
+      ══════════════════════════════════ -->
+      <div id="failedView" class="state-view">
+        <div class="state-icon-circle failed">
+          <i class="bi bi-x-lg"></i>
+        </div>
+        <h2>Payment Failed</h2>
+        <p>Your payment was not completed. This could be due to a cancelled transaction, insufficient funds, or a network issue. <strong>Your booking is still reserved</strong> — you can try again.</p>
+
+        <div class="receipt-box" style="margin-bottom:28px;">
+          <div class="receipt-row">
+            <span class="r-label">Booking ID</span>
+            <span class="r-value" id="failBookingId">—</span>
+          </div>
+          <div class="receipt-row">
+            <span class="r-label">Amount</span>
+            <span class="r-value" id="failAmount">—</span>
+          </div>
+          <div class="receipt-row">
+            <span class="r-label">Status</span>
+            <span class="r-value" style="color:#991b1b; font-weight:700;">✗ Failed / Cancelled</span>
+          </div>
+        </div>
+
+        <div style="display:flex; gap:12px; justify-content:center; flex-wrap:wrap;">
+          <button class="action-btn btn-primary-maroon" onclick="retryPayment()">
+            <i class="bi bi-arrow-clockwise"></i> Try Again
+          </button>
+          <a href="booking_history.html" class="action-btn btn-outline-maroon">
+            <i class="bi bi-clock-history"></i> Back to History
+          </a>
+        </div>
+      </div>
+
+    </div><!-- end .payment-card -->
+  </div>
+</main>
+
+<footer id="footer" class="footer position-relative light-background">
+  <div class="footer-bottom">
+    <div class="container">
+      <p class="mb-0 text-center py-3">© <strong>UTMSPACE</strong>. All rights reserved.</p>
+    </div>
+  </div>
+</footer>
+
+<script src="../vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="../main.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../supabase.js"></script>
+
+<script>
+  // ================================================================
+  // TOYYIBPAY SANDBOX CONFIG
+  // ================================================================
+  const TOYYIBPAY_BASE_URL    = 'https://dev.toyyibpay.com'; // sandbox
+  const TOYYIBPAY_SECRET_KEY  = 'tzv4uklj-dnpv-uye3-avn6-djzzzw29gcdv';   // ← replace with your sandbox secret key
+  const TOYYIBPAY_CATEGORY_CODE = 'ep3feopq';      // ← replace with your category code
+
+  // ================================================================
+  // STATE
+  // ================================================================
+  let reservationId = null;
+  let bookingData   = null;
+
+  // ================================================================
+  // INIT — detect which view to show
+  // ================================================================
+  document.addEventListener('DOMContentLoaded', async () => {
+    loadHeaderProfile();
+
+    const params    = new URLSearchParams(window.location.search);
+    reservationId   = params.get('id');
+    const statusCode = params.get('status_id'); // toyyibPay returns status_id
+    const billCode   = params.get('billcode');
+
+    // Returned from ToyyibPay
+    if (statusCode !== null) {
+      await fetchBookingData(reservationId || params.get('order_id'));
+      if (statusCode === '1') {
+        await handlePaymentSuccess();
+      } else {
+        handlePaymentFailed();
+      }
+      return;
+    }
+
+    // Normal entry from booking_history
+    if (!reservationId) {
+      alert('No booking ID found. Redirecting...');
+      window.location.href = 'booking_history.html';
+      return;
+    }
+
+    await fetchBookingData(reservationId);
+    showSummaryView();
+  });
+
+  // ================================================================
+  // FETCH BOOKING FROM SUPABASE
+  // ================================================================
+  async function fetchBookingData(id) {
+    if (!id) return;
+    try {
+      const { data, error } = await db
+        .from('reservations')
+        .select('*')
+        .eq('reservation_id', id)
+        .single();
+
+      if (error) throw error;
+      bookingData = data;
+    } catch (err) {
+      console.error('Error fetching booking:', err);
+      document.getElementById('loadingView').innerHTML = `
+        <p style="color:#dc2626; padding:40px; text-align:center;">
+          <i class="bi bi-exclamation-triangle-fill" style="font-size:40px; display:block; margin-bottom:12px;"></i>
+          Failed to load booking details. <a href="booking_history.html">Go back</a>
+        </p>`;
+    }
+  }
+
+  // ================================================================
+  // SHOW SUMMARY VIEW
+  // ================================================================
+  function showSummaryView() {
+    document.getElementById('loadingView').style.display  = 'none';
+    document.getElementById('summaryView').style.display  = 'block';
+
+    if (!bookingData) return;
+
+    const checkIn  = bookingData.check_in  ? bookingData.check_in.substring(0, 10)  : '—';
+    const checkOut = bookingData.check_out ? bookingData.check_out.substring(0, 10) : '—';
+    const amount   = parseFloat(bookingData.total_amount || 0).toFixed(2);
+
+    document.getElementById('sumBookingId').textContent  = bookingData.reservation_id || '—';
+    document.getElementById('sumCollege').textContent    = bookingData.college         || '—';
+    document.getElementById('sumRoomType').textContent   = bookingData.room_type       || '—';
+    document.getElementById('sumCheckIn').textContent    = checkIn;
+    document.getElementById('sumCheckOut').textContent   = checkOut;
+    document.getElementById('sumAmount').innerHTML       = `<span>RM</span>${amount}`;
+  }
+
+  // ================================================================
+  // INITIATE PAYMENT — calls ToyyibPay createBill via proxy/edge fn
+  // ================================================================
+  async function initiatePayment() {
+    if (!bookingData) return;
+
+    const btn     = document.getElementById('payNowBtn');
+    const spinner = document.getElementById('btnSpinner');
+    const icon    = document.getElementById('btnIcon');
+    const text    = document.getElementById('btnText');
+
+    btn.disabled      = true;
+    spinner.style.display = 'block';
+    icon.style.display    = 'none';
+    text.textContent      = 'Processing...';
+
+    try {
+      // Current page URL as return URL (with booking id so we can fetch on return)
+      const returnUrl = `${window.location.origin}${window.location.pathname}?id=${bookingData.reservation_id}`;
+
+      // Amount in cents (toyyibpay uses cents)
+      const amountCents = Math.round(parseFloat(bookingData.total_amount || 0) * 100);
+
+      // Get student email for bill
+      const email = localStorage.getItem('studentEmail') || 'student@utm.my';
+
+      // Build form data for ToyyibPay createBill
+      const formData = new URLSearchParams();
+      formData.append('userSecretKey',         TOYYIBPAY_SECRET_KEY);
+      formData.append('categoryCode',          TOYYIBPAY_CATEGORY_CODE);
+      formData.append('billName',              `Room_${bookingData.reservation_id}`);
+      formData.append('billDescription',       `Room booking at ${bookingData.college}`);
+      formData.append('billPriceSetting',      '1');                // fixed price
+      formData.append('billPayorInfo',         '1');                // collect payer info
+      formData.append('billAmount',            amountCents);
+      formData.append('billReturnUrl',         returnUrl);
+      formData.append('billCallbackUrl',       returnUrl);          // same page handles callback
+      formData.append('billExternalReferenceNo', bookingData.reservation_id);
+      formData.append('billTo',                localStorage.getItem('studentName') || 'Student');
+      formData.append('billEmail',             email);
+      formData.append('billPhone',             '0111234567');       // default phone
+      formData.append('billSplitPayment',      '0');
+      formData.append('billSplitPaymentArgs',  '');
+      formData.append('billPaymentChannel',    '0');                // all channels
+      formData.append('billContentEmail',      `Thank you for your payment for booking ${bookingData.reservation_id}`);
+      formData.append('billChargeToCustomer',  '1');
+
+      // ⚠️  Direct browser call to ToyyibPay works on sandbox (CORS allowed for dev)
+      //     For production, replace this fetch with a call to your Supabase Edge Function
+      const response = await fetch(`${TOYYIBPAY_BASE_URL}/index.php/api/createBill`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: formData.toString()
+      });
+
+      const result = await response.json();
+      console.log('ToyyibPay createBill response:', result);
+
+      if (result && result[0] && result[0].BillCode) {
+        const billCode     = result[0].BillCode;
+        const paymentUrl   = `${TOYYIBPAY_BASE_URL}/${billCode}`;
+        // Redirect student to ToyyibPay payment page
+        window.location.href = paymentUrl;
+      } else {
+        throw new Error(result?.message || 'Failed to create bill');
+      }
+
+    } catch (err) {
+      console.error('Payment initiation error:', err);
+      alert('Failed to initiate payment. Please try again.\n\nError: ' + err.message);
+      btn.disabled          = false;
+      spinner.style.display = 'none';
+      icon.style.display    = 'inline';
+      text.textContent      = 'Proceed to Pay';
+    }
+  }
+
+  // ================================================================
+  // HANDLE SUCCESS — update Supabase + show success view
+  // ================================================================
+  async function handlePaymentSuccess() {
+    // Update reservation status to Paid in Supabase
+    if (bookingData) {
+      try {
+        await db
+          .from('reservations')
+          .update({ status: 'Paid' })
+          .eq('reservation_id', bookingData.reservation_id);
+      } catch (err) {
+        console.error('Failed to update status:', err);
+      }
+    }
+
+    document.getElementById('loadingView').style.display = 'none';
+    document.getElementById('successView').classList.add('active');
+
+    if (bookingData) {
+      const checkIn  = bookingData.check_in  ? bookingData.check_in.substring(0, 10)  : '—';
+      const checkOut = bookingData.check_out ? bookingData.check_out.substring(0, 10) : '—';
+      const amount   = parseFloat(bookingData.total_amount || 0).toFixed(2);
+
+      document.getElementById('rcpBookingId').textContent = bookingData.reservation_id || '—';
+      document.getElementById('rcpCollege').textContent   = bookingData.college         || '—';
+      document.getElementById('rcpRoomType').textContent  = bookingData.room_type       || '—';
+      document.getElementById('rcpCheckIn').textContent   = checkIn;
+      document.getElementById('rcpCheckOut').textContent  = checkOut;
+      document.getElementById('rcpAmount').textContent    = `RM ${amount}`;
+    }
+  }
+
+  // ================================================================
+  // HANDLE FAILED
+  // ================================================================
+  function handlePaymentFailed() {
+    document.getElementById('loadingView').style.display = 'none';
+    document.getElementById('failedView').classList.add('active');
+
+    if (bookingData) {
+      const amount = parseFloat(bookingData.total_amount || 0).toFixed(2);
+      document.getElementById('failBookingId').textContent = bookingData.reservation_id || '—';
+      document.getElementById('failAmount').textContent    = `RM ${amount}`;
+    }
+  }
+
+  // ================================================================
+  // RETRY PAYMENT
+  // ================================================================
+  function retryPayment() {
+    if (reservationId) {
+      window.location.href = `payment.html?id=${reservationId}`;
+    } else {
+      window.location.href = 'booking_history.html';
+    }
+  }
+
+  // ================================================================
+  // HEADER PROFILE
+  // ================================================================
+  async function loadHeaderProfile() {
+    const email = localStorage.getItem('studentEmail');
+    if (!email || typeof db === 'undefined') return;
+
+    const { data, error } = await db
+      .from('Student')
+      .select('name, email')
+      .eq('email', email)
+      .single();
+
+    if (!error && data) {
+      const initial = data.name ? data.name.charAt(0).toUpperCase() : 'S';
+      document.getElementById('avatarInitial').textContent    = initial;
+      document.getElementById('dropdownUserName').textContent = data.name;
+      document.getElementById('dropdownUserEmail').textContent = data.email;
+      localStorage.setItem('studentName', data.name);
+    }
+  }
+
+  // Logout
+  document.getElementById('logoutBtn')?.addEventListener('click', function(e) {
+    e.preventDefault();
+    localStorage.removeItem('studentEmail');
+    localStorage.removeItem('studentId');
+    localStorage.removeItem('studentName');
+    window.location.href = '/Student/index.html';
+  });
+
+  // User dropdown
+  const userProfile  = document.querySelector('.user-profile');
+  const userDropdown = document.querySelector('.user-dropdown');
+  if (userProfile && userDropdown) {
+    userProfile.addEventListener('click', (e) => {
+      e.stopPropagation();
+      userDropdown.classList.toggle('show');
+    });
+    document.addEventListener('click', () => userDropdown?.classList.remove('show'));
+  }
+</script>
+
+</body>
+</html>
