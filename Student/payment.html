@@ -811,9 +811,7 @@
   // ================================================================
   // TOYYIBPAY SANDBOX CONFIG
   // ================================================================
-  const TOYYIBPAY_BASE_URL    = 'https://dev.toyyibpay.com'; // sandbox
-  const TOYYIBPAY_SECRET_KEY  = 'tzv4uklj-dnpv-uye3-avn6-djzzzw29gcdv';   // ← replace with your sandbox secret key
-  const TOYYIBPAY_CATEGORY_CODE = 'ep3feopq';      // ← replace with your category code
+ const EDGE_FUNCTION_URL = 'https://lpqzdcdinynhsbmekfnl.supabase.co/functions/v1/create-toyyibpay-bill';
 
   // ================================================================
   // STATE
@@ -910,64 +908,37 @@
     const icon    = document.getElementById('btnIcon');
     const text    = document.getElementById('btnText');
 
-    btn.disabled      = true;
+    btn.disabled          = true;
     spinner.style.display = 'block';
     icon.style.display    = 'none';
     text.textContent      = 'Processing...';
 
     try {
-      // Current page URL as return URL (with booking id so we can fetch on return)
       const returnUrl = `${window.location.origin}${window.location.pathname}?id=${bookingData.reservation_id}`;
 
-      // Amount in cents (toyyibpay uses cents)
-      const amountCents = Math.round(parseFloat(bookingData.total_amount || 0) * 100);
-
-      // Get student email for bill
-      const email = localStorage.getItem('studentEmail') || 'student@utm.my';
-
-      // Build form data for ToyyibPay createBill
-      const formData = new URLSearchParams();
-      formData.append('userSecretKey',         TOYYIBPAY_SECRET_KEY);
-      formData.append('categoryCode',          TOYYIBPAY_CATEGORY_CODE);
-      formData.append('billName',              `Room_${bookingData.reservation_id}`);
-      formData.append('billDescription',       `Room booking at ${bookingData.college}`);
-      formData.append('billPriceSetting',      '1');                // fixed price
-      formData.append('billPayorInfo',         '1');                // collect payer info
-      formData.append('billAmount',            amountCents);
-      formData.append('billReturnUrl',         returnUrl);
-      formData.append('billCallbackUrl',       returnUrl);          // same page handles callback
-      formData.append('billExternalReferenceNo', bookingData.reservation_id);
-      formData.append('billTo',                localStorage.getItem('studentName') || 'Student');
-      formData.append('billEmail',             email);
-      formData.append('billPhone',             '0111234567');       // default phone
-      formData.append('billSplitPayment',      '0');
-      formData.append('billSplitPaymentArgs',  '');
-      formData.append('billPaymentChannel',    '0');                // all channels
-      formData.append('billContentEmail',      `Thank you for your payment for booking ${bookingData.reservation_id}`);
-      formData.append('billChargeToCustomer',  '1');
-
-      // ⚠️  Direct browser call to ToyyibPay works on sandbox (CORS allowed for dev)
-      //     For production, replace this fetch with a call to your Supabase Edge Function
-      const response = await fetch(`${TOYYIBPAY_BASE_URL}/index.php/api/createBill`, {
+      const response = await fetch('https://lpqzdcdinynhsbmekfnl.supabase.co/functions/v1/create-toyyibpay-bill', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: formData.toString()
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          reservationId: bookingData.reservation_id,
+          amount:        bookingData.total_amount,
+          college:       bookingData.college,
+          studentName:   localStorage.getItem('studentName')  || 'Student',
+          studentEmail:  localStorage.getItem('studentEmail') || 'student@utm.my',
+          returnUrl:     returnUrl,
+        }),
       });
 
       const result = await response.json();
-      console.log('ToyyibPay createBill response:', result);
 
-      if (result && result[0] && result[0].BillCode) {
-        const billCode     = result[0].BillCode;
-        const paymentUrl   = `${TOYYIBPAY_BASE_URL}/${billCode}`;
-        // Redirect student to ToyyibPay payment page
-        window.location.href = paymentUrl;
+      if (result.success && result.paymentUrl) {
+        window.location.href = result.paymentUrl;
       } else {
-        throw new Error(result?.message || 'Failed to create bill');
+        throw new Error(result.error || 'Failed to create bill');
       }
 
     } catch (err) {
-      console.error('Payment initiation error:', err);
+      console.error('Payment error:', err);
       alert('Failed to initiate payment. Please try again.\n\nError: ' + err.message);
       btn.disabled          = false;
       spinner.style.display = 'none';
