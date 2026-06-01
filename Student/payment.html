@@ -509,11 +509,7 @@
 
         <div class="payment-body">
           
-          <!-- Sandbox Banner -->
-          <div class="sandbox-banner">
-            <i class="bi bi-cone-striped"></i>
-            SANDBOX / TEST MODE — No real money will be charged
-          </div>
+      
 
           <div class="summary-section">
             <div class="summary-title">Booking Details</div>
@@ -828,10 +824,10 @@
   async function handlePaymentSuccess() {
     if (bookingData) {
       try {
-        await db
-          .from('reservations')
-          .update({ status: 'Confirmed' })
-          .eq('reservation_id', bookingData.reservation_id);
+       await db
+        .from('reservations')
+        .update({ status: 'Paid' })  // ✅ CORRECT
+        .eq('reservation_id', bookingData.reservation_id);
       } catch (err) {
         console.error('Failed to update status:', err);
       }

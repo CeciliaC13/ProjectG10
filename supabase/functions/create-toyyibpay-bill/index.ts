@@ -1,9 +1,9 @@
 // Supabase Edge Function — ToyyibPay createBill
 // Location: supabase/functions/create-toyyibpay-bill/index.ts
 
-const TOYYIBPAY_SECRET_KEY    = 'tzv4uklj-dnpv-uye3-avn6-djzzzw29gcdv';  // ← replace
-const TOYYIBPAY_CATEGORY_CODE = 'ep3feopq';       // ← replace
-const TOYYIBPAY_BASE_URL      = 'https://dev.toyyibpay.com'; // sandbox
+const TOYYIBPAY_SECRET_KEY    = 'knh1ysms-ewcy-5a05-g27v-zvqo9l8j0140';  // ← replace
+const TOYYIBPAY_CATEGORY_CODE = 'zxipigyj';       // ← replace
+const TOYYIBPAY_BASE_URL      = 'https://toyyibpay.com'; // sandbox
 
 Deno.serve(async (req) => {
 
