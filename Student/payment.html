@@ -15,568 +15,449 @@
 
   <link href="../vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
   <link href="../vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
+  <link href="../vendor/aos/aos.css" rel="stylesheet">
+  <link href="../vendor/swiper/swiper-bundle.min.css" rel="stylesheet">
   <link href="../main.css" rel="stylesheet">
 
   <style>
-    :root {
-      --maroon: #6b092a;
-      --maroon-dark: #4a0619;
-      --maroon-light: #8b0e35;
-      --navy: #1a3c5e;
-      --gold: #c9a84c;
-      --gold-light: #f0d080;
-      --success: #166534;
-      --success-bg: #dcfce7;
-      --danger: #991b1b;
-      --danger-bg: #fee2e2;
-    }
-
-    * { box-sizing: border-box; }
-
-    body {
-      background: #f0f2f5;
-      font-family: 'Raleway', sans-serif;
-      min-height: 100vh;
-    }
-
-    /* ── PAGE WRAPPER ── */
     .payment-page {
+      padding: 60px 0;
+      background: #f8f9fa;
       min-height: 100vh;
-      padding: 40px 0 60px;
-      position: relative;
-      overflow: hidden;
     }
 
-    .payment-page::before {
-      content: '';
-      position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 260px;
-      background: linear-gradient(135deg, var(--maroon-dark), var(--maroon-light));
-      z-index: 0;
+    .payment-header-box {
+      background: linear-gradient(135deg, #6b092a, #8b0e35);
+      color: white;
+      border-radius: 22px;
+      padding: 35px;
+      margin-bottom: 35px;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.12);
     }
 
-    .payment-page::after {
-      content: '';
-      position: fixed;
-      top: 160px; left: -60px;
-      width: 320px; height: 320px;
-      background: rgba(255,255,255,0.04);
-      border-radius: 50%;
-      z-index: 0;
+    .payment-header-box h1 {
+      color: white;
+      font-weight: 700;
+      margin-bottom: 10px;
     }
 
-    .container { position: relative; z-index: 1; }
-
-    /* ── TOP BAR ── */
-    .top-bar {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      margin-bottom: 32px;
+    .payment-header-box p {
+      margin: 0;
+      color: rgba(255,255,255,0.85);
     }
 
-    .back-btn {
+    .back-link-btn {
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      color: rgba(255,255,255,0.9);
-      background: rgba(255,255,255,0.15);
-      border: 1px solid rgba(255,255,255,0.25);
-      padding: 9px 18px;
-      border-radius: 40px;
+      color: white;
+      background: rgba(255,255,255,0.18);
+      padding: 8px 16px;
+      border-radius: 30px;
       text-decoration: none;
       font-weight: 600;
-      font-size: 14px;
-      transition: all 0.2s;
+      margin-bottom: 18px;
     }
 
-    .back-btn:hover {
+    .back-link-btn:hover {
       color: white;
-      background: rgba(255,255,255,0.25);
+      background: rgba(255,255,255,0.28);
     }
 
-    .page-title {
-      color: white;
-      font-family: 'Montserrat', sans-serif;
-      font-weight: 700;
-      font-size: 22px;
-      margin: 0;
-    }
-
-    /* ── MAIN CARD ── */
     .payment-card {
       background: white;
-      border-radius: 24px;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.12);
+      border-radius: 20px;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.08);
       overflow: hidden;
       max-width: 600px;
       margin: 0 auto;
     }
 
-    .card-header-band {
-      background: linear-gradient(135deg, var(--maroon), var(--maroon-light));
-      padding: 28px 32px;
+    .payment-card-header {
+      background: linear-gradient(135deg, #1a3c5e, #2c5a7a);
+      padding: 25px 30px;
       display: flex;
       align-items: center;
-      gap: 16px;
+      gap: 15px;
     }
 
-    .card-header-band .header-icon {
-      width: 52px; height: 52px;
-      background: rgba(255,255,255,0.18);
-      border-radius: 14px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 24px;
+    .payment-card-header i {
+      font-size: 32px;
       color: white;
-      flex-shrink: 0;
     }
 
-    .card-header-band h2 {
+    .payment-card-header h2 {
       color: white;
       font-family: 'Montserrat', sans-serif;
       font-weight: 700;
-      font-size: 20px;
-      margin: 0 0 4px;
-    }
-
-    .card-header-band p {
-      color: rgba(255,255,255,0.8);
-      font-size: 13px;
       margin: 0;
+      font-size: 20px;
     }
 
-    .card-body-inner {
-      padding: 32px;
+    .payment-card-header p {
+      color: rgba(255,255,255,0.8);
+      margin: 0;
+      font-size: 13px;
     }
 
-    /* ── BOOKING SUMMARY ── */
+    .payment-body {
+      padding: 30px;
+    }
+
+    /* Summary Section */
+    .summary-section {
+      background: #f8f9fa;
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 25px;
+    }
+
     .summary-title {
       font-size: 12px;
       font-weight: 700;
-      letter-spacing: 1.5px;
       text-transform: uppercase;
       color: #999;
-      margin-bottom: 16px;
-    }
-
-    .summary-rows {
-      background: #f8f9fa;
-      border-radius: 14px;
-      overflow: hidden;
-      margin-bottom: 24px;
+      letter-spacing: 1px;
+      margin-bottom: 15px;
     }
 
     .summary-row {
       display: flex;
       justify-content: space-between;
-      align-items: center;
-      padding: 13px 18px;
+      padding: 10px 0;
+      border-bottom: 1px solid #e0e0e0;
+    }
+
+    .summary-row:last-child {
+      border-bottom: none;
+    }
+
+    .summary-label {
+      color: #666;
       font-size: 14px;
-      border-bottom: 1px solid #eee;
     }
 
-    .summary-row:last-child { border-bottom: none; }
-
-    .summary-row .label {
-      color: #777;
-      display: flex;
-      align-items: center;
-      gap: 8px;
+    .summary-label i {
+      color: #6b092a;
+      margin-right: 8px;
     }
 
-    .summary-row .label i { color: var(--maroon); font-size: 15px; }
-
-    .summary-row .value {
+    .summary-value {
       font-weight: 600;
-      color: #222;
-      text-align: right;
+      color: #333;
+      font-size: 14px;
     }
 
-    /* ── AMOUNT BOX ── */
+    /* Amount Box */
     .amount-box {
-      background: linear-gradient(135deg, var(--navy), #2c5a7a);
+      background: linear-gradient(135deg, #1a3c5e, #2c5a7a);
       border-radius: 16px;
-      padding: 22px 24px;
+      padding: 20px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 28px;
+      margin-bottom: 25px;
       color: white;
     }
 
-    .amount-box .amount-label {
+    .amount-label {
       font-size: 13px;
       color: rgba(255,255,255,0.75);
       margin-bottom: 4px;
     }
 
-    .amount-box .amount-value {
+    .amount-value {
       font-family: 'Montserrat', sans-serif;
-      font-size: 32px;
-      font-weight: 800;
-      color: white;
-      letter-spacing: -1px;
-    }
-
-    .amount-box .amount-value span {
-      font-size: 16px;
-      font-weight: 600;
-      opacity: 0.8;
-      margin-right: 4px;
-    }
-
-    .amount-box .currency-badge {
-      background: rgba(255,255,255,0.15);
-      border: 1px solid rgba(255,255,255,0.25);
-      border-radius: 10px;
-      padding: 8px 14px;
-      font-size: 13px;
+      font-size: 28px;
       font-weight: 700;
-      color: rgba(255,255,255,0.9);
     }
 
-    /* ── NOTICE ── */
+    .amount-value small {
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    /* Notice Bar */
     .notice-bar {
-      background: #fffbeb;
-      border: 1px solid #fde68a;
-      border-radius: 10px;
+      background: #fff3cd;
+      border-left: 4px solid #ffc107;
+      border-radius: 12px;
       padding: 12px 16px;
       font-size: 13px;
-      color: #92400e;
+      color: #856404;
       display: flex;
       gap: 10px;
-      align-items: flex-start;
-      margin-bottom: 24px;
+      margin-bottom: 25px;
     }
 
-    .notice-bar i { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+    .notice-bar i {
+      font-size: 18px;
+    }
 
-    /* ── PAY BUTTON ── */
-    .pay-now-btn {
+    /* Pay Button */
+    .pay-btn {
       width: 100%;
-      background: linear-gradient(135deg, var(--maroon), var(--maroon-light));
+      background: linear-gradient(135deg, #e74c3c, #c0392b);
       color: white;
       border: none;
-      border-radius: 14px;
-      padding: 16px;
+      border-radius: 12px;
+      padding: 14px;
       font-family: 'Montserrat', sans-serif;
       font-size: 16px;
-      font-weight: 700;
+      font-weight: 600;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 10px;
-      transition: all 0.25s;
-      letter-spacing: 0.5px;
-      position: relative;
-      overflow: hidden;
+      transition: all 0.3s ease;
     }
 
-    .pay-now-btn::after {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: rgba(255,255,255,0);
-      transition: background 0.2s;
-    }
-
-    .pay-now-btn:hover::after { background: rgba(255,255,255,0.08); }
-
-    .pay-now-btn:hover {
+    .pay-btn:hover {
       transform: translateY(-2px);
-      box-shadow: 0 10px 30px rgba(107,9,42,0.4);
+      box-shadow: 0 5px 20px rgba(231, 76, 60, 0.3);
     }
 
-    .pay-now-btn:active { transform: translateY(0); }
-
-    .pay-now-btn:disabled {
-      background: #ccc;
+    .pay-btn:disabled {
+      opacity: 0.6;
       cursor: not-allowed;
       transform: none;
-      box-shadow: none;
     }
 
-    .btn-spinner {
-      width: 18px; height: 18px;
-      border: 2px solid rgba(255,255,255,0.4);
-      border-top-color: white;
-      border-radius: 50%;
-      animation: spin 0.7s linear infinite;
-      display: none;
-    }
-
-    @keyframes spin { to { transform: rotate(360deg); } }
-
-    /* ── SECURITY NOTE ── */
-    .security-note {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-      margin-top: 14px;
-      font-size: 12px;
-      color: #aaa;
-    }
-
-    /* ── SUCCESS STATE ── */
+    /* State Views */
     .state-view {
       display: none;
-      padding: 40px 32px;
       text-align: center;
+      padding: 40px 30px;
     }
 
-    .state-view.active { display: block; }
+    .state-view.active {
+      display: block;
+    }
 
-    .state-icon-circle {
-      width: 90px; height: 90px;
+    .state-icon {
+      width: 80px;
+      height: 80px;
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
-      margin: 0 auto 24px;
-      font-size: 42px;
+      margin: 0 auto 20px;
+      font-size: 40px;
     }
 
-    .state-icon-circle.success {
-      background: var(--success-bg);
-      color: var(--success);
-      animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
+    .state-icon.success {
+      background: #dcfce7;
+      color: #166534;
     }
 
-    .state-icon-circle.failed {
-      background: var(--danger-bg);
-      color: var(--danger);
-      animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
+    .state-icon.failed {
+      background: #fee2e2;
+      color: #991b1b;
     }
 
-    @keyframes popIn {
-      from { transform: scale(0); opacity: 0; }
-      to   { transform: scale(1); opacity: 1; }
-    }
-
-    .state-view h2 {
-      font-family: 'Montserrat', sans-serif;
-      font-size: 24px;
-      font-weight: 800;
-      color: #1a1a1a;
+    .state-view h3 {
+      font-size: 22px;
+      font-weight: 700;
+      color: #1a3c5e;
       margin-bottom: 10px;
     }
 
     .state-view p {
       color: #666;
-      font-size: 15px;
-      line-height: 1.6;
-      margin-bottom: 28px;
+      font-size: 14px;
+      margin-bottom: 25px;
     }
 
-    /* ── SUCCESS RECEIPT ── */
+    /* Receipt Box */
     .receipt-box {
       background: #f8f9fa;
-      border-radius: 14px;
+      border-radius: 16px;
       padding: 20px;
       text-align: left;
-      margin-bottom: 28px;
+      margin-bottom: 25px;
     }
 
     .receipt-row {
       display: flex;
       justify-content: space-between;
-      font-size: 14px;
-      padding: 8px 0;
-      border-bottom: 1px dashed #ddd;
+      padding: 10px 0;
+      border-bottom: 1px solid #e0e0e0;
     }
 
-    .receipt-row:last-child { border-bottom: none; }
-    .receipt-row .r-label { color: #777; }
-    .receipt-row .r-value { font-weight: 600; color: #222; }
+    .receipt-row:last-child {
+      border-bottom: none;
+    }
+
+    .receipt-label {
+      color: #666;
+      font-size: 13px;
+    }
+
+    .receipt-value {
+      font-weight: 600;
+      color: #333;
+      font-size: 13px;
+    }
 
     .receipt-total {
-      background: var(--success-bg);
-      border-radius: 10px;
-      padding: 14px 18px;
+      background: #dcfce7;
+      border-radius: 12px;
+      padding: 15px;
       display: flex;
       justify-content: space-between;
-      align-items: center;
-      margin-top: 12px;
+      margin-top: 15px;
       font-weight: 700;
     }
 
-    .receipt-total .r-label { color: var(--success); font-size: 14px; }
-    .receipt-total .r-value { color: var(--success); font-size: 20px; font-family: 'Montserrat', sans-serif; }
+    .status-badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+    }
 
-    /* ── ACTION BUTTONS ── */
+    .status-pending {
+      background: #fff3cd;
+      color: #856404;
+    }
+
+    .status-paid {
+      background: #dcfce7;
+      color: #166534;
+    }
+
+    /* Action Buttons */
+    .action-buttons {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
     .action-btn {
+      padding: 10px 24px;
+      border-radius: 40px;
+      font-size: 14px;
+      font-weight: 600;
+      text-decoration: none;
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      padding: 12px 28px;
-      border-radius: 40px;
-      font-size: 14px;
-      font-weight: 700;
-      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .action-btn.primary {
+      background: linear-gradient(135deg, #1a3c5e, #2c5a7a);
+      color: white;
       border: none;
-      text-decoration: none;
-      transition: all 0.2s;
     }
 
-    .btn-primary-maroon {
-      background: linear-gradient(135deg, var(--maroon), var(--maroon-light));
-      color: white;
-    }
-
-    .btn-primary-maroon:hover {
-      color: white;
+    .action-btn.primary:hover {
       transform: translateY(-2px);
-      box-shadow: 0 8px 20px rgba(107,9,42,0.35);
+      box-shadow: 0 5px 15px rgba(44, 90, 122, 0.3);
     }
 
-    .btn-outline-maroon {
+    .action-btn.secondary {
       background: transparent;
-      color: var(--maroon);
-      border: 2px solid var(--maroon);
+      color: #6b092a;
+      border: 2px solid #6b092a;
     }
 
-    .btn-outline-maroon:hover {
-      background: var(--maroon);
+    .action-btn.secondary:hover {
+      background: #6b092a;
       color: white;
     }
 
-    .btn-outline-navy {
-      background: transparent;
-      color: var(--navy);
-      border: 2px solid var(--navy);
-    }
-
-    .btn-outline-navy:hover {
-      background: var(--navy);
-      color: white;
-    }
-
-    /* ── LOADING STATE ── */
-    #loadingView {
-      padding: 60px 32px;
+    /* Loading */
+    .loading-view {
       text-align: center;
+      padding: 60px 30px;
     }
 
-    .loading-spinner-lg {
-      width: 52px; height: 52px;
+    .spinner {
+      width: 50px;
+      height: 50px;
       border: 4px solid #eee;
-      border-top-color: var(--maroon);
+      border-top-color: #6b092a;
       border-radius: 50%;
       animation: spin 0.8s linear infinite;
       margin: 0 auto 20px;
     }
 
-    /* ── TOYYIBPAY LOGO ── */
-    .toyyibpay-badge {
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .sandbox-banner {
+      background: #fef3c7;
+      border-radius: 10px;
+      padding: 10px 15px;
+      font-size: 12px;
+      color: #92400e;
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 8px;
-      margin-top: 12px;
-      font-size: 12px;
-      color: #bbb;
-    }
-
-    .toyyibpay-badge strong { color: #888; }
-
-    /* ── STATUS BADGE ── */
-    .status-pill {
-      display: inline-block;
-      padding: 4px 14px;
-      border-radius: 20px;
-      font-size: 12px;
-      font-weight: 700;
-    }
-
-    .status-pill.pending-pay { background: #fff3cd; color: #856404; }
-    .status-pill.paid        { background: var(--success-bg); color: var(--success); }
-
-    /* ── SANDBOX BANNER ── */
-    .sandbox-banner {
-      background: #fef3c7;
-      border: 1px solid #fcd34d;
-      border-radius: 8px;
-      padding: 8px 14px;
-      font-size: 12px;
-      font-weight: 600;
-      color: #92400e;
-      text-align: center;
       margin-bottom: 20px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
     }
 
     @media (max-width: 576px) {
-      .card-body-inner { padding: 24px 20px; }
-      .card-header-band { padding: 22px 20px; }
-      .amount-box .amount-value { font-size: 26px; }
+      .payment-body {
+        padding: 20px;
+      }
+      .payment-card-header {
+        padding: 20px;
+      }
     }
   </style>
 </head>
 
-<body>
+<body class="index-page">
 
 <header id="header" class="logo d-flex align-items-center" style="margin-right: auto;">
   <div class="container position-relative d-flex align-items-center">
- 
+
     <a href="dashboard.html" class="logo d-flex align-items-center">
       <img src="../img/spacelogo.png" alt="UTM Space Logo" style="height: 50px; width: auto; max-height:60px;">
     </a>
- 
+
     <nav id="navmenu" class="navmenu">
       <ul>
         <li><a href="dashboard.html">Home</a></li>
-        <li><a href="booking_history.html" >History</a></li>
+        <li><a href="booking_history.html">History</a></li>
         <li><a href="applianceform_student.html">Appliance Form</a></li>
         <li><a href="reportform_student.html">Report</a></li>
         <li><a href="contact.html">Contact</a></li>
       </ul>
       <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>
     </nav>
- 
+
     <div class="header-actions">
- 
+
       <div class="header-social-links">
         <a href="https://www.facebook.com/utmspace/" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><i class="bi bi-facebook"></i></a>
         <a href="https://www.instagram.com/spaceutm_official/?hl=en" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><i class="bi bi-instagram"></i></a>
       </div>
- 
-     <div class="notification-wrapper">
-    <button class="notification-btn" id="notificationBtn" title="Notifications">
-    <i class="bi bi-bell-fill"></i>
-    <span class="notification-badge" 
-          id="notificationBadge" 
-          style="display: none;">0</span>
-    </button>
-  
-    <div class="notification-dropdown" id="notificationDropdown">
-    <div class="notification-dropdown-header">
-      <h4><i class="bi bi-bell-fill"></i> Notifications</h4>
-      
-      <a href="#" 
-         class="mark-all-link" 
-         id="markAllNotifications" 
-         onclick="event.preventDefault(); markAllNotificationsAsRead();">
-         Mark all as read
-      </a>
-    </div>
-    
-    <div class="notification-list" id="notificationList"></div>
+
+      <div class="notification-wrapper">
+        <button class="notification-btn" id="notificationBtn" title="Notifications">
+          <i class="bi bi-bell-fill"></i>
+        </button>
+        <div class="notification-dropdown" id="notificationDropdown">
+          <div class="notification-dropdown-header">
+            <h4><i class="bi bi-bell-fill"></i> Notifications</h4>
+            <a href="#" class="mark-all-link" id="markAllNotifications">Mark all as read</a>
+          </div>
+          <div class="notification-list" id="notificationList"></div>
+        </div>
       </div>
-    </div>
- 
+
       <div class="user-profile">
         <div class="user-avatar">
           <div class="avatar-placeholder" id="avatarInitial">S</div>
         </div>
- 
         <div class="user-dropdown">
           <div class="dropdown-header">
             <div class="user-info">
@@ -585,252 +466,265 @@
               <div class="user-email" id="dropdownUserEmail">Their email@gmail.com</div>
             </div>
           </div>
- 
           <ul class="dropdown-menu-list">
             <li><a href="userprofile_student.html"><i class="bi bi-person-circle"></i> Profile</a></li>
             <li><a href="index.html" id="logoutBtn"><i class="bi bi-box-arrow-right"></i> Logout</a></li>
           </ul>
         </div>
       </div>
- 
+
     </div>
- 
+
   </div>
 </header>
 
 <main class="payment-page">
   <div class="container">
 
-    <div class="top-bar">
-      <a href="booking_history.html" class="back-btn">
+    <div class="payment-header-box">
+      <a href="booking_history.html" class="back-link-btn">
         <i class="bi bi-arrow-left"></i> Back to History
       </a>
-      <h1 class="page-title">Payment</h1>
+      <h1><i class="bi bi-credit-card"></i> Payment</h1>
+      <p>Complete your payment to confirm your room booking</p>
     </div>
 
     <div class="payment-card">
 
-      <!-- ══════════════════════════════════
-           LOADING VIEW
-      ══════════════════════════════════ -->
-      <div id="loadingView">
-        <div class="loading-spinner-lg"></div>
-        <p style="color:#999; font-size:15px;">Loading booking details...</p>
+      <!-- Loading View -->
+      <div id="loadingView" class="loading-view">
+        <div class="spinner"></div>
+        <p style="color:#999;">Loading booking details...</p>
       </div>
 
-      <!-- ══════════════════════════════════
-           SUMMARY VIEW
-      ══════════════════════════════════ -->
+      <!-- Summary View -->
       <div id="summaryView" style="display:none;">
-        <div class="card-header-band">
-          <div class="header-icon"><i class="bi bi-credit-card-2-front"></i></div>
+        <div class="payment-card-header">
+          <i class="bi bi-credit-card-2-front"></i>
           <div>
             <h2>Payment Summary</h2>
             <p>Review your booking before proceeding</p>
           </div>
         </div>
 
-        <div class="card-body-inner">
-
+        <div class="payment-body">
+          
           <!-- Sandbox Banner -->
           <div class="sandbox-banner">
             <i class="bi bi-cone-striped"></i>
             SANDBOX / TEST MODE — No real money will be charged
           </div>
 
-          <p class="summary-title">Booking Details</p>
-
-          <div class="summary-rows">
+          <div class="summary-section">
+            <div class="summary-title">Booking Details</div>
             <div class="summary-row">
-              <span class="label"><i class="bi bi-upc-scan"></i> Booking ID</span>
-              <span class="value" id="sumBookingId">—</span>
+              <span class="summary-label"><i class="bi bi-upc-scan"></i> Booking ID</span>
+              <span class="summary-value" id="sumBookingId">—</span>
             </div>
             <div class="summary-row">
-              <span class="label"><i class="bi bi-building"></i> College</span>
-              <span class="value" id="sumCollege">—</span>
+              <span class="summary-label"><i class="bi bi-building"></i> College</span>
+              <span class="summary-value" id="sumCollege">—</span>
             </div>
             <div class="summary-row">
-              <span class="label"><i class="bi bi-door-open"></i> Room Type</span>
-              <span class="value" id="sumRoomType">—</span>
+              <span class="summary-label"><i class="bi bi-door-open"></i> Room Type</span>
+              <span class="summary-value" id="sumRoomType">—</span>
             </div>
             <div class="summary-row">
-              <span class="label"><i class="bi bi-calendar-check"></i> Check-In</span>
-              <span class="value" id="sumCheckIn">—</span>
+              <span class="summary-label"><i class="bi bi-calendar-check"></i> Check-In</span>
+              <span class="summary-value" id="sumCheckIn">—</span>
             </div>
             <div class="summary-row">
-              <span class="label"><i class="bi bi-calendar-x"></i> Check-Out</span>
-              <span class="value" id="sumCheckOut">—</span>
+              <span class="summary-label"><i class="bi bi-calendar-x"></i> Check-Out</span>
+              <span class="summary-value" id="sumCheckOut">—</span>
             </div>
             <div class="summary-row">
-              <span class="label"><i class="bi bi-info-circle"></i> Status</span>
-              <span class="value"><span class="status-pill pending-pay">Pending Payment</span></span>
+              <span class="summary-label"><i class="bi bi-info-circle"></i> Status</span>
+              <span class="summary-value"><span class="status-badge status-pending">Pending Payment</span></span>
             </div>
           </div>
 
-          <!-- Amount -->
           <div class="amount-box">
             <div>
               <div class="amount-label">Total Amount Due</div>
-              <div class="amount-value" id="sumAmount">
-                <span>RM</span>0.00
-              </div>
+              <div class="amount-value" id="sumAmount"><small>RM</small> 0.00</div>
             </div>
-            <div class="currency-badge">MYR</div>
+            <i class="bi bi-currency-exchange" style="font-size: 28px; opacity: 0.7;"></i>
           </div>
 
-          <!-- Notice -->
           <div class="notice-bar">
             <i class="bi bi-info-circle-fill"></i>
             <span>You will be redirected to <strong>ToyyibPay</strong> to complete your payment securely. Do not close the window during the process.</span>
           </div>
 
-          <!-- Pay Button -->
-          <button class="pay-now-btn" id="payNowBtn" onclick="initiatePayment()">
-            <div class="btn-spinner" id="btnSpinner"></div>
-            <i class="bi bi-lock-fill" id="btnIcon"></i>
+          <button class="pay-btn" id="payNowBtn" onclick="initiatePayment()">
+            <i class="bi bi-lock-fill"></i>
             <span id="btnText">Proceed to Pay</span>
           </button>
 
-          <div class="security-note">
-            <i class="bi bi-shield-check"></i>
-            Secured by ToyyibPay · SSL Encrypted
+          <div class="text-center mt-3">
+            <small class="text-muted"><i class="bi bi-shield-check"></i> Secured by ToyyibPay · SSL Encrypted</small>
           </div>
-
-          <div class="toyyibpay-badge">
-            Powered by <strong>ToyyibPay</strong>
-          </div>
-
         </div>
       </div>
 
-      <!-- ══════════════════════════════════
-           SUCCESS VIEW
-      ══════════════════════════════════ -->
+      <!-- Success View -->
       <div id="successView" class="state-view">
-        <div class="state-icon-circle success">
+        <div class="state-icon success">
           <i class="bi bi-check-lg"></i>
         </div>
-        <h2>Payment Successful! 🎉</h2>
+        <h3>Payment Successful! 🎉</h3>
         <p>Your room booking payment has been received. Your reservation is now confirmed and active.</p>
 
         <div class="receipt-box">
-          <p style="font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#999;margin-bottom:12px;">Payment Receipt</p>
           <div class="receipt-row">
-            <span class="r-label">Booking ID</span>
-            <span class="r-value" id="rcpBookingId">—</span>
+            <span class="receipt-label">Booking ID</span>
+            <span class="receipt-value" id="rcpBookingId">—</span>
           </div>
           <div class="receipt-row">
-            <span class="r-label">College</span>
-            <span class="r-value" id="rcpCollege">—</span>
+            <span class="receipt-label">College</span>
+            <span class="receipt-value" id="rcpCollege">—</span>
           </div>
           <div class="receipt-row">
-            <span class="r-label">Room Type</span>
-            <span class="r-value" id="rcpRoomType">—</span>
+            <span class="receipt-label">Room Type</span>
+            <span class="receipt-value" id="rcpRoomType">—</span>
           </div>
           <div class="receipt-row">
-            <span class="r-label">Check-In</span>
-            <span class="r-value" id="rcpCheckIn">—</span>
+            <span class="receipt-label">Check-In</span>
+            <span class="receipt-value" id="rcpCheckIn">—</span>
           </div>
           <div class="receipt-row">
-            <span class="r-label">Check-Out</span>
-            <span class="r-value" id="rcpCheckOut">—</span>
+            <span class="receipt-label">Check-Out</span>
+            <span class="receipt-value" id="rcpCheckOut">—</span>
           </div>
           <div class="receipt-row">
-            <span class="r-label">Payment Status</span>
-            <span class="r-value"><span class="status-pill paid">✓ Paid</span></span>
+            <span class="receipt-label">Payment Status</span>
+            <span class="receipt-value"><span class="status-badge status-paid">✓ Paid</span></span>
           </div>
           <div class="receipt-total">
-            <span class="r-label">Amount Paid</span>
-            <span class="r-value" id="rcpAmount">RM 0.00</span>
+            <span>Amount Paid</span>
+            <span id="rcpAmount">RM 0.00</span>
           </div>
         </div>
 
-        <div style="display:flex; gap:12px; justify-content:center; flex-wrap:wrap;">
-          <a href="booking_history.html" class="action-btn btn-primary-maroon">
-            <i class="bi bi-clock-history"></i> View Booking History
+        <div class="action-buttons">
+          <a href="booking_history.html" class="action-btn primary">
+            <i class="bi bi-clock-history"></i> View History
           </a>
-          <a href="dashboard.html" class="action-btn btn-outline-navy">
-            <i class="bi bi-house"></i> Go to Dashboard
+          <a href="dashboard.html" class="action-btn secondary">
+            <i class="bi bi-house"></i> Dashboard
           </a>
         </div>
       </div>
 
-      <!-- ══════════════════════════════════
-           FAILED VIEW
-      ══════════════════════════════════ -->
+      <!-- Failed View -->
       <div id="failedView" class="state-view">
-        <div class="state-icon-circle failed">
+        <div class="state-icon failed">
           <i class="bi bi-x-lg"></i>
         </div>
-        <h2>Payment Failed</h2>
-        <p>Your payment was not completed. This could be due to a cancelled transaction, insufficient funds, or a network issue. <strong>Your booking is still reserved</strong> — you can try again.</p>
+        <h3>Payment Failed</h3>
+        <p>Your payment was not completed. This could be due to a cancelled transaction, insufficient funds, or a network issue.<br><strong>Your booking is still reserved</strong> — you can try again.</p>
 
-        <div class="receipt-box" style="margin-bottom:28px;">
+        <div class="receipt-box">
           <div class="receipt-row">
-            <span class="r-label">Booking ID</span>
-            <span class="r-value" id="failBookingId">—</span>
+            <span class="receipt-label">Booking ID</span>
+            <span class="receipt-value" id="failBookingId">—</span>
           </div>
           <div class="receipt-row">
-            <span class="r-label">Amount</span>
-            <span class="r-value" id="failAmount">—</span>
+            <span class="receipt-label">Amount</span>
+            <span class="receipt-value" id="failAmount">—</span>
           </div>
           <div class="receipt-row">
-            <span class="r-label">Status</span>
-            <span class="r-value" style="color:#991b1b; font-weight:700;">✗ Failed / Cancelled</span>
+            <span class="receipt-label">Status</span>
+            <span class="receipt-value" style="color: #991b1b;">✗ Failed / Cancelled</span>
           </div>
         </div>
 
-        <div style="display:flex; gap:12px; justify-content:center; flex-wrap:wrap;">
-          <button class="action-btn btn-primary-maroon" onclick="retryPayment()">
+        <div class="action-buttons">
+          <button class="action-btn primary" onclick="retryPayment()">
             <i class="bi bi-arrow-clockwise"></i> Try Again
           </button>
-          <a href="booking_history.html" class="action-btn btn-outline-maroon">
+          <a href="booking_history.html" class="action-btn secondary">
             <i class="bi bi-clock-history"></i> Back to History
           </a>
         </div>
       </div>
 
-    </div><!-- end .payment-card -->
+    </div>
   </div>
 </main>
 
 <footer id="footer" class="footer position-relative light-background">
+  <div class="container">
+    <div class="row gy-5">
+      <div class="col-lg-4">
+        <div class="footer-brand">
+          <a href="dashboard.html" class="logo d-flex align-items-center mb-3">
+            <span class="sitename">UTM SPACE</span>
+          </a>
+          <p class="tagline">Transforming the way colleges book, manage, and connect — with modern simplicity.</p>
+          <div class="social-links mt-4">
+            <a href="https://www.facebook.com/utmspace/" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><i class="bi bi-facebook"></i></a>
+            <a href="https://www.instagram.com/spaceutm_official/?hl=en" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><i class="bi bi-instagram"></i></a>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-6">
+        <div class="footer-links-grid">
+          <div class="col-6 col-md-4">
+            <h5>Support</h5>
+            <ul class="list-unstyled">
+              <li><a href="#">Contact Us: +607-531 8000</a></li>
+              <li><a href="#">Privacy Policy</a></li>
+              <li><a href="#">Terms of Service</a></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
   <div class="footer-bottom">
     <div class="container">
-      <p class="mb-0 text-center py-3">© <strong>UTMSPACE</strong>. All rights reserved.</p>
+      <div class="row">
+        <div class="col-12">
+          <div class="footer-bottom-content">
+            <p class="mb-0">© <strong>UTMSPACE</strong>. All rights reserved.</p>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </footer>
 
+<a href="#" id="scroll-top" class="scroll-top d-flex align-items-center justify-content-center">
+  <i class="bi bi-arrow-up-short"></i>
+</a>
+
+<div id="preloader"></div>
+
 <script src="../vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="../vendor/php-email-form/validate.js"></script>
+<script src="../vendor/aos/aos.js"></script>
+<script src="../vendor/swiper/swiper-bundle.min.js"></script>
+<script src="../vendor/purecounter/purecounter_vanilla.js"></script>
+
 <script src="../main.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="../supabase.js"></script>
 
 <script>
-  // ================================================================
-  // TOYYIBPAY SANDBOX CONFIG
-  // ================================================================
- const EDGE_FUNCTION_URL = 'https://lpqzdcdinynhsbmekfnl.supabase.co/functions/v1/create-toyyibpay-bill';
+  const EDGE_FUNCTION_URL = 'https://lpqzdcdinynhsbmekfnl.supabase.co/functions/v1/create-toyyibpay-bill';
 
-  // ================================================================
-  // STATE
-  // ================================================================
   let reservationId = null;
-  let bookingData   = null;
+  let bookingData = null;
 
-  // ================================================================
-  // INIT — detect which view to show
-  // ================================================================
   document.addEventListener('DOMContentLoaded', async () => {
+    initDropdowns();
     loadHeaderProfile();
 
-    const params    = new URLSearchParams(window.location.search);
-    reservationId   = params.get('id');
-    const statusCode = params.get('status_id'); // toyyibPay returns status_id
-    const billCode   = params.get('billcode');
+    const params = new URLSearchParams(window.location.search);
+    reservationId = params.get('id');
+    const statusCode = params.get('status_id');
 
-    // Returned from ToyyibPay
     if (statusCode !== null) {
       await fetchBookingData(reservationId || params.get('order_id'));
       if (statusCode === '1') {
@@ -841,7 +735,6 @@
       return;
     }
 
-    // Normal entry from booking_history
     if (!reservationId) {
       alert('No booking ID found. Redirecting...');
       window.location.href = 'booking_history.html';
@@ -852,9 +745,6 @@
     showSummaryView();
   });
 
-  // ================================================================
-  // FETCH BOOKING FROM SUPABASE
-  // ================================================================
   async function fetchBookingData(id) {
     if (!id) return;
     try {
@@ -869,63 +759,53 @@
     } catch (err) {
       console.error('Error fetching booking:', err);
       document.getElementById('loadingView').innerHTML = `
-        <p style="color:#dc2626; padding:40px; text-align:center;">
-          <i class="bi bi-exclamation-triangle-fill" style="font-size:40px; display:block; margin-bottom:12px;"></i>
-          Failed to load booking details. <a href="booking_history.html">Go back</a>
-        </p>`;
+        <div class="text-center" style="padding:40px;">
+          <i class="bi bi-exclamation-triangle-fill" style="font-size:48px; color:#dc2626;"></i>
+          <p style="margin-top:15px;">Failed to load booking details. <a href="booking_history.html">Go back</a></p>
+        </div>`;
     }
   }
 
-  // ================================================================
-  // SHOW SUMMARY VIEW
-  // ================================================================
   function showSummaryView() {
-    document.getElementById('loadingView').style.display  = 'none';
-    document.getElementById('summaryView').style.display  = 'block';
+    document.getElementById('loadingView').style.display = 'none';
+    document.getElementById('summaryView').style.display = 'block';
 
     if (!bookingData) return;
 
-    const checkIn  = bookingData.check_in  ? bookingData.check_in.substring(0, 10)  : '—';
+    const checkIn = bookingData.check_in ? bookingData.check_in.substring(0, 10) : '—';
     const checkOut = bookingData.check_out ? bookingData.check_out.substring(0, 10) : '—';
-    const amount   = parseFloat(bookingData.total_amount || 0).toFixed(2);
+    const amount = parseFloat(bookingData.total_amount || 0).toFixed(2);
 
-    document.getElementById('sumBookingId').textContent  = bookingData.reservation_id || '—';
-    document.getElementById('sumCollege').textContent    = bookingData.college         || '—';
-    document.getElementById('sumRoomType').textContent   = bookingData.room_type       || '—';
-    document.getElementById('sumCheckIn').textContent    = checkIn;
-    document.getElementById('sumCheckOut').textContent   = checkOut;
-    document.getElementById('sumAmount').innerHTML       = `<span>RM</span>${amount}`;
+    document.getElementById('sumBookingId').textContent = bookingData.reservation_id || '—';
+    document.getElementById('sumCollege').textContent = bookingData.college || '—';
+    document.getElementById('sumRoomType').textContent = bookingData.room_type || '—';
+    document.getElementById('sumCheckIn').textContent = checkIn;
+    document.getElementById('sumCheckOut').textContent = checkOut;
+    document.getElementById('sumAmount').innerHTML = `<small>RM</small> ${amount}`;
   }
 
-  // ================================================================
-  // INITIATE PAYMENT — calls ToyyibPay createBill via proxy/edge fn
-  // ================================================================
   async function initiatePayment() {
     if (!bookingData) return;
 
-    const btn     = document.getElementById('payNowBtn');
-    const spinner = document.getElementById('btnSpinner');
-    const icon    = document.getElementById('btnIcon');
-    const text    = document.getElementById('btnText');
+    const btn = document.getElementById('payNowBtn');
+    const btnText = document.getElementById('btnText');
 
-    btn.disabled          = true;
-    spinner.style.display = 'block';
-    icon.style.display    = 'none';
-    text.textContent      = 'Processing...';
+    btn.disabled = true;
+    btnText.innerHTML = '<i class="bi bi-hourglass-split"></i> Processing...';
 
     try {
       const returnUrl = `${window.location.origin}${window.location.pathname}?id=${bookingData.reservation_id}`;
 
-      const response = await fetch('https://lpqzdcdinynhsbmekfnl.supabase.co/functions/v1/create-toyyibpay-bill', {
+      const response = await fetch(EDGE_FUNCTION_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           reservationId: bookingData.reservation_id,
-          amount:        bookingData.total_amount,
-          college:       bookingData.college,
-          studentName:   localStorage.getItem('studentName')  || 'Student',
-          studentEmail:  localStorage.getItem('studentEmail') || 'student@utm.my',
-          returnUrl:     returnUrl,
+          amount: bookingData.total_amount,
+          college: bookingData.college,
+          studentName: localStorage.getItem('studentName') || 'Student',
+          studentEmail: localStorage.getItem('studentEmail') || 'student@utm.my',
+          returnUrl: returnUrl,
         }),
       });
 
@@ -940,23 +820,17 @@
     } catch (err) {
       console.error('Payment error:', err);
       alert('Failed to initiate payment. Please try again.\n\nError: ' + err.message);
-      btn.disabled          = false;
-      spinner.style.display = 'none';
-      icon.style.display    = 'inline';
-      text.textContent      = 'Proceed to Pay';
+      btn.disabled = false;
+      btnText.innerHTML = '<i class="bi bi-lock-fill"></i> Proceed to Pay';
     }
   }
 
-  // ================================================================
-  // HANDLE SUCCESS — update Supabase + show success view
-  // ================================================================
   async function handlePaymentSuccess() {
-    // Update reservation status to Paid in Supabase
     if (bookingData) {
       try {
         await db
           .from('reservations')
-          .update({ status: 'Paid' })
+          .update({ status: 'Confirmed' })
           .eq('reservation_id', bookingData.reservation_id);
       } catch (err) {
         console.error('Failed to update status:', err);
@@ -967,22 +841,19 @@
     document.getElementById('successView').classList.add('active');
 
     if (bookingData) {
-      const checkIn  = bookingData.check_in  ? bookingData.check_in.substring(0, 10)  : '—';
+      const checkIn = bookingData.check_in ? bookingData.check_in.substring(0, 10) : '—';
       const checkOut = bookingData.check_out ? bookingData.check_out.substring(0, 10) : '—';
-      const amount   = parseFloat(bookingData.total_amount || 0).toFixed(2);
+      const amount = parseFloat(bookingData.total_amount || 0).toFixed(2);
 
       document.getElementById('rcpBookingId').textContent = bookingData.reservation_id || '—';
-      document.getElementById('rcpCollege').textContent   = bookingData.college         || '—';
-      document.getElementById('rcpRoomType').textContent  = bookingData.room_type       || '—';
-      document.getElementById('rcpCheckIn').textContent   = checkIn;
-      document.getElementById('rcpCheckOut').textContent  = checkOut;
-      document.getElementById('rcpAmount').textContent    = `RM ${amount}`;
+      document.getElementById('rcpCollege').textContent = bookingData.college || '—';
+      document.getElementById('rcpRoomType').textContent = bookingData.room_type || '—';
+      document.getElementById('rcpCheckIn').textContent = checkIn;
+      document.getElementById('rcpCheckOut').textContent = checkOut;
+      document.getElementById('rcpAmount').textContent = `RM ${amount}`;
     }
   }
 
-  // ================================================================
-  // HANDLE FAILED
-  // ================================================================
   function handlePaymentFailed() {
     document.getElementById('loadingView').style.display = 'none';
     document.getElementById('failedView').classList.add('active');
@@ -990,13 +861,10 @@
     if (bookingData) {
       const amount = parseFloat(bookingData.total_amount || 0).toFixed(2);
       document.getElementById('failBookingId').textContent = bookingData.reservation_id || '—';
-      document.getElementById('failAmount').textContent    = `RM ${amount}`;
+      document.getElementById('failAmount').textContent = `RM ${amount}`;
     }
   }
 
-  // ================================================================
-  // RETRY PAYMENT
-  // ================================================================
   function retryPayment() {
     if (reservationId) {
       window.location.href = `payment.html?id=${reservationId}`;
@@ -1005,9 +873,6 @@
     }
   }
 
-  // ================================================================
-  // HEADER PROFILE
-  // ================================================================
   async function loadHeaderProfile() {
     const email = localStorage.getItem('studentEmail');
     if (!email || typeof db === 'undefined') return;
@@ -1020,32 +885,45 @@
 
     if (!error && data) {
       const initial = data.name ? data.name.charAt(0).toUpperCase() : 'S';
-      document.getElementById('avatarInitial').textContent    = initial;
+      document.getElementById('avatarInitial').textContent = initial;
       document.getElementById('dropdownUserName').textContent = data.name;
       document.getElementById('dropdownUserEmail').textContent = data.email;
-      localStorage.setItem('studentName', data.name);
     }
   }
 
-  // Logout
+  function initDropdowns() {
+    const notifBtn = document.getElementById('notificationBtn');
+    const notifDropdown = document.getElementById('notificationDropdown');
+    if (notifBtn && notifDropdown) {
+      notifBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        notifDropdown.classList.toggle('show');
+      });
+      document.addEventListener('click', function() {
+        notifDropdown?.classList.remove('show');
+      });
+    }
+
+    const userProfile = document.querySelector('.user-profile');
+    const userDropdown = document.querySelector('.user-dropdown');
+    if (userProfile && userDropdown) {
+      userProfile.addEventListener('click', function(e) {
+        e.stopPropagation();
+        userDropdown.classList.toggle('show');
+      });
+      document.addEventListener('click', function() {
+        userDropdown?.classList.remove('show');
+      });
+    }
+  }
+
   document.getElementById('logoutBtn')?.addEventListener('click', function(e) {
     e.preventDefault();
     localStorage.removeItem('studentEmail');
     localStorage.removeItem('studentId');
     localStorage.removeItem('studentName');
-    window.location.href = '/Student/index.html';
+    window.location.href = 'index.html';
   });
-
-  // User dropdown
-  const userProfile  = document.querySelector('.user-profile');
-  const userDropdown = document.querySelector('.user-dropdown');
-  if (userProfile && userDropdown) {
-    userProfile.addEventListener('click', (e) => {
-      e.stopPropagation();
-      userDropdown.classList.toggle('show');
-    });
-    document.addEventListener('click', () => userDropdown?.classList.remove('show'));
-  }
 </script>
 
 </body>
