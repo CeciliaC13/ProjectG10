@@ -226,7 +226,6 @@
                 <th>College</th>
                 <th>Room Type</th>
                 <th>Status</th>
-                <th>Receipt</th>
                 <th>Actions</th>
               </tr>
             </thead>
@@ -381,7 +380,6 @@
         roomType:    item.room_type,
         status:      item.status || 'Pending',
         createdAt:   item.created_at,
-        receiptUrl:  item.receipt_url || null,
       }));
 
       renderBookings();
