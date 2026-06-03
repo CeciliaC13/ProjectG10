@@ -442,6 +442,11 @@
       localStorage.setItem('studentName', data.name);
       window.location.href = 'DashBoard.html';
     });
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') {
+        document.getElementById('loginBtn').click();
+      }
+    });
   </script>
 </body>
 

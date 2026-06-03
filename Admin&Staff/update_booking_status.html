@@ -410,14 +410,9 @@
     const now = new Date();
     tbody.innerHTML = filtered.map((item, index) => {
       const daysDiff  = Math.floor((now - new Date(item.createdAt)) / 86400000);
-      const isOverdue = item.status === 'Pending Payment' && !item.receiptUrl && daysDiff >= 7;
+      const isOverdue = item.status === 'Pending Payment' && daysDiff >= 7;
 
-      const receiptCell = item.receiptUrl
-        ? `<button class="btn-receipt" onclick="viewReceipt('${escAttr(item.receiptUrl)}')">
-             <i class="bi bi-file-earmark-image"></i> View
-           </button>`
-        : `<span class="locked-label">None</span>`;
-
+      
       let actionButtons = '';
       if (item.status === 'Pending') {
         actionButtons = `
@@ -462,7 +457,6 @@
           <td>${item.college  || 'N/A'}</td>
           <td>${item.roomType || 'N/A'}</td>
           <td><span class="status-badge ${getStatusClass(item.status)}">${item.status}</span></td>
-          <td>${receiptCell}</td>
           <td>
             <div class="action-btn-group">
               ${actionButtons}

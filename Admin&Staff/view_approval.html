@@ -466,61 +466,21 @@
           <p><span class="status-badge ${getStatusClass(item.status)}">${item.status}</span></p>
         </div>
       </div>
-      ${item.receiptUrl ? `<p><strong>Receipt:</strong> <a href="${item.receiptUrl}" target="_blank">View Receipt</a></p>` : ''}
+     
     `;
 
     // Show Approve/Reject buttons only for Pending bookings
     const footer = document.getElementById('modalFooter');
-    if (item.status === 'Pending') {
-      footer.innerHTML = `
-        <button class="btn-approve" onclick="updateStatus('Pending Payment')">
-          <i class="bi bi-check-circle"></i> Approve
-        </button>
-        <button class="btn-reject" onclick="updateStatus('Rejected')">
-          <i class="bi bi-x-circle"></i> Reject
-        </button>
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-      `;
-    } else {
+   
       footer.innerHTML = `
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
       `;
-    }
+    
 
     new bootstrap.Modal(document.getElementById('bookingModal')).show();
   }
 
-  // ---- APPROVE / REJECT ----
-  // ✅ When admin approves → status becomes 'Pending Payment' (student can now pay)
-  // ✅ When admin rejects → status becomes 'Rejected'
-  async function updateStatus(newStatus) {
-    if (!currentBookingId) return;
-
-    try {
-      const { error } = await db
-        .from('reservations')
-        .update({ status: newStatus })
-        .eq('reservation_id', currentBookingId);
-
-      if (error) throw error;
-
-      // Close modal
-      bootstrap.Modal.getInstance(document.getElementById('bookingModal')).hide();
-
-      // Show success message
-      const msg = newStatus === 'Pending Payment'
-        ? '✅ Booking approved! Student can now make payment.'
-        : '❌ Booking has been rejected.';
-      alert(msg);
-
-      // Refresh table
-      await fetchReservations();
-
-    } catch (err) {
-      console.error('Error updating status:', err.message);
-      alert('Failed to update status. Please try again.');
-    }
-  }
+  
 
   // ---- HEADER ----
   async function loadAdminStaffHeader() {

@@ -374,6 +374,11 @@
       localStorage.setItem('staffAdminId', role === 'admin' ? data.admin_id : data.staff_id);
       window.location.href = 'admin_staff_dashboard.html';
     });
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') {
+        document.getElementById('loginBtn').click();
+      }
+    });
   </script>
 
 </body>
