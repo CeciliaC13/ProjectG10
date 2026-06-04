@@ -195,32 +195,52 @@ function updateNotificationBadge(dataArray) {
     }
   }
 }
-  // Mark single notification as read
-  function markAsRead(notificationId) {
-    const index = notificationsData.findIndex(n => n.id === notificationId);
-    if (index !== -1 && !notificationsData[index].read) {
-      notificationsData[index].read = true;
-      localStorage.setItem('dashboard_notifications', JSON.stringify(notificationsData));
-      renderNotificationDropdown();
-      updateNotificationBadge();
-    }
-  }
-
-  // Mark all notifications as read
-  function markAllAsRead() {
-    notificationsData = notificationsData.map(n => ({ ...n, read: true }));
+ // 1. Updated Mark single notification as read
+function markAsRead(notificationId) {
+  const index = notificationsData.findIndex(n => n.id === notificationId);
+  if (index !== -1 && !notificationsData[index].read) {
+    notificationsData[index].read = true;
     localStorage.setItem('dashboard_notifications', JSON.stringify(notificationsData));
+    
+    // UI Updates
     renderNotificationDropdown();
-    updateNotificationBadge();
+    updateNotificationBadge(notificationsData); // <-- Fixed: Passed the data array here
+  }
+}
+
+// 2. Updated Mark all notifications as read
+function markAllAsRead() {
+  notificationsData = notificationsData.map(n => ({ ...n, read: true }));
+  localStorage.setItem('dashboard_notifications', JSON.stringify(notificationsData));
+  
+  // UI Updates
+  renderNotificationDropdown();
+  updateNotificationBadge(notificationsData); // <-- Fixed: Passed the data array here
+}
+
+// 3. Keep your robust badge function exactly like this
+function updateNotificationBadge(dataArray) {
+  // If no array is passed, fallback to global notificationsData if it exists
+  const targetData = dataArray || notificationsData;
+  
+  if (!targetData || !Array.isArray(targetData)) {
+    console.log("No notification data available yet.");
+    return;
   }
 
-  // Toggle notification dropdown
-  function toggleNotificationDropdown() {
-    const dropdown = document.getElementById('notificationDropdown');
-    if (dropdown) {
-      dropdown.classList.toggle('show');
+  const unreadCount = targetData.filter(n => !n.read).length;
+  console.log("Unread notifications count:", unreadCount);
+  
+  const badge = document.getElementById('notificationBadge');
+  if (badge) {
+    if (unreadCount > 0) {
+      badge.textContent = unreadCount;
+      badge.style.display = 'flex'; 
+    } else {
+      badge.style.display = 'none';
     }
   }
+}
 
   // Close dropdown when clicking outside
   function closeDropdownOnClickOutside(e) {
