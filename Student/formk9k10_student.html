@@ -706,28 +706,41 @@
   };
 
   // Room type selection event handler
+// Room type selection event handler from URL parameter
 document.addEventListener("DOMContentLoaded", function () {
-
   const urlParams = new URLSearchParams(window.location.search);
   const roomParam = urlParams.get('roomType');
+  const roomSelectElement = document.getElementById('roomType');
+  const roomDetailsDiv = document.getElementById('roomDetails');
 
-  if (roomParam) {
+  if (roomParam && roomSelectElement) {
     const roomName = roomParam.split('|')[0].trim();
-    const roomSelectElement = document.getElementById('roomType');
     
-    if (roomSelectElement) {
+    // Ensure the room exists in our config
+    if (roomPriceConfig[roomName]) {
       roomSelectElement.value = roomName;
+      
+      // Update global variables manually for the initial load
+      selectedRoomName = roomName;
+      selectedPrice = roomPriceConfig[roomName].price;
+      
+      // Trigger change event for UI styling libraries (like AOS/Bootstrap)
       roomSelectElement.dispatchEvent(new Event('change'));
     }
-      calculateTotal();
-    } else {
-      roomDetailsDiv.classList.remove('show');
-      selectedRoomName = '';
-      selectedPrice = 0;
-      if (document.getElementById('totalPriceDisplay')) document.getElementById('totalPriceDisplay').style.display = 'none';
+    
+    calculateTotal();
+  } else {
+    if (roomDetailsDiv) roomDetailsDiv.classList.remove('show');
+    selectedRoomName = '';
+    selectedPrice = 0;
+    if (document.getElementById('totalPriceDisplay')) {
+      document.getElementById('totalPriceDisplay').style.display = 'none';
+    }
+    if (document.getElementById('durationDisplay')) {
       document.getElementById('durationDisplay').innerHTML = '<i class="bi bi-calendar"></i> Select dates to see duration';
     }
-  });
+  }
+});
 
   document.getElementById('checkIn').addEventListener('change', calculateTotal);
   document.getElementById('checkOut').addEventListener('change', calculateTotal);
