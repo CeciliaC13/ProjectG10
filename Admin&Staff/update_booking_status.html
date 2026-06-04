@@ -516,7 +516,7 @@
       if (item.studentId) {
         const messages = {
           'Approved':        `Your booking (${bookingId}) has been approved. Please wait for key handover before making payment.`,
-          'Pending Payment': `You have collected your room key for booking (${bookingId}). Please log in to complete your payment.`,
+          'Pending Payment': `You have collected your room key for booking (${bookingId}). Please complete your payment within 3 days.`,
           'Rejected':        `Your booking (${bookingId}) has been declined. Please contact the housing office for more information.`,
         };
         if (messages[newStatus]) {
@@ -669,7 +669,7 @@
         await sendNotification(
           item.studentId.trim(),
           'Overdue Payment Alert',
-          `Your booking (${item.bookingId}) has been awaiting payment for ${days} days. Please complete payment to secure your room.`,
+          `Your booking (${item.bookingId}) has been awaiting payment for ${days} days. The booking has been cancelled.`,
           item.bookingId
         );
       }
