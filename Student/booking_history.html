@@ -250,24 +250,6 @@
       flex-shrink: 0;
     }
  
-    /* Warning message for overdue payment */
-    .overdue-warning {
-      background: #fee2e2;
-      border-left: 4px solid #dc2626;
-      border-radius: 10px;
-      padding: 12px 16px;
-      font-size: 13px;
-      color: #991b1b;
-      margin-bottom: 20px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
- 
-    .overdue-warning i {
-      font-size: 18px;
-    }
- 
     /* Cancel Confirmation Modal */
     .cancel-popup-overlay {
       position: fixed;
@@ -512,19 +494,13 @@
       </div>
     </div>
  
-    <!-- Overdue Warning Message (will show if any booking is overdue) -->
-    <div id="overdueWarning" class="overdue-warning" style="display: none;">
-      <i class="bi bi-exclamation-triangle-fill"></i>
-      <span id="overdueMessage"></span>
-    </div>
- 
     <!-- Booking Table -->
     <div class="table-box">
       <h3 class="mb-3">Your Booking Records</h3>
  
       <div class="how-it-works-bar">
         <i class="bi bi-info-circle-fill"></i>
-        <span><strong>How it works:</strong> Submit booking → Admin approves → Collect your room key → Admin marks "Key Handed" → Pay Now button unlocks → Complete payment within 3 days.</span>
+        <span><strong>How it works:</strong> Submit booking → Admin approves → Collect your room key → Admin marks "Key Handed" → Pay Now button unlocks → Complete payment.</span>
       </div>
  
       <div class="table-wrapper">
@@ -652,72 +628,7 @@
     if (s === 'approved') return 'status-confirmed';
     if (s === 'paid') return 'status-completed';
     if (s === 'cancelled' || s === 'rejected') return 'status-cancelled';
-    return 'status-pending';
-  }
- 
-  // -------------------------------------------------------
-  // Check and auto-cancel overdue payments (3 days after approval)
-  // -------------------------------------------------------
-  async function checkAndCancelOverduePayments() {
-    const pendingPaymentBookings = bookings.filter(b => b.status === 'Pending Payment');
-    let hasOverdue = false;
-    let overdueCount = 0;
- 
-    for (const booking of pendingPaymentBookings) {
-      // Get the approval date from the booking (when status changed to Approved)
-      // We'll use updated_at or created_at from when it became Approved
-      // For this to work, you need an 'approved_at' field or we can use 'updated_at'
-      const approvedDate = booking.approved_at || booking.updated_at;
-      
-      if (approvedDate) {
-        const approvedDateTime = new Date(approvedDate);
-        const currentDate = new Date();
-        const daysDiff = Math.floor((currentDate - approvedDateTime) / (1000 * 60 * 60 * 24));
-        
-        // If more than 3 days have passed since approval
-        if (daysDiff >= 3) {
-          hasOverdue = true;
-          overdueCount++;
-          
-          // Cancel the overdue booking
-          try {
-            const { error } = await db
-              .from('reservations')
-              .update({ 
-                status: 'Cancelled',
-                cancellation_reason: 'Payment overdue - expired after 3 days'
-              })
-              .eq('reservation_id', booking.reservation_id);
- 
-            if (error) {
-              console.error(`Error cancelling overdue booking ${booking.reservation_id}:`, error);
-            } else {
-              console.log(`Cancelled overdue booking: ${booking.reservation_id}`);
-              // Send notification (you can implement this)
-              // await sendCancellationNotification(booking);
-            }
-          } catch (err) {
-            console.error(`Failed to cancel booking ${booking.reservation_id}:`, err);
-          }
-        }
-      }
-    }
- 
-    // Show warning if there are overdue bookings
-    const overdueWarning = document.getElementById('overdueWarning');
-    const overdueMessage = document.getElementById('overdueMessage');
-    
-    if (hasOverdue) {
-      overdueWarning.style.display = 'flex';
-      overdueMessage.innerHTML = `<strong>⚠️ Payment Overdue!</strong> You have ${overdueCount} booking(s) that have exceeded the 3-day payment deadline. These bookings have been automatically cancelled. Please make a new booking if you still need a room.`;
-    } else {
-      overdueWarning.style.display = 'none';
-    }
- 
-    // Refresh bookings after cancelling overdue ones
-    if (hasOverdue) {
-      await fetchBookings();
-    }
+    return 'status-pending'; // pending, pending payment, etc.
   }
  
   // -------------------------------------------------------
@@ -750,9 +661,6 @@
     document.getElementById('dropdownUserRole').textContent = 'Student';
  
     await fetchBookings();
-    
-    // Run overdue check after loading bookings
-    await checkAndCancelOverduePayments();
   }
  
   // -------------------------------------------------------
@@ -836,22 +744,11 @@
       const totalAmount    = booking.total_amount ? `RM ${booking.total_amount}` : 'RM 0';
       const originalIndex  = bookings.indexOf(booking);
  
+      // Only allow cancel when Pending (review) or Approved
       const canCancel      = booking.status === 'Pending' || booking.status === 'Approved';
-      const isPendingPayment = booking.status === 'Pending Payment';
  
-      // Check if this pending payment is overdue
-      let isOverdue = false;
-      let daysLeft = null;
-      if (isPendingPayment && booking.approved_at) {
-        const approvedDate = new Date(booking.approved_at);
-        const currentDate = new Date();
-        const daysPassed = Math.floor((currentDate - approvedDate) / (1000 * 60 * 60 * 24));
-        if (daysPassed >= 3) {
-          isOverdue = true;
-        } else {
-          daysLeft = 3 - daysPassed;
-        }
-      }
+      // Show Pay Now only when status is exactly 'Pending Payment'
+      const isPendingPayment = booking.status === 'Pending Payment';
  
       return `
       <tr>
@@ -866,21 +763,17 @@
           <span class="status-badge ${getStatusClass(booking.status)}">
             ${booking.status || 'Pending'}
           </span>
-          ${isPendingPayment && daysLeft ? `<small style="display:block; font-size:10px;">${daysLeft} day(s) left to pay</small>` : ''}
-          ${isPendingPayment && isOverdue ? `<small style="display:block; font-size:10px; color:#dc2626;">Overdue - Booking cancelled</small>` : ''}
         </td>
  
         <!-- PAYMENT COLUMN -->
         <td>
-          ${isPendingPayment && !isOverdue
+          ${isPendingPayment
             ? `<button class="pay-btn" onclick="makePayment('${booking.reservation_id}')">
                  <i class="bi bi-credit-card"></i> Pay Now
                </button>`
             : booking.status === 'Paid'
               ? `<span class="status-badge status-completed"><i class="bi bi-check-circle"></i> Paid</span>`
-              : isOverdue
-                ? `<span class="status-badge status-cancelled">Expired</span>`
-                : '-'
+              : '-'
           }
         </td>
  
@@ -889,7 +782,7 @@
           <button class="view-btn" onclick="viewBookingDetails(${originalIndex})">
             <i class="bi bi-eye"></i> View
           </button>
-          ${canCancel && !isOverdue
+          ${canCancel
             ? `<button class="cancel-btn" onclick="openCancelPopup('${booking.reservation_id}')">
                  <i class="bi bi-x-circle"></i> Cancel
                </button>`
@@ -907,20 +800,6 @@
     const checkIn  = booking.check_in  ? booking.check_in.substring(0, 10)  : '-';
     const checkOut = booking.check_out ? booking.check_out.substring(0, 10) : '-';
  
-    // Calculate days left for payment if pending payment
-    let paymentInfo = '';
-    if (booking.status === 'Pending Payment' && booking.approved_at) {
-      const approvedDate = new Date(booking.approved_at);
-      const currentDate = new Date();
-      const daysPassed = Math.floor((currentDate - approvedDate) / (1000 * 60 * 60 * 24));
-      const daysLeft = 3 - daysPassed;
-      if (daysLeft > 0) {
-        paymentInfo = `<p><strong><i class="bi bi-hourglass-split"></i> Payment Deadline:</strong> ${daysLeft} day(s) remaining</p>`;
-      } else if (daysLeft <= 0) {
-        paymentInfo = `<p><strong><i class="bi bi-exclamation-triangle-fill"></i> Payment Status:</strong> <span style="color:#dc2626;">OVERDUE - Booking will be cancelled</span></p>`;
-      }
-    }
- 
     document.getElementById('bookingDetails').innerHTML = `
       <div class="row">
         <div class="col-6">
@@ -932,7 +811,6 @@
           <p><strong><i class="bi bi-currency-ringgit"></i> Total Amount:</strong></p>
           <p><strong><i class="bi bi-info-circle"></i> Status:</strong></p>
           <p><strong><i class="bi bi-clock"></i> Booking Date:</strong></p>
-          ${paymentInfo ? `<p><strong><i class="bi bi-hourglass-split"></i> Payment Info:</strong></p>` : ''}
         </div>
         <div class="col-6">
           <p>${booking.reservation_id || 'N/A'}</p>
@@ -943,7 +821,6 @@
           <p><strong>RM ${booking.total_amount || 0}</strong></p>
           <p><span class="status-badge ${getStatusClass(booking.status)}">${booking.status || 'Pending'}</span></p>
           <p>${booking.created_at ? booking.created_at.substring(0, 10) : '-'}</p>
-          ${paymentInfo ? `<p>${paymentInfo.replace(/<[^>]*>/g, '')}</p>` : ''}
         </div>
       </div>`;
  
@@ -1072,14 +949,6 @@
     initDropdowns();
     loadStudentInfo();
     loadHeaderProfile();
-    
-    // Set up auto-check every 5 minutes (300,000 ms) for overdue payments
-    setInterval(async () => {
-      if (studentId) {
-        await fetchBookings();
-        await checkAndCancelOverduePayments();
-      }
-    }, 300000);
   });
 </script>
  
