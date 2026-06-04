@@ -951,4 +951,137 @@
   }
  
   // -------------------------------------------------------
-  // Pay Now — redirect to payment
+  // Pay Now — redirect to payment page
+  // -------------------------------------------------------
+  function makePayment(reservationId) {
+    window.location.href = `payment.html?id=${reservationId}`;
+  }
+ 
+  // -------------------------------------------------------
+  // Cancel popup
+  // -------------------------------------------------------
+  function openCancelPopup(reservationId) {
+    pendingCancelId = reservationId;
+    document.getElementById('cancelPopup').classList.add('active');
+  }
+ 
+  function closeCancelPopup() {
+    document.getElementById('cancelPopup').classList.remove('active');
+    pendingCancelId = null;
+  }
+ 
+  async function confirmCancel() {
+    if (!pendingCancelId) return;
+ 
+    try {
+      const { error } = await db
+        .from('reservations')
+        .update({ status: 'Cancelled' })
+        .eq('reservation_id', pendingCancelId);
+ 
+      if (error) throw error;
+ 
+      await fetchBookings();
+      alert('Your reservation has been cancelled successfully.');
+    } catch (err) {
+      console.error('Error cancelling reservation:', err);
+      alert('Failed to cancel reservation. Please try again.');
+    } finally {
+      closeCancelPopup();
+    }
+  }
+ 
+  // -------------------------------------------------------
+  // Filter
+  // -------------------------------------------------------
+  function filterBookings() {
+    renderBookings();
+  }
+ 
+  // -------------------------------------------------------
+  // Header profile
+  // -------------------------------------------------------
+  async function loadHeaderProfile() {
+    const email = localStorage.getItem('studentEmail');
+    if (!email) return;
+ 
+    if (typeof db !== 'undefined' && db) {
+      const { data, error } = await db
+        .from('Student')
+        .select('name, email')
+        .eq('email', email)
+        .single();
+ 
+      if (!error && data) {
+        const initial = data.name ? data.name.charAt(0).toUpperCase() : 'S';
+        const el = (id) => document.getElementById(id);
+        if (el('avatarInitial'))    el('avatarInitial').textContent    = initial;
+        if (el('dropdownUserName')) el('dropdownUserName').textContent = data.name;
+        if (el('dropdownUserEmail'))el('dropdownUserEmail').textContent= data.email;
+      }
+    }
+  }
+ 
+  // -------------------------------------------------------
+  // Dropdowns
+  // -------------------------------------------------------
+  function initDropdowns() {
+    const notifBtn      = document.getElementById('notificationBtn');
+    const notifDropdown = document.getElementById('notificationDropdown');
+ 
+    if (notifBtn && notifDropdown) {
+      notifBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        notifDropdown.classList.toggle('show');
+      });
+      document.addEventListener('click', () => notifDropdown?.classList.remove('show'));
+      notifDropdown?.addEventListener('click', (e) => e.stopPropagation());
+    }
+ 
+    const userProfile  = document.querySelector('.user-profile');
+    const userDropdown = document.querySelector('.user-dropdown');
+ 
+    if (userProfile && userDropdown) {
+      userProfile.addEventListener('click', (e) => {
+        e.stopPropagation();
+        userDropdown.classList.toggle('show');
+      });
+      document.addEventListener('click', () => userDropdown?.classList.remove('show'));
+      userDropdown?.addEventListener('click', (e) => e.stopPropagation());
+    }
+  }
+ 
+  // -------------------------------------------------------
+  // Button listeners
+  // -------------------------------------------------------
+  document.getElementById('cancelNoBtn').addEventListener('click', closeCancelPopup);
+  document.getElementById('cancelYesBtn').addEventListener('click', confirmCancel);
+ 
+  document.getElementById('logoutBtn').addEventListener('click', function(e) {
+    e.preventDefault();
+    localStorage.removeItem('studentEmail');
+    localStorage.removeItem('studentId');
+    localStorage.removeItem('studentName');
+    window.location.href = 'index.html';
+  });
+ 
+  // -------------------------------------------------------
+  // Init
+  // -------------------------------------------------------
+  document.addEventListener('DOMContentLoaded', function() {
+    initDropdowns();
+    loadStudentInfo();
+    loadHeaderProfile();
+    
+    // Set up auto-check every 5 minutes (300,000 ms) for overdue payments
+    setInterval(async () => {
+      if (studentId) {
+        await fetchBookings();
+        await checkAndCancelOverduePayments();
+      }
+    }, 300000);
+  });
+</script>
+ 
+</body>
+</html>
