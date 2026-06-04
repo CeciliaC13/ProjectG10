@@ -170,23 +170,31 @@ window.addEventListener('load', () => {
     `).join('');
   }
 
-  // Update notification badge count
-  updateNotificationBadge(notificationsData);
+// 1. Pass the data when calling the function
+updateNotificationBadge(notificationsData);
 
-  function updateNotificationBadge() {
-    const unreadCount = notificationsData.filter(n => !n.read).length;
-    console.log("Unread notifications count:", unreadCount);
-    const badge = document.getElementById('notificationBadge');
-    if (badge) {
-      if (unreadCount > 0) {
-        badge.textContent = unreadCount;
-        badge.style.display = 'flex';
-      } else {
-        badge.style.display = 'none';
-      }
-    }
+// 2. Accept the data as a parameter (e.g., dataArray)
+function updateNotificationBadge(dataArray) {
+  // Add a safety check to prevent crashing if data hasn't loaded yet
+  if (!dataArray || !Array.isArray(dataArray)) {
+    console.log("No notification data available yet.");
+    return;
   }
 
+  // Filter using the passed parameter instead of a global variable
+  const unreadCount = dataArray.filter(n => !n.read).length;
+  console.log("Unread notifications count:", unreadCount);
+  
+  const badge = document.getElementById('notificationBadge');
+  if (badge) {
+    if (unreadCount > 0) {
+      badge.textContent = unreadCount;
+      badge.style.display = 'flex'; // Or 'block', depending on your CSS layout
+    } else {
+      badge.style.display = 'none';
+    }
+  }
+}
   // Mark single notification as read
   function markAsRead(notificationId) {
     const index = notificationsData.findIndex(n => n.id === notificationId);
