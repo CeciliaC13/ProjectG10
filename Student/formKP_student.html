@@ -861,46 +861,94 @@
     }
   });
 
-  document.addEventListener("DOMContentLoaded", function () {
-    autofillStudentDetails();
+async function autofillStudentDetails() {
+  try {
 
-    const urlParams = new URLSearchParams(window.location.search);
-    const roomParam = urlParams.get('roomType');
-
-    if (roomParam) {
-      const roomName = roomParam.split('|')[0].trim();
-      const roomSelectElement = document.getElementById('roomType');
+    const { data: { user }, error: authError } = await db.auth.getUser();
+    
+    if (!authError && user) {
+      console.log("Supabase Auth detected logged-in user:", user.email);
       
-      if (roomSelectElement) {
-        roomSelectElement.value = roomName;
-        roomSelectElement.dispatchEvent(new Event('change'));
+      const { data: studentData, error: dbError } = await db
+        .from('Student')
+        .select('*')
+        .eq('student_id', user.id) 
+        .single();
+
+      if (!dbError && studentData) {
+        const nameElem = document.getElementById('name') || document.getElementById('fullName');
+        if (nameElem) nameElem.value = studentData.name || '';
+
+        const idElem = document.getElementById('student_id') || document.getElementById('studentId');
+        if (idElem) idElem.value = studentData.student_id || '';
+
+        const phoneElem = document.getElementById('telephone') || document.getElementById('phone');
+        if (phoneElem) phoneElem.value = studentData.telephone || '';
+
+        const emailElem = document.getElementById('email');
+        if (emailElem) emailElem.value = studentData.email || '';
+
+        console.log("✅succesfully autofilled student details from Supabase Auth and database.");
+        return; 
+      } else {
+        console.warn("failed to fetch student data from Supabase:", dbError?.message);
       }
     }
-  });
 
-  // Auto-fill student info from localStorage
-  async function loadStudentInfo() {
-    const email = localStorage.getItem('studentEmail');
-    if (email) {
-      document.getElementById('email').value = email;
+    console.log("🔄 reading local storage...");
+    
+    const localEmail = localStorage.getItem('studentEmail');
+    if (localEmail) {
+      const emailElem = document.getElementById('email');
+      if (emailElem) emailElem.value = localEmail;
       
       if (typeof db !== 'undefined' && db) {
-        const { data, error } = await db
+        const { data: localData, error: localDbError } = await db
           .from('Student')
           .select('name, student_id, telephone')
-          .eq('email', email)
+          .eq('email', localEmail)
           .single();
         
-        if (!error && data) {
-          if (data.name) document.getElementById('fullName').value = data.name;
-          if (data.student_id) document.getElementById('studentId').value = data.student_id;
-          if (data.telephone) document.getElementById('phone').value = data.telephone;
+        if (!localDbError && localData) {
+          const nameElem = document.getElementById('name') || document.getElementById('fullName');
+          if (nameElem && localData.name) nameElem.value = localData.name;
+
+          const idElem = document.getElementById('student_id') || document.getElementById('studentId');
+          if (idElem && localData.student_id) idElem.value = localData.student_id;
+
+          const phoneElem = document.getElementById('telephone') || document.getElementById('phone');
+          if (phoneElem && localData.telephone) phoneElem.value = localData.telephone;
+          
+          console.log("ℹ️ successfully autofilled student details from local storage email lookup.");
+          return;
         }
       }
     }
+    
+    console.log("❌ No valid student details found.");
+
+  } catch (err) {
+    console.error("failed to autofill student details", err);
   }
+}
+
+document.addEventListener("DOMContentLoaded", function () {
   
-  loadStudentInfo();
+  autofillStudentDetails();
+
+  const urlParams = new URLSearchParams(window.location.search);
+  const roomParam = urlParams.get('roomType');
+
+  if (roomParam) {
+    const roomName = roomParam.split('|')[0].trim();
+    const roomSelectElement = document.getElementById('roomType');
+    
+    if (roomSelectElement) {
+      roomSelectElement.value = roomName;
+      roomSelectElement.dispatchEvent(new Event('change'));
+    }
+  }
+});
 </script>
 </body>
 </html>

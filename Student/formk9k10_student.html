@@ -554,14 +554,14 @@
           <input type="tel" class="form-control" id="phone" placeholder="e.g., 012-3456789" required>
         </div>
 
-        <div class="form-group">
-          <label>Select College <span class="required">*</span></label>
-          <select class="form-select" id="college" required>
-            <option value="">-- Please select college --</option>
-            <option value="Kolej 9">Kolej 9 (female ONLY)</option>
-            <option value="Kolej 10">Kolej 10 (male ONLY)</option>
-          </select>
-        </div>
+      <div class="form-group">
+        <label>Select College <span class="required">*</span></label>
+        <select class="form-select" id="college" required>
+          <option value="">-- Please select college --</option>
+          <option value="Kolej 9">Kolej 9 (female ONLY)</option>
+          <option value="Kolej 10">Kolej 10 (male ONLY)</option>
+        </select>
+      </div>
 
         <div class="form-group">
           <label>Select Room Type <span class="required">*</span></label>
@@ -706,18 +706,19 @@
   };
 
   // Room type selection event handler
-  document.getElementById('roomType').addEventListener('change', function() {
-    const selectedValue = this.value;
-    const roomDetailsDiv = document.getElementById('roomDetails');
-    const roomDetailsText = document.getElementById('roomDetailsText');
-    
-    if (selectedValue && roomPriceConfig[selectedValue]) {
-      selectedRoomName = selectedValue;
-      selectedPrice = roomPriceConfig[selectedValue].price;
-      
-      roomDetailsText.innerHTML = `<strong>${selectedRoomName}</strong> - ${roomDetailsMap[selectedRoomName] || 'Includes all basic amenities'}`;
-      roomDetailsDiv.classList.add('show');
+document.addEventListener("DOMContentLoaded", function () {
 
+  const urlParams = new URLSearchParams(window.location.search);
+  const roomParam = urlParams.get('roomType');
+
+  if (roomParam) {
+    const roomName = roomParam.split('|')[0].trim();
+    const roomSelectElement = document.getElementById('roomType');
+    
+    if (roomSelectElement) {
+      roomSelectElement.value = roomName;
+      roomSelectElement.dispatchEvent(new Event('change'));
+    }
       calculateTotal();
     } else {
       roomDetailsDiv.classList.remove('show');
@@ -789,7 +790,7 @@
     const studentId = document.getElementById('studentId').value.trim();
     const email = document.getElementById('email').value.trim();
     const phone = document.getElementById('phone').value.trim();
-    const college = document.getElementById('college').value;
+  const college = document.getElementById('college').value; 
     const roomTypeSelect = document.getElementById('roomType').value;
     const checkIn = document.getElementById('checkIn').value;
     const checkOut = document.getElementById('checkOut').value;
@@ -918,15 +919,17 @@
   });
 
   // Auto-fill student info from localStorage
+  // Auto-fill student info and auto-select college based on gender
   async function loadStudentInfo() {
     const email = localStorage.getItem('studentEmail');
     if (email) {
       document.getElementById('email').value = email;
       
       if (typeof db !== 'undefined' && db) {
+        // Added 'gender' to the selected fields
         const { data, error } = await db
           .from('Student')
-          .select('name, student_id, telephone')
+          .select('name, student_id, telephone, gender')
           .eq('email', email)
           .single();
         
@@ -934,12 +937,29 @@
           if (data.name) document.getElementById('fullName').value = data.name;
           if (data.student_id) document.getElementById('studentId').value = data.student_id;
           if (data.telephone) document.getElementById('phone').value = data.telephone;
+          
+          // --- Auto-select College based on Gender Filter ---
+          const collegeSelect = document.getElementById('college');
+          if (collegeSelect && data.gender) {
+            const genderCleaned = data.gender.trim().toLowerCase();
+            
+            if (genderCleaned === 'female' || genderCleaned === 'f') {
+              collegeSelect.value = 'Kolej 9';
+              // Optional: lock the selection so they can't change it
+              collegeSelect.disabled = true; 
+            } else if (genderCleaned === 'male' || genderCleaned === 'm') {
+              collegeSelect.value = 'Kolej 10';
+              // Optional: lock the selection so they can't change it
+              collegeSelect.disabled = true; 
+            }
+          }
         }
       }
     }
   }
   
   loadStudentInfo();
+
 </script>
 </body>
 </html>
