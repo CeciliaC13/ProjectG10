@@ -846,7 +846,7 @@ document.addEventListener("DOMContentLoaded", function () {
         .from('reservations')
         .select('status, reservation_id')
         .eq('student_id', studentId)
-        .in('status', ['Pending', 'Pending Payment', 'Rejected']);
+        .in('status', ['Pending', 'Pending Payment']);
 
       if (checkError) throw checkError;
 
