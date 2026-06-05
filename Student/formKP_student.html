@@ -325,8 +325,14 @@
 
     .custom-popup i {
       font-size: 70px;
+    }
+
+    .custom-popup i.error-icon {
+      color: #dc2626;
+    }
+
+    .custom-popup i.success-icon {
       color: #22c55e;
-      margin-bottom: 20px;
     }
 
     .custom-popup h3 {
@@ -358,6 +364,14 @@
     .custom-popup .popup-btn:hover {
       transform: translateY(-2px);
       box-shadow: 0 5px 15px rgba(44, 90, 122, 0.3);
+    }
+
+    .custom-popup .popup-btn.error-btn {
+      background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+    }
+
+    .custom-popup .popup-btn.error-btn:hover {
+      box-shadow: 0 5px 15px rgba(220, 38, 38, 0.3);
     }
 
     @media (max-width: 576px) {
@@ -553,13 +567,23 @@
   </div>
 </main>
 
-<!-- Custom Popup Modal -->
+<!-- Success Popup Modal -->
 <div class="custom-popup-overlay" id="successPopup">
   <div class="custom-popup">
-    <i class="bi bi-check-circle-fill"></i>
+    <i class="bi bi-check-circle-fill success-icon"></i>
     <h3>Reservation Submitted!</h3>
     <p>Your room reservation has been successfully submitted.<br><br>Please wait for admin approval. You will be notified once your booking is confirmed.</p>
     <button class="popup-btn" id="popupCloseBtn">OK</button>
+  </div>
+</div>
+
+<!-- Error/Access Denied Popup Modal -->
+<div class="custom-popup-overlay" id="errorPopup">
+  <div class="custom-popup">
+    <i class="bi bi-exclamation-triangle-fill error-icon"></i>
+    <h3>Access Denied</h3>
+    <p id="errorPopupMessage">You already have an active application. You cannot submit a new application until your current request is cleared or updated.</p>
+    <button class="popup-btn error-btn" id="errorPopupCloseBtn">Close</button>
   </div>
 </div>
 
@@ -626,16 +650,33 @@
     window.location.href = 'kp_student.html';
   }
 
-  // Show popup and redirect function
+  // Show success popup and redirect function
   function showSuccessPopupAndRedirect() {
     const popup = document.getElementById('successPopup');
     popup.classList.add('active');
     
-    // Close popup and redirect when OK button is clicked
     document.getElementById('popupCloseBtn').onclick = function() {
       popup.classList.remove('active');
       window.location.href = 'dashboard.html';
     };
+  }
+
+  // Show error popup function (just close, no redirect)
+  function showErrorPopup(message) {
+    const popup = document.getElementById('errorPopup');
+    const messageElement = document.getElementById('errorPopupMessage');
+    messageElement.innerHTML = message;
+    popup.classList.add('active');
+    
+    document.getElementById('errorPopupCloseBtn').onclick = function() {
+      popup.classList.remove('active');
+    };
+  }
+
+  // Function to close error popup
+  function closeErrorPopup() {
+    const popup = document.getElementById('errorPopup');
+    popup.classList.remove('active');
   }
 
   const roomDetailsMap = {
@@ -783,12 +824,14 @@
       if (activeReservations && activeReservations.length > 0) {
         const currentConflict = activeReservations[0];
         
-        errorAlert.querySelector('span').innerHTML = `
-          <strong>Access Denied:</strong> You already have an active application 
-          (${currentConflict.reservation_id}) marked as <strong>${currentConflict.status}</strong>. 
+        // Show error popup instead of inline error
+        const errorMessage = `
+          <strong>Access Denied</strong><br><br>
+          You already have an active application (${currentConflict.reservation_id}) 
+          marked as <strong>${currentConflict.status}</strong>.<br><br>
           You cannot submit a new application until your current request is cleared or updated.
         `;
-        errorAlert.classList.add('show');
+        showErrorPopup(errorMessage);
         
         submitBtn.disabled = false;
         submitBtn.innerHTML = 'Confirm Reservation';
@@ -797,7 +840,7 @@
 
     } catch (checkErr) {
       console.error('Eligibility check dropped:', checkErr.message);
-      alert('System failed to verify booking restrictions: ' + checkErr.message);
+      showErrorPopup('System failed to verify booking restrictions: ' + checkErr.message);
       submitBtn.disabled = false;
       submitBtn.innerHTML = 'Confirm Reservation';
       return;
@@ -841,7 +884,7 @@
         
       } catch (err) {
         console.error('Submit failed:', err.message);
-        alert('Submit failed, please try again: ' + err.message);
+        showErrorPopup('Submit failed: ' + err.message);
         submitBtn.disabled = false;
         submitBtn.innerHTML = 'Confirm Reservation';
       }
