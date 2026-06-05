@@ -540,11 +540,40 @@
           </div>
 
           <div class="amount-box">
-            <div>
-              <div class="amount-label">Total Amount Due</div>
-              <div class="amount-value" id="sumAmount"><small>RM</small> 0.00</div>
+            <div style="flex:1;">
+              
+              <!-- Fee Breakdown Rows -->
+              <div style="margin-bottom: 14px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.12);">
+                  <span style="font-size:13px; color:rgba(255,255,255,0.75); display:flex; align-items:center; gap:8px;">
+                    <span style="background:rgba(255,255,255,0.15); border-radius:8px; padding:4px 8px; font-size:11px;">
+                      <i class="bi bi-door-open"></i> Room
+                    </span>
+                    Room Charge
+                  </span>
+                  <span id="breakdownRoom" style="font-size:14px; color:white; font-weight:600;">RM 0.00</span>
+                </div>
+
+                <div style="display:flex; justify-content:space-between; align-items:center; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.12);">
+                  <span style="font-size:13px; color:rgba(255,255,255,0.75); display:flex; align-items:center; gap:8px;">
+                    <span style="background:rgba(255,255,255,0.15); border-radius:8px; padding:4px 8px; font-size:11px;">
+                      <i class="bi bi-bank"></i> FPX
+                    </span>
+                    Processing Fee
+                  </span>
+                  <span style="font-size:14px; color:white; font-weight:600;">RM 1.00</span>
+                </div>
+              </div>
+
+              <!-- Total Row -->
+              <div style="background:rgba(255,255,255,0.15); border-radius:12px; padding:12px 16px; display:flex; justify-content:space-between; align-items:center;">
+                <div>
+                  <div style="font-size:11px; color:rgba(255,255,255,0.65); text-transform:uppercase; letter-spacing:1px; margin-bottom:3px;">Total Amount Due</div>
+                  <div class="amount-value" id="sumAmount"><small>RM</small> 0.00</div>
+                </div>
+              </div>
+
             </div>
-            <i class="bi bi-currency-exchange" style="font-size: 28px; opacity: 0.7;"></i>
           </div>
 
           <div class="notice-bar">
@@ -770,14 +799,17 @@
 
     const checkIn = bookingData.check_in ? bookingData.check_in.substring(0, 10) : '—';
     const checkOut = bookingData.check_out ? bookingData.check_out.substring(0, 10) : '—';
-    const amount = parseFloat(bookingData.total_amount || 0).toFixed(2);
+    const rawAmount = parseFloat(bookingData.total_amount || 0);
+    const totalAmount = (rawAmount + 1).toFixed(2);
 
     document.getElementById('sumBookingId').textContent = bookingData.reservation_id || '—';
     document.getElementById('sumCollege').textContent = bookingData.college || '—';
     document.getElementById('sumRoomType').textContent = bookingData.room_type || '—';
     document.getElementById('sumCheckIn').textContent = checkIn;
     document.getElementById('sumCheckOut').textContent = checkOut;
-    document.getElementById('sumAmount').innerHTML = `<small>RM</small> ${amount}`;
+    document.getElementById('sumAmount').innerHTML = `<small>RM</small> ${totalAmount}`;
+    document.getElementById('breakdownRoom').textContent = `RM ${rawAmount.toFixed(2)}`;
+    
   }
 
   async function initiatePayment() {
@@ -791,13 +823,15 @@
 
     try {
       const returnUrl = `${window.location.origin}${window.location.pathname}?id=${bookingData.reservation_id}`;
+      const rawAmount = parseFloat(bookingData.total_amount || 0);
+      const chargedAmount = rawAmount + 1;  // +RM1 ToyyibPay fee
 
       const response = await fetch(EDGE_FUNCTION_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           reservationId: bookingData.reservation_id,
-          amount: bookingData.total_amount,
+          amount: chargedAmount,   // ← was bookingData.total_amount
           college: bookingData.college,
           studentName: localStorage.getItem('studentName') || 'Student',
           studentEmail: localStorage.getItem('studentEmail') || 'student@utm.my',
@@ -839,7 +873,8 @@
     if (bookingData) {
       const checkIn = bookingData.check_in ? bookingData.check_in.substring(0, 10) : '—';
       const checkOut = bookingData.check_out ? bookingData.check_out.substring(0, 10) : '—';
-      const amount = parseFloat(bookingData.total_amount || 0).toFixed(2);
+      const rawAmount = parseFloat(bookingData.total_amount || 0);
+      const amount = (rawAmount + 1).toFixed(2);
 
       document.getElementById('rcpBookingId').textContent = bookingData.reservation_id || '—';
       document.getElementById('rcpCollege').textContent = bookingData.college || '—';

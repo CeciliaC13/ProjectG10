@@ -875,30 +875,58 @@ document.addEventListener("DOMContentLoaded", function () {
 
       if (typeof db === 'undefined') throw new Error("Database configuration context missing.");
 
+      // Check 1: Block if any Pending or Pending Payment exists
       const { data: activeReservations, error: checkError } = await db
         .from('reservations')
-        .select('status, reservation_id')
+        .select('status, reservation_id, check_in, check_out')
         .eq('student_id', studentId)
-        .in('status', ['Pending', 'Pending Payment']);
+        .in('status', ['Pending', 'Pending Payment', 'Approved', 'Paid']);
 
       if (checkError) throw checkError;
 
       if (activeReservations && activeReservations.length > 0) {
-        const currentConflict = activeReservations[0];
-        
-        // Show error popup instead of inline error
-        const errorMessage = `
+
+        // Rule 1: Block if any Pending / Pending Payment exists
+        const pendingBlock = activeReservations.find(b =>
+          b.status === 'Pending' || b.status === 'Pending Payment' || b.status === 'Approved'
+        );
+        if (pendingBlock) {
+         const errorMessage = `
           <strong>Access Denied</strong><br><br>
-          You already have an active application (${currentConflict.reservation_id}) 
-          marked as <strong>${currentConflict.status}</strong>.<br><br>
+          You already have an active application (${pendingBlock.reservation_id}) 
+          marked as <strong>${pendingBlock.status}</strong>.<br><br>
           You cannot submit a new application until your current request is cleared or updated.
         `;
+          showErrorPopup(errorMessage);
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = 'Confirm Reservation';
+          return;
+        }
+        // Rule 2: Block if dates overlap with any Paid booking
+      const newStart = new Date(checkIn);
+      const newEnd = new Date(checkOut);
+
+      const overlapBlock = activeReservations.find(b => {
+        if (b.status !== 'Paid') return false;
+        const existStart = new Date(b.check_in);
+        const existEnd = new Date(b.check_out);
+        return newStart < existEnd && newEnd > existStart;
+      });
+
+      if (overlapBlock) {
+        const errorMessage = `
+          <strong>Booking Conflict</strong><br><br>
+          You already have a confirmed booking (${overlapBlock.reservation_id}) 
+          from <strong>${overlapBlock.check_in}</strong> to <strong>${overlapBlock.check_out}</strong> 
+          that overlaps with your selected dates.<br><br>
+          Please choose different dates.
+        `;
         showErrorPopup(errorMessage);
-        
         submitBtn.disabled = false;
         submitBtn.innerHTML = 'Confirm Reservation';
-        return; 
+        return;
       }
+    }
 
     } catch (checkErr) {
       console.error('Eligibility check dropped:', checkErr.message);
