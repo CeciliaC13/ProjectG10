@@ -97,6 +97,7 @@
     }
     @keyframes pulseWarn { 0% { opacity: 0.6; } 100% { opacity: 1; } }
     tr.row-overdue { background-color: rgba(231,76,60,0.06) !important; }
+    tr.row-expiring { background-color: rgba(245,158,11,0.08) !important; }
     .flow-legend {
       display: flex; align-items: center; gap: 8px;
       flex-wrap: wrap; margin-bottom: 20px; font-size: 13px; color: #555;
@@ -186,6 +187,10 @@
           <span class="flow-arrow">→</span>
           <span class="flow-step" style="color:#166534;"><i class="bi bi-credit-card-fill"></i> Paid</span>
         </div>
+        <div class="flow-legend" style="margin-top: 10px;">
+          <span class="flow-step" style="background:#fef3c7; color:#d97706;"><i class="bi bi-exclamation-triangle-fill"></i> Expiring in 1-2 days</span>
+          <span class="flow-step" style="background:#fee2e2; color:#dc2626;"><i class="bi bi-hourglass-bottom"></i> Overdue (will auto-cancel)</span>
+        </div>
         <div class="row gy-3">
           <div class="col-md-6">
             <label class="form-label fw-semibold">Filter by Status</label>
@@ -226,6 +231,7 @@
                 <th>College</th>
                 <th>Room Type</th>
                 <th>Status</th>
+                <th>Approved Date</th>
                 <th>Actions</th>
               </tr>
             </thead>
@@ -293,61 +299,35 @@
 <script>
   // ═══════════════════════════════════════════════════════════════════════════
   // ROOM MAPPING
-  // ─────────────────────────────────────────────────────────────────────────
-  // Maps reservations.college   → College_Room.College_id
-  // Maps reservations.room_type → Room.Room_id
-  //
-  // HOW TO READ:
-  //   Left side  = exact string stored in reservations.college / room_type
-  //   Right side = exact ID stored in College_Room / Room tables
-  //
-  // If a booking's room type doesn't map here, the room count won't update
-  // and a warning toast will appear. Fix it by:
-  //   1. Standardising the room_type value when the student books, OR
-  //   2. Adding the variant string here pointing to the correct Room_id.
   // ═══════════════════════════════════════════════════════════════════════════
   const COLLEGE_ID_MAP = {
-    // Current canonical names used in reservations
     'KP':   'KP',
     'K9':   'K9',
     'K10':  'K10',
     'KLG':  'KLG',
-    // Legacy / alternate names (from old data or different booking forms)
     'Kolej 9':                    'K9',
     'Kolej 10':                   'K10',
     'Perdana Residence Block U7': 'KP',
     'KLG Campus Residence':       'KLG',
   };
 
-  // FIX: updated to match Room table exactly
-  // Room_id → Room_type in your DB:
-  //   ACR1 → AC Room
-  //   DR1  → Double/Twin Room
-  //   SR1  → Single Room
-  //   TR1  → Three Person Room
-  //
-  // Left side must match EXACTLY what is stored in reservations.room_type.
-  // If students are booking with names like "Twin Bed Fan Room", either
-  // fix the booking form to use "Double/Twin Room", or add the variant below.
   const ROOM_ID_MAP = {
-  // Canonical names
-  'AC Room':          'ACR1',
-  'Double/Twin Room': 'DR1',
-  'Single Room':      'SR1',
-  'Three Person Room':'TR1',
-  // Common variants
-  'Single Bed AC Room':    'ACR1',
-  'AC Single Room':        'ACR1',
-  'Double Room':           'DR1',
-  'Twin Room':             'DR1',
-  'Twin Bed Room':         'DR1',
-  'Twin Bed Fan Room':     'DR1',
-  'Double/Twin':           'DR1',
-  'Single':                'SR1',
-  'Three Person':          'TR1',
-  'Triple Room':           'TR1',
-  'Single Bed Fan Room':   'SR1',   // ← add this
-};
+    'AC Room':          'ACR1',
+    'Double/Twin Room': 'DR1',
+    'Single Room':      'SR1',
+    'Three Person Room':'TR1',
+    'Single Bed AC Room':    'ACR1',
+    'AC Single Room':        'ACR1',
+    'Double Room':           'DR1',
+    'Twin Room':             'DR1',
+    'Twin Bed Room':         'DR1',
+    'Twin Bed Fan Room':     'DR1',
+    'Double/Twin':           'DR1',
+    'Single':                'SR1',
+    'Three Person':          'TR1',
+    'Triple Room':           'TR1',
+    'Single Bed Fan Room':   'SR1',
+  };
 
   // ═══════════════════════════════════════════════════════════════════════════
   // STATE
@@ -357,13 +337,80 @@
   const isAdmin = currentUserRole === 'admin';
 
   // ═══════════════════════════════════════════════════════════════════════════
+  // AUTO-CANCEL OVERDUE PAYMENTS (3 days after approval)
+  // ═══════════════════════════════════════════════════════════════════════════
+  async function autoCancelOverduePayments() {
+    let cancelledCount = 0;
+    
+    for (const booking of bookings) {
+      // Only check bookings that are in "Pending Payment" status
+      if (booking.status !== 'Pending Payment') continue;
+      
+      // Get the approval date (when status changed to Approved)
+      const approvedDate = booking.approved_at;
+      
+      if (approvedDate) {
+        const approvedDateTime = new Date(approvedDate);
+        const currentDate = new Date();
+        const daysDiff = Math.floor((currentDate - approvedDateTime) / (1000 * 60 * 60 * 24));
+        
+        // If more than 3 days have passed since approval
+        if (daysDiff >= 3) {
+          cancelledCount++;
+          
+          // Cancel the overdue booking
+          try {
+            const { error } = await db
+              .from('reservations')
+              .update({ 
+                status: 'Cancelled',
+                cancellation_reason: 'Payment overdue - expired after 3 days',
+                cancelled_at: new Date().toISOString()
+              })
+              .eq('reservation_id', booking.bookingId);
+            
+            if (error) {
+              console.error(`Error cancelling overdue booking ${booking.bookingId}:`, error);
+            } else {
+              console.log(`Auto-cancelled overdue booking: ${booking.bookingId}`);
+              
+              // Restore room availability
+              await adjustRoomAvailability(booking.college, booking.roomType, 'restore');
+              
+              // Send notification to student
+              if (booking.studentId) {
+                await sendNotification(
+                  booking.studentId.trim(),
+                  'Booking Cancelled - Payment Overdue',
+                  `Your booking (${booking.bookingId}) has been automatically cancelled because payment was not completed within 3 days of approval. Please submit a new booking if you still need a room.`,
+                  booking.bookingId
+                );
+              }
+              
+              // Update local booking status
+              booking.status = 'Cancelled';
+            }
+          } catch (err) {
+            console.error(`Failed to cancel booking ${booking.bookingId}:`, err);
+          }
+        }
+      }
+    }
+    
+    if (cancelledCount > 0) {
+      showMessage(`${cancelledCount} overdue booking(s) have been automatically cancelled.`, 'error');
+      renderBookings(); // Refresh the table
+    }
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════════
   // FETCH
   // ═══════════════════════════════════════════════════════════════════════════
   async function fetchBookings() {
     document.getElementById('bookingTableBody').innerHTML =
       `<tr><td colspan="9" style="text-align:center;padding:30px;color:#999;">
          <i class="bi bi-hourglass-split"></i> Loading bookings...
-       </td></tr>`;
+        </td></tr>`;
     try {
       if (typeof db === 'undefined') throw new Error('Supabase client not found.');
       const { data, error } = await db
@@ -380,8 +427,12 @@
         roomType:    item.room_type,
         status:      item.status || 'Pending',
         createdAt:   item.created_at,
+        approved_at: item.approved_at || (item.status === 'Pending Payment' || item.status === 'Approved' ? item.updated_at : null),
       }));
 
+      // Run auto-cancel check after loading bookings
+      await autoCancelOverduePayments();
+      
       renderBookings();
       runPassiveNotifications();
     } catch (err) {
@@ -409,9 +460,16 @@
 
     const now = new Date();
     tbody.innerHTML = filtered.map((item, index) => {
-      const daysDiff  = Math.floor((now - new Date(item.createdAt)) / 86400000);
-      const isOverdue = item.status === 'Pending Payment' && daysDiff >= 3; // Highlight if pending payment for 1+ days (adjust as needed)
-
+      let daysSinceApproval = null;
+      let isOverdue = false;
+      let isExpiring = false;
+      
+      if (item.status === 'Pending Payment' && item.approved_at) {
+        const approvedDate = new Date(item.approved_at);
+        daysSinceApproval = Math.floor((now - approvedDate) / (1000 * 60 * 60 * 24));
+        isOverdue = daysSinceApproval >= 3;
+        isExpiring = daysSinceApproval === 1 || daysSinceApproval === 2;
+      }
       
       let actionButtons = '';
       if (item.status === 'Pending') {
@@ -431,7 +489,11 @@
             <i class="bi bi-x-lg"></i> Reject
           </button>`;
       } else if (item.status === 'Pending Payment') {
-        actionButtons = `<span class="locked-label"><i class="bi bi-clock"></i> Awaiting payment</span>`;
+        if (isOverdue) {
+          actionButtons = `<span class="locked-label" style="color:#dc2626;"><i class="bi bi-exclamation-octagon-fill"></i> Auto-cancelled</span>`;
+        } else {
+          actionButtons = `<span class="locked-label"><i class="bi bi-clock"></i> Awaiting payment</span>`;
+        }
       } else if (item.status === 'Paid') {
         actionButtons = `<span class="paid-label"><i class="bi bi-check-circle-fill"></i> Complete</span>`;
       } else {
@@ -444,12 +506,27 @@
            </button>`
         : '';
 
-      const warningHtml = isOverdue
-        ? `<div class="payment-warning"><i class="bi bi-exclamation-triangle-fill"></i> Overdue ${daysDiff}d</div>`
-        : '';
+      let warningHtml = '';
+      let rowClass = '';
+      if (isOverdue) {
+        warningHtml = `<div class="payment-warning"><i class="bi bi-exclamation-octagon-fill"></i> Overdue - Auto-cancelled</div>`;
+        rowClass = 'row-overdue';
+      } else if (isExpiring) {
+        const daysLeft = 3 - daysSinceApproval;
+        warningHtml = `<div class="payment-warning" style="color:#d97706;"><i class="bi bi-hourglass-bottom"></i> Expires in ${daysLeft} day(s)</div>`;
+        rowClass = 'row-expiring';
+      }
+
+      let approvedDateDisplay = '-';
+      if (item.approved_at) {
+        approvedDateDisplay = new Date(item.approved_at).toLocaleDateString('en-MY');
+        if (item.status === 'Pending Payment' && daysSinceApproval !== null) {
+          approvedDateDisplay += ` (${daysSinceApproval} days ago)`;
+        }
+      }
 
       return `
-        <tr class="${isOverdue ? 'row-overdue' : ''}">
+        <tr class="${rowClass}">
           <td>${index + 1}</td>
           <td><strong>${item.bookingId || 'N/A'}</strong></td>
           <td>${item.studentId   || 'N/A'}</td>
@@ -457,13 +534,14 @@
           <td>${item.college  || 'N/A'}</td>
           <td>${item.roomType || 'N/A'}</td>
           <td><span class="status-badge ${getStatusClass(item.status)}">${item.status}</span></td>
+          <td>${approvedDateDisplay}</td>
           <td>
             <div class="action-btn-group">
               ${actionButtons}
               ${deleteBtn}
             </div>
           </td>
-        </tr>`;
+        <tr>`;
     }).join('');
   }
 
@@ -492,15 +570,20 @@
     btn.innerHTML = '<i class="bi bi-hourglass-split"></i> Saving...';
 
     try {
+      const updateData = { status: newStatus };
+      
+      // Set approved_at when moving to Approved status
+      if (newStatus === 'Approved') {
+        updateData.approved_at = new Date().toISOString();
+      }
+      
       const { error: resError } = await db
         .from('reservations')
-        .update({ status: newStatus })
+        .update(updateData)
         .eq('reservation_id', bookingId);
       if (resError) throw resError;
 
-      // Room availability:
-      //   Pending  → Approved  : deduct 1
-      //   Approved → Rejected  : restore 1 (booking was approved but now cancelled)
+      // Room availability adjustments
       let direction = null;
       if (oldStatus === 'Pending'  && newStatus === 'Approved') direction = 'deduct';
       if (oldStatus === 'Approved' && newStatus === 'Rejected') direction = 'restore';
@@ -510,12 +593,15 @@
       }
 
       item.status = newStatus;
+      if (newStatus === 'Approved') {
+        item.approved_at = new Date().toISOString();
+      }
       renderBookings();
       showMessage(`Booking ${bookingId} updated to "${newStatus}".`);
 
       if (item.studentId) {
         const messages = {
-          'Approved':        `Your booking (${bookingId}) has been approved. Please wait for key handover before making payment.`,
+          'Approved':        `Your booking (${bookingId}) has been approved. Please collect your room key from the office. You have 3 days to make payment after key collection.`,
           'Pending Payment': `You have collected your room key for booking (${bookingId}). Please complete your payment within 3 days.`,
           'Rejected':        `Your booking (${bookingId}) has been declined. Please contact the housing office for more information.`,
         };
@@ -533,22 +619,13 @@
 
   // ═══════════════════════════════════════════════════════════════════════════
   // ADJUST ROOM AVAILABILITY
-  // ─────────────────────────────────────────────────────────────────────────
-  // Your schema:
-  //   College_Room       — junction table: College_id, Room_id (no count here)
-  //   College_Room_Type  — has the actual Room_available + Room_total columns
-  //
-  // Query: find the College_Room_Type row where College_id + Room_id match,
-  // then increment or decrement Room_available.
   // ═══════════════════════════════════════════════════════════════════════════
   async function adjustRoomAvailability(college, roomType, direction) {
     try {
-      // Resolve to DB IDs using the maps above
       const collegeId = COLLEGE_ID_MAP[college];
       const roomId    = ROOM_ID_MAP[roomType];
 
       if (!collegeId || !roomId) {
-        // Show a clear warning but don't throw — the reservation update already succeeded
         console.warn('[Room] No mapping for:', { college, roomType });
         showRoomToast(
           `⚠ No mapping for "${college} / ${roomType}". ` +
@@ -558,18 +635,16 @@
         return;
       }
 
-      // FIX: query College_Room_Type (not College_Room) — that's where Room_available lives
       const { data: rows, error: fetchErr } = await db
-      .from('College_Room')        // ✅
-      .select('id, Room_available, Room_total')
-      .eq('College_id', collegeId)
-      .eq('Room_id', roomId);
-
+        .from('College_Room')
+        .select('id, Room_available, Room_total')
+        .eq('College_id', collegeId)
+        .eq('Room_id', roomId);
 
       if (fetchErr) throw fetchErr;
 
       if (!rows || rows.length === 0) {
-        console.warn('[Room] No College_Room_Type row for:', { collegeId, roomId });
+        console.warn('[Room] No College_Room row for:', { collegeId, roomId });
         showRoomToast(
           `⚠ No availability record found for ${collegeId} / ${roomId}. ` +
           `Please add it in the Room Availability page.`,
@@ -589,12 +664,11 @@
         }
         updated = current - 1;
       } else {
-        // restore — cap at Room_total so we never exceed original capacity
         updated = Math.min(row.Room_total ?? current, current + 1);
       }
 
       const { error: updateErr } = await db
-        .from('College_Room')        // ✅
+        .from('College_Room')
         .update({ Room_available: updated })
         .eq('id', row.id);
 
@@ -664,14 +738,16 @@
     const now = new Date();
     for (const item of bookings) {
       if (!item.studentId) continue;
-      const days = Math.floor((now - new Date(item.createdAt)) / 86400000);
-      if (item.status === 'Pending Payment' &&  days >= 3) {
-        await sendNotification(
-          item.studentId.trim(),
-          'Overdue Payment Alert',
-          `Your booking (${item.bookingId}) has been awaiting payment for ${days} days. The booking has been cancelled.`,
-          item.bookingId
-        );
+      if (item.status === 'Pending Payment' && item.approved_at) {
+        const days = Math.floor((now - new Date(item.approved_at)) / (1000 * 60 * 60 * 24));
+        if (days === 2) {
+          await sendNotification(
+            item.studentId.trim(),
+            'Payment Reminder',
+            `Your booking (${item.bookingId}) requires payment within 1 day. Please complete your payment to avoid cancellation.`,
+            item.bookingId
+          );
+        }
       }
     }
   }
@@ -754,6 +830,13 @@
       .forEach(k => localStorage.removeItem(k));
     window.location.href = 'admin_staff_login.html';
   });
+
+  // Set interval to check for overdue payments every 5 minutes
+  setInterval(async () => {
+    if (bookings.length > 0) {
+      await autoCancelOverduePayments();
+    }
+  }, 300000); // 5 minutes
 
   loadAdminStaffHeader();
   fetchBookings();
