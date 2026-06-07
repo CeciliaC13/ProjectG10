@@ -146,7 +146,7 @@
           </div>
           <ul class="dropdown-menu-list">
             <li><a href="userprofile_student.html"><i class="bi bi-person-circle"></i> Profile</a></li>
-            <li><a href="../logout.html" id="logoutBtn"><i class="bi bi-box-arrow-right"></i> Logout</a></li>
+            <li><a href="logout.html" id="logoutBtn"><i class="bi bi-box-arrow-right"></i> Logout</a></li>
           </ul>
         </div>
       </div>
@@ -155,6 +155,30 @@
 </header>
 
 <main class="main">
+  <!-- Broadcast Popup Modal -->
+<div id="broadcastPopupModal" style="display:none; position:fixed; inset:0; z-index:9999; background:rgba(0,0,0,0.45); align-items:center; justify-content:center;">
+  <div style="background:#fff; border-radius:20px; max-width:520px; width:90%; max-height:80vh; overflow:hidden; box-shadow:0 20px 60px rgba(0,0,0,0.2); display:flex; flex-direction:column;">
+    
+    <div style="background:linear-gradient(135deg,#6b092a,#8b0e35); padding:24px 28px; color:white; flex-shrink:0;">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <div>
+          <div style="font-size:13px; opacity:0.8; margin-bottom:4px;">📢 New Announcements</div>
+          <div style="font-size:20px; font-weight:700;">Notice Board</div>
+        </div>
+        <button onclick="closeBroadcastPopup()" style="background:rgba(255,255,255,0.2); border:none; color:white; border-radius:50%; width:36px; height:36px; font-size:18px; cursor:pointer; display:flex; align-items:center; justify-content:center;">&times;</button>
+      </div>
+    </div>
+
+    <div id="broadcastPopupList" style="padding:20px 28px; overflow-y:auto; flex:1;"></div>
+
+    <div style="padding:16px 28px; border-top:1px solid #f1f5f9; flex-shrink:0; text-align:right;">
+      <button onclick="closeBroadcastPopup()" style="background:linear-gradient(135deg,#6b092a,#8b0e35); color:white; border:none; border-radius:10px; padding:10px 24px; font-weight:600; cursor:pointer; font-size:14px;">
+        Got it!
+      </button>
+    </div>
+
+  </div>
+</div>
 
   <section id="college" class="college section">
     <div class="college-container" data-aos="fade">
@@ -490,6 +514,8 @@
           if (avatarElem) avatarElem.textContent = initial;
           if (nameElem) nameElem.textContent = data.name;
           if (emailElem) emailElem.textContent = data.email;
+          const roleElem = document.getElementById('dropdownUserRole');
+          if (roleElem) roleElem.textContent = 'Student';
           
           // Set gender and filter colleges
           currentUserGender = data.gender;
@@ -506,11 +532,59 @@
         renderCollegeCards();
       }
     }
+   
+    async function checkNewBroadcasts() {
+      if (typeof db === 'undefined' || !db) return;
+
+      // Get when student last saw broadcasts
+      const lastSeen = localStorage.getItem('broadcastLastSeen') || '1970-01-01T00:00:00Z';
+
+      try {
+        const { data, error } = await db
+          .from('broadcasts')
+          .select('*')
+          .gt('created_at', lastSeen)           // only newer than last visit
+          .order('created_at', { ascending: false });
+
+        if (error) throw error;
+        if (!data || data.length === 0) return; // nothing new, skip popup
+
+        // Render into popup
+        const list = document.getElementById('broadcastPopupList');
+        list.innerHTML = data.map(item => `
+          <div style="padding:16px 0; border-bottom:1px solid #f1f5f9;">
+            <div style="font-weight:700; color:#1e293b; font-size:14px; margin-bottom:6px;">
+              📢 ${item.title}
+            </div>
+            <div style="color:#475569; font-size:13px; line-height:1.6; white-space:pre-line;">
+              ${item.message || ''}
+            </div>
+            <div style="font-size:11px; color:#94a3b8; margin-top:8px;">
+              <i class="bi bi-clock"></i>
+              ${new Date(item.created_at).toLocaleDateString('en-MY', { month:'short', day:'numeric', hour:'2-digit', minute:'2-digit' })}
+            </div>
+          </div>
+        `).join('');
+
+        // Show modal
+        const modal = document.getElementById('broadcastPopupModal');
+        modal.style.display = 'flex';
+
+      } catch (err) {
+        console.error('Broadcast popup check failed:', err.message);
+      }
+    }
+
 
     // Initialize renders
     renderPictures();
     loadUserAndApplyFilter();
+     checkNewBroadcasts();
   });
+  function closeBroadcastPopup() {
+  document.getElementById('broadcastPopupModal').style.display = 'none';
+  localStorage.setItem('broadcastLastSeen', new Date().toISOString());
+}
 </script>
 
 </body>
