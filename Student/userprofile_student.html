@@ -18,11 +18,61 @@
 
   <style>
     .modal-header .modal-title {
-    color: white !important;
+      color: white !important;
     }
 
     .modal-header .modal-title i {
-    color: white !important;
+      color: white !important;
+    }
+
+    /* Password wrapper with eye icon for modal */
+    .password-wrapper-modal {
+      position: relative;
+      width: 100%;
+    }
+    
+    .password-wrapper-modal input {
+      width: 100%;
+      padding: 0.6rem 40px 0.6rem 1rem;
+      border: 1px solid #dee2e6;
+      border-radius: 10px;
+      font-family: 'Roboto', sans-serif;
+    }
+    
+    .password-wrapper-modal input:focus {
+      outline: none;
+      border-color: #6b092a;
+      box-shadow: 0 0 0 0.2rem rgba(107, 9, 42, 0.1);
+    }
+    
+    .toggle-password-modal {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      cursor: pointer;
+      color: #aaa;
+      font-size: 16px;
+      transition: color 0.3s ease;
+      z-index: 2;
+    }
+    
+    .toggle-password-modal:hover {
+      color: #6b092a;
+    }
+    
+    /* Password hint styling */
+    .password-hint-modal {
+      font-size: 11px;
+      color: #888;
+      margin-top: 5px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    
+    .password-hint-modal i {
+      font-size: 12px;
     }
   </style>
 </head>
@@ -206,6 +256,7 @@
 <a href="#" id="scroll-top" class="scroll-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
 <div id="preloader"></div>
 
+<!-- Edit Profile Modal -->
 <div class="modal fade" id="editProfileModal" tabindex="-1" aria-labelledby="editProfileModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
@@ -248,6 +299,7 @@
   </div>
 </div>
 
+<!-- Change Password Modal with Eye Icons & Password Hint -->
 <div class="modal fade" id="changePasswordModal" tabindex="-1" aria-labelledby="changePasswordModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
@@ -259,15 +311,28 @@
         <form id="changePasswordForm">
           <div class="mb-3">
             <label for="currentPassword" class="form-label">Current Password</label>
-            <input type="password" class="form-control" id="currentPassword" required>
+            <div class="password-wrapper-modal">
+              <input type="password" class="form-control" id="currentPassword" required>
+              <i class="bi bi-eye-slash toggle-password-modal" id="toggleCurrentPassword"></i>
+            </div>
           </div>
           <div class="mb-3">
             <label for="newPassword" class="form-label">New Password</label>
-            <input type="password" class="form-control" id="newPassword" required>
+            <div class="password-wrapper-modal">
+              <input type="password" class="form-control" id="newPassword" required>
+              <i class="bi bi-eye-slash toggle-password-modal" id="toggleNewPassword"></i>
+            </div>
+            <div class="password-hint-modal">
+              <i class="bi bi-info-circle"></i>
+              <span>Min. 8 characters with letters, numbers & symbols (e.g. Adam@1234)</span>
+            </div>
           </div>
           <div class="mb-3">
             <label for="confirmPassword" class="form-label">Confirm New Password</label>
-            <input type="password" class="form-control" id="confirmPassword" required>
+            <div class="password-wrapper-modal">
+              <input type="password" class="form-control" id="confirmPassword" required>
+              <i class="bi bi-eye-slash toggle-password-modal" id="toggleConfirmPassword"></i>
+            </div>
           </div>
         </form>
       </div>
@@ -293,14 +358,29 @@
 <script>
   console.log("Student Profile Page Loaded");
 
+  // Toggle password visibility functions
+  function setupPasswordToggle(toggleId, inputId) {
+    const toggleBtn = document.getElementById(toggleId);
+    const passwordInput = document.getElementById(inputId);
+    
+    if (toggleBtn && passwordInput) {
+      toggleBtn.addEventListener('click', function() {
+        const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+        passwordInput.setAttribute('type', type);
+        this.classList.toggle('bi-eye');
+        this.classList.toggle('bi-eye-slash');
+      });
+    }
+  }
+
   function updateGenderDisplay(gender) {
     const genderIcon = document.getElementById('genderIcon');
     const genderText = document.getElementById('genderText');
     
-    if (gender === 'Male'||gender === 'male') {
+    if (gender === 'Male' || gender === 'male') {
       genderIcon.innerHTML = '<i class="bi bi-gender-male" style="color: #2c5a7a;"></i>';
       genderText.textContent = 'Male';
-    } else if (gender === 'Female'||'female') {
+    } else if (gender === 'Female' || gender === 'female') {
       genderIcon.innerHTML = '<i class="bi bi-gender-female" style="color: #e74c3c;"></i>';
       genderText.textContent = 'Female';
     } else {
@@ -371,7 +451,6 @@
     document.getElementById('editEmail').value = data.email;
     document.getElementById('editPhone').value = data.telephone || '';
     document.getElementById('editMatric').value = data.student_id;
-    document.getElementById('editGender').value = gender === 'Male' ? 'Male' : (gender === 'Female' ? 'Female' : 'Not specified');
     document.getElementById('editGender').value = gender === 'Male' || gender === 'male' ? '👨 Male' : (gender === 'Female' || gender === 'female' ? '👩 Female' : 'Not specified');
   }
 
@@ -431,7 +510,7 @@
 
     const passwordRegex = /^(?=.*[a-zA-Z])(?=.*[0-9])(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]).{8,}$/;
     if (!passwordRegex.test(newPassword)) {
-      alert('Password must be at least 8 characters with letters, numbers & symbols.');
+      alert('Password must be at least 8 characters with letters, numbers & symbols (e.g. Adam@1234).');
       return;
     }
 
@@ -529,6 +608,13 @@
   document.addEventListener('DOMContentLoaded', function() {
     initDropdowns();
     loadStudentProfile();
+    
+    // Setup password toggles after modal is loaded
+    setTimeout(() => {
+      setupPasswordToggle('toggleCurrentPassword', 'currentPassword');
+      setupPasswordToggle('toggleNewPassword', 'newPassword');
+      setupPasswordToggle('toggleConfirmPassword', 'confirmPassword');
+    }, 100);
   });
 </script>
   
