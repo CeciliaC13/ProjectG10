@@ -23,12 +23,42 @@
 
     body {
       font-family: 'Roboto', sans-serif;
-      background:#5c001f;
       min-height: 100vh;
       display: flex;
       align-items: center;
       justify-content: center;
       padding: 20px;
+      position: relative;
+    }
+
+    /* Background Image with Blur */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: url('../img/utmspace.webp');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      filter: blur(8px);
+      -webkit-filter: blur(8px);
+      transform: scale(1.05);
+      z-index: -2;
+    }
+
+    /* Dark Overlay for better readability */
+    body::after {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: -1;
     }
 
     .forgot-container {
@@ -53,7 +83,7 @@
     }
 
     .forgot-header {
-      background: linear-gradient(135deg, #1a3c5e 0%, #2c5a7a 100%);
+      background: #6b092a;
       padding: 40px 30px;
       text-align: center;
     }
@@ -115,7 +145,7 @@
     }
 
     .step.active .step-number {
-      background: #2c5a7a;
+      background: #6b092a;
       color: white;
     }
 
@@ -130,7 +160,7 @@
     }
 
     .step.active .step-label {
-      color: #2c5a7a;
+      color: #6b092a;
       font-weight: 600;
     }
 
@@ -250,7 +280,7 @@
 
     .reset-btn {
       width: 100%;
-      background: linear-gradient(135deg, #1a3c5e 0%, #2c5a7a 100%);
+      background: #6b092a;
       color: white;
       border: none;
       padding: 14px;
@@ -286,7 +316,7 @@
     }
 
     .back-link a {
-      color: #2c5a7a;
+      color: #6b092a;
       text-decoration: none;
       font-size: 14px;
       font-weight: 500;
@@ -297,7 +327,7 @@
     }
 
     .back-link a:hover {
-      color:  #900021;
+      color:  #2c5a7a;
     }
 
     .alert {
