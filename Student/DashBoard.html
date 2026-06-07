@@ -159,7 +159,6 @@
   <section id="college" class="college section">
     <div class="college-container" data-aos="fade">
       <div class="college-image-wrapper">
-        <!-- Fixed image path -->
         <img src="../img/utmspace.webp" alt="UTMSPACE Image">
         <div class="college-overlay"></div>
         <div class="college-content">
@@ -288,7 +287,8 @@
       });
     }
 
-    const colleges = [
+    // All colleges data
+    const allColleges = [
       {
         id: 1,
         name: 'Perdana Residence Block U7',
@@ -296,7 +296,8 @@
         author: 'Scholar\'s Inn UTM',
         image: '../img/U7.webp',
         link: 'kp_student.html',
-        available: true
+        available: true,
+        genderAllowed: 'female'  // Female only
       },
       {
         id: 2,
@@ -305,7 +306,8 @@
         author: 'UTM Johor Bahru',
         image: '../img/k10.jpg',
         link: 'kolej_student.html',
-        available: true
+        available: true,
+        genderAllowed: 'all'  // All genders allowed (Kolej 9 female, Kolej 10 male)
       },
       {
         id: 3,
@@ -314,7 +316,8 @@
         author: 'UTM Johor Bahru',
         image: '../img/klg.webp',
         link: 'klg_student.html',
-        available: false
+        available: false,
+        genderAllowed: 'female'  // Female only (Block A)
       }
     ];
 
@@ -325,12 +328,71 @@
     ];
 
     let showAvailableOnly = false;
+    let currentUserGender = null;
+    let colleges = [...allColleges];
+
+    // Function to get student gender from database
+    async function getStudentGender() {
+      const email = localStorage.getItem('studentEmail');
+      if (!email) {
+        console.log('No student email found');
+        return null;
+      }
+
+      try {
+        if (typeof db !== 'undefined' && db) {
+          const { data, error } = await db
+            .from('Student')
+            .select('gender')
+            .eq('email', email)
+            .single();
+          
+          if (!error && data) {
+            return data.gender;
+          } else {
+            console.log('Error fetching gender:', error);
+            return null;
+          }
+        }
+      } catch (err) {
+        console.error('Error fetching student gender:', err);
+      }
+      return null;
+    }
+
+    // Function to filter colleges based on gender
+    function filterCollegesByGender(gender) {
+      if (gender === 'Male') {
+        // Male students can only see Kolej 9 & 10
+        colleges = allColleges.filter(college => 
+          college.genderAllowed === 'all'
+        );
+      } else if (gender === 'Female') {
+        // Female students can see all colleges (all are female-allowed or co-ed)
+        colleges = [...allColleges];
+      } else {
+        // If gender unknown, show only co-ed colleges
+        colleges = allColleges.filter(college => 
+          college.genderAllowed === 'all'
+        );
+      }
+    }
 
     function renderCollegeCards() {
       const container = document.getElementById('collegeCardsContainer');
       if (!container) return;
       
-      const filteredColleges = showAvailableOnly ? colleges.filter(c => c.available) : colleges;
+      let filteredColleges = showAvailableOnly ? colleges.filter(c => c.available) : colleges;
+      
+      if (filteredColleges.length === 0) {
+        container.innerHTML = `
+          <div class="col-12 text-center py-5">
+            <i class="bi bi-building-slash" style="font-size: 48px; color: #ccc;"></i>
+            <p class="mt-3 text-muted">No colleges available at the moment.</p>
+          </div>
+        `;
+        return;
+      }
       
       container.innerHTML = filteredColleges.map(college => `
         <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="200">
@@ -393,10 +455,7 @@
       });
     }
 
-    // Initialize renders
-    renderCollegeCards();
-    renderPictures();
-
+    // Initialize user dropdown
     const userProfile = document.querySelector('.user-profile');
     const userDropdown = document.getElementById('userDropdown');
     if (userProfile && userDropdown) {
@@ -412,20 +471,45 @@
       });
     }
 
-    try {
-      const userData = localStorage.getItem('user') || sessionStorage.getItem('user');
-      if (userData) {
-        const user = JSON.parse(userData);
-        const nameElem = document.getElementById('dropdownUserName');
-        const emailElem = document.getElementById('dropdownUserEmail');
-        const avatarElem = document.getElementById('avatarInitial');
-        if (nameElem) nameElem.textContent = user.name || 'Student User';
-        if (emailElem) emailElem.textContent = user.email || 'student@utmspace.edu.my';
-        if (avatarElem) avatarElem.textContent = (user.name ? user.name.charAt(0).toUpperCase() : 'S');
+    // Load user profile and apply gender-based filtering
+    async function loadUserAndApplyFilter() {
+      const email = localStorage.getItem('studentEmail');
+      if (email && typeof db !== 'undefined' && db) {
+        const { data, error } = await db
+          .from('Student')
+          .select('name, email, gender')
+          .eq('email', email)
+          .single();
+        
+        if (!error && data) {
+          const initial = data.name ? data.name.charAt(0).toUpperCase() : 'S';
+          const avatarElem = document.getElementById('avatarInitial');
+          const nameElem = document.getElementById('dropdownUserName');
+          const emailElem = document.getElementById('dropdownUserEmail');
+          
+          if (avatarElem) avatarElem.textContent = initial;
+          if (nameElem) nameElem.textContent = data.name;
+          if (emailElem) emailElem.textContent = data.email;
+          
+          // Set gender and filter colleges
+          currentUserGender = data.gender;
+          filterCollegesByGender(currentUserGender);
+          renderCollegeCards();
+        } else {
+          // Default: show only co-ed colleges
+          filterCollegesByGender(null);
+          renderCollegeCards();
+        }
+      } else {
+        // Default: show only co-ed colleges
+        filterCollegesByGender(null);
+        renderCollegeCards();
       }
-    } catch(e) {
-      console.log('No user data found');
     }
+
+    // Initialize renders
+    renderPictures();
+    loadUserAndApplyFilter();
   });
 </script>
 
