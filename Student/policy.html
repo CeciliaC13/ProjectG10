@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <title>Privacy Policy - UTMSPACE College Booking</title>
+
+  <link href="../img/favicon.png" rel="icon">
+  <link href="../img/apple-touch-icon.png" rel="apple-touch-icon">
+
+  <link href="https://fonts.googleapis.com" rel="preconnect">
+  <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&family=Montserrat:wght@400;500;600;700;800;900&family=Raleway:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <link href="../vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+  <link href="../vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
+  <link href="../vendor/aos/aos.css" rel="stylesheet">
+  <link href="../vendor/swiper/swiper-bundle.min.css" rel="stylesheet">
+  <link href="../main.css" rel="stylesheet">
+
+  <style>
+    .policy-page {
+      padding: 60px 0;
+      background: #f8f9fa;
+      min-height: 100vh;
+    }
+
+    .policy-header-box {
+      background: linear-gradient(135deg, #6b092a, #8b0e35);
+      color: white;
+      border-radius: 22px;
+      padding: 35px;
+      margin-bottom: 35px;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.12);
+    }
+
+    .policy-header-box h1 {
+      color: white;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+
+    .policy-header-box p {
+      margin: 0;
+      color: rgba(255,255,255,0.85);
+    }
+
+    .back-link-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: white;
+      background: rgba(255,255,255,0.18);
+      padding: 8px 16px;
+      border-radius: 30px;
+      text-decoration: none;
+      font-weight: 600;
+      margin-bottom: 18px;
+    }
+
+    .back-link-btn:hover {
+      color: white;
+      background: rgba(255,255,255,0.28);
+    }
+
+    .policy-content {
+      background: white;
+      border-radius: 20px;
+      padding: 40px;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+    }
+
+    .policy-section {
+      margin-bottom: 30px;
+    }
+
+    .policy-section h3 {
+      font-size: 20px;
+      font-weight: 700;
+      color: #1a3c5e;
+      margin-bottom: 15px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid #e0e0e0;
+    }
+
+    .policy-section p {
+      font-size: 14px;
+      line-height: 1.6;
+      color: #555;
+      margin-bottom: 12px;
+    }
+
+    .policy-section ul {
+      margin-left: 20px;
+    }
+
+    .policy-section li {
+      font-size: 14px;
+      line-height: 1.6;
+      color: #555;
+      margin-bottom: 8px;
+    }
+
+    .last-updated {
+      margin-top: 30px;
+      padding-top: 20px;
+      border-top: 1px solid #e0e0e0;
+      font-size: 12px;
+      color: #999;
+      text-align: center;
+    }
+
+    @media (max-width: 768px) {
+      .policy-content {
+        padding: 25px;
+      }
+      .policy-header-box {
+        padding: 25px;
+      }
+    }
+  </style>
+</head>
+
+<body class="index-page">
+
+<header id="header" class="logo d-flex align-items-center" style="margin-right: auto;">
+  <div class="container position-relative d-flex align-items-center">
+
+    <a href="dashboard.html" class="logo d-flex align-items-center">
+      <img src="../img/spacelogo.png" alt="UTM Space Logo" style="height: 50px; width: auto; max-height:60px;">
+    </a>
+
+    <nav id="navmenu" class="navmenu">
+      <ul>
+        <li><a href="dashboard.html">Home</a></li>
+        <li><a href="booking_history.html">History</a></li>
+        <li><a href="applianceform_student.html">Appliance Form</a></li>
+        <li><a href="reportform_student.html">Report</a></li>
+        <li><a href="contact.html">Contact</a></li>
+      </ul>
+      <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>
+    </nav>
+
+    <div class="header-actions">
+
+      <div class="header-social-links">
+        <a href="https://www.facebook.com/utmspace/" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><i class="bi bi-facebook"></i></a>
+        <a href="https://www.instagram.com/spaceutm_official/?hl=en" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><i class="bi bi-instagram"></i></a>
+      </div>
+
+      <div class="notification-wrapper">
+        <button class="notification-btn" id="notificationBtn" title="Notifications">
+          <i class="bi bi-bell-fill"></i>
+        </button>
+        <div class="notification-dropdown" id="notificationDropdown">
+          <div class="notification-dropdown-header">
+            <h4><i class="bi bi-bell-fill"></i> Notifications</h4>
+            <a href="#" class="mark-all-link" id="markAllNotifications">Mark all as read</a>
+          </div>
+          <div class="notification-list" id="notificationList"></div>
+        </div>
+      </div>
+
+      <div class="user-profile">
+        <div class="user-avatar">
+          <div class="avatar-placeholder" id="avatarInitial">S</div>
+        </div>
+
+        <div class="user-dropdown">
+          <div class="dropdown-header">
+            <div class="user-info">
+              <div class="user-name" id="dropdownUserName">Student name</div>
+              <div class="user-role" id="dropdownUserRole">Student</div>
+              <div class="user-email" id="dropdownUserEmail">Their email@gmail.com</div>
+            </div>
+          </div>
+
+          <ul class="dropdown-menu-list">
+            <li><a href="userprofile_student.html"><i class="bi bi-person-circle"></i> Profile</a></li>
+            <li><a href="index.html" id="logoutBtn"><i class="bi bi-box-arrow-right"></i> Logout</a></li>
+          </ul>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+</header>
+
+<main class="policy-page">
+  <div class="container">
+
+    <div class="policy-header-box">
+      <a href="dashboard.html" class="back-link-btn">
+        <i class="bi bi-arrow-left"></i> Back to Dashboard
+      </a>
+      <h1><i class="bi bi-shield-lock"></i> Privacy Policy</h1>
+      <p>How we collect, use, and protect your information</p>
+    </div>
+
+    <div class="policy-content">
+      
+      <div class="policy-section">
+        <h3>1. Information We Collect</h3>
+        <p>When you register an account with UTMSPACE College Booking System, we collect the following information:</p>
+        <ul>
+          <li>Full Name</li>
+          <li>Student ID / Matric Number</li>
+          <li>Email Address (UTM email)</li>
+          <li>Phone Number</li>
+          <li>Gender</li>
+          <li>Booking and payment history</li>
+        </ul>
+      </div>
+
+      <div class="policy-section">
+        <h3>2. How We Use Your Information</h3>
+        <p>We use the information we collect to:</p>
+        <ul>
+          <li>Process your room booking requests</li>
+          <li>Communicate with you about your bookings and status updates</li>
+          <li>Verify your identity as a UTM student</li>
+          <li>Improve our services and user experience</li>
+          <li>Send important notifications regarding your reservations</li>
+        </ul>
+      </div>
+
+      <div class="policy-section">
+        <h3>3. Data Protection</h3>
+        <p>We take the security of your personal information seriously. We implement appropriate technical and organizational measures to protect your data from unauthorized access, alteration, disclosure, or destruction. Your password is encrypted and stored securely.</p>
+      </div>
+
+      <div class="policy-section">
+        <h3>4. Information Sharing</h3>
+        <p>We do not sell, trade, or rent your personal information to third parties. Your information may be shared only with:</p>
+        <ul>
+          <li>College administration for verification purposes</li>
+          <li>Payment processing partners (ToyyibPay) to complete transactions</li>
+          <li>Legal authorities when required by law</li>
+        </ul>
+      </div>
+
+      <div class="policy-section">
+        <h3>5. Cookies and Tracking</h3>
+        <p>Our website uses cookies to enhance your browsing experience, remember your login session, and analyze site traffic. You can disable cookies through your browser settings, but this may affect the functionality of certain features.</p>
+      </div>
+
+      <div class="policy-section">
+        <h3>6. Your Rights</h3>
+        <p>You have the right to:</p>
+        <ul>
+          <li>Access the personal information we hold about you</li>
+          <li>Request correction of inaccurate information</li>
+          <li>Request deletion of your account (subject to pending obligations)</li>
+          <li>Withdraw consent for data processing</li>
+        </ul>
+      </div>
+
+      <div class="policy-section">
+        <h3>7. Changes to This Policy</h3>
+        <p>We may update this Privacy Policy from time to time. Any changes will be posted on this page with an updated revision date. We encourage you to review this policy periodically.</p>
+      </div>
+
+      <div class="last-updated">
+        <i class="bi bi-calendar3"></i> Last Updated: June 2026
+      </div>
+
+    </div>
+
+  </div>
+</main>
+
+<footer id="footer" class="footer position-relative light-background">
+  <div class="container">
+    <div class="row gy-5">
+      <div class="col-lg-4">
+        <div class="footer-brand">
+          <a href="dashboard.html" class="logo d-flex align-items-center mb-3">
+            <span class="sitename">UTM SPACE</span>
+          </a>
+          <p class="tagline">Transforming the way colleges book, manage, and connect — with modern simplicity.</p>
+          <div class="social-links mt-4">
+            <a href="https://www.facebook.com/utmspace/" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><i class="bi bi-facebook"></i></a>
+            <a href="https://www.instagram.com/spaceutm_official/?hl=en" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><i class="bi bi-instagram"></i></a>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-6">
+        <div class="footer-links-grid">
+          <div class="col-6 col-md-4">
+            <h5>Support</h5>
+            <ul class="list-unstyled">
+              <li><a href="#">Contact Us: +607-531 8000</a></li>
+              <li><a href="privacy.html">Privacy Policy</a></li>
+              <li><a href="terms.html">Terms of Service</a></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <div class="container">
+      <div class="row">
+        <div class="col-12">
+          <div class="footer-bottom-content">
+            <p class="mb-0">© <strong>UTMSPACE</strong>. All rights reserved.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<a href="#" id="scroll-top" class="scroll-top d-flex align-items-center justify-content-center">
+  <i class="bi bi-arrow-up-short"></i>
+</a>
+
+<div id="preloader"></div>
+
+<script src="../vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="../vendor/php-email-form/validate.js"></script>
+<script src="../vendor/aos/aos.js"></script>
+<script src="../vendor/swiper/swiper-bundle.min.js"></script>
+<script src="../vendor/purecounter/purecounter_vanilla.js"></script>
+
+<script src="../main.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../supabase.js"></script>
+
+<script>
+  async function loadHeaderProfile() {
+    const email = localStorage.getItem('studentEmail');
+    if (!email) return;
+
+    if (typeof db !== 'undefined' && db) {
+      const { data, error } = await db
+        .from('Student')
+        .select('name, email')
+        .eq('email', email)
+        .single();
+
+      if (!error && data) {
+        const initial = data.name ? data.name.charAt(0).toUpperCase() : 'S';
+        document.getElementById('avatarInitial').textContent = initial;
+        document.getElementById('dropdownUserName').textContent = data.name;
+        document.getElementById('dropdownUserEmail').textContent = data.email;
+      }
+    }
+  }
+
+  loadHeaderProfile();
+</script>
+
+</body>
+</html>
