@@ -332,18 +332,21 @@
 
     .toast-message {
       position: fixed;
-      bottom: 30px;
+      top: 90px;        /* below the header */
       left: 50%;
       transform: translateX(-50%);
       background: #1e293b;
       color: white;
-      padding: 10px 24px;
+      padding: 12px 28px;
       border-radius: 40px;
-      font-size: 0.85rem;
-      z-index: 1100;
+      font-size: 0.9rem;
+      font-weight: 600;
+      z-index: 9999;
       opacity: 0;
-      transition: 0.2s;
+      transition: opacity 0.3s ease;
       pointer-events: none;
+      white-space: nowrap;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.2);
     }
 
     .toast-message.show {
@@ -396,6 +399,13 @@
       }
       .stat-card {
         min-width: 100%;
+      }
+      #role:disabled {
+        appearance: none;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        background: #f8fafc;
+        cursor: default;
       }
     }
   </style>
@@ -724,9 +734,16 @@ async function loadData() {
 async function deleteMember(id, source) {
   const label = source === 'Admin' ? 'Admin' : 'Staff';
   const col   = source === 'Admin' ? 'admin_id' : 'staff_id';
- 
+
+  // Block deleting yourself
+  const currentId = localStorage.getItem('staffAdminId');
+  if (id === currentId) {
+    showToast('⚠️ You cannot delete your own account.', true);
+    return;
+  }
+
   if (!confirm(`⚠️ Remove ${label} "${id}" from the system? This is permanent.`)) return;
- 
+
   const { error } = await _supabase.from(source).delete().eq(col, id);
   if (error) { showToast(`Delete failed: ${error.message}`, true); return; }
   showToast(`✅ ${label} ${id} removed.`);

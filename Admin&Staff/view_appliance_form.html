@@ -289,7 +289,6 @@
               <th>Appliance</th>
               <th>Quantity</th>
               <th>Register Date</th>
-              <th>Status</th>
               <th>Action</th>
             </tr>
           </thead>
@@ -397,10 +396,9 @@
       if (error) throw error;
 
       applianceForms = data.map(item => ({
-        id: item.appliance_id || item.id || item.student_id, 
-        
-        studentId: item.student_id || item.matric_no || 'N/A',
-        studentName: item.student_name || item.full_name || 'Unknown Student',
+        id: item.declaration_id,
+        studentId: item.student_id || 'N/A',
+        studentName: item.student_name || 'Unknown',
         college: item.college || 'N/A',
         roomNo: item.room_number || 'N/A',
         appliance: item.appliance_name || item.appliances || 'N/A',
@@ -453,20 +451,9 @@
           <td>${item.quantity}</td>
           <td>${item.registerDate}</td>
           <td>
-            <span class="status-badge ${getStatusClass(item.status)}">
-              ${item.status}
-            </span>
-          </td>
-          <td>
-            <div class="d-flex gap-1">
+            <div class="d-flex gap-1 justify-content-center">
               <button class="btn btn-sm btn-outline-primary px-2" style="font-size:12px; border-radius:6px;" onclick="viewForm(${realIndex})">
                 View
-              </button>
-              <button class="btn btn-sm btn-success px-2" style="font-size:12px; border-radius:6px;" onclick="updateStatus(${realIndex}, 'Approved')">
-                Approve
-              </button>
-              <button class="btn btn-sm btn-danger px-2" style="font-size:12px; border-radius:6px;" onclick="updateStatus(${realIndex}, 'Rejected')">
-                Reject
               </button>
               <button class="btn btn-sm btn-outline-secondary px-1" style="font-size:12px; border-radius:6px;" onclick="deleteForm(${realIndex})">
                 <i class="bi bi-trash"></i>
@@ -490,7 +477,6 @@
       <p><strong>Registered Appliance:</strong> ${item.appliance}</p>
       <p><strong>Quantity Units:</strong> ${item.quantity}</p>
       <p><strong>Application Date:</strong> ${item.registerDate}</p>
-      <p><strong>Current Status:</strong> <span class="status-badge ${getStatusClass(item.status)}">${item.status}</span></p>
     `;
 
     new bootstrap.Modal(document.getElementById('applianceModal')).show();
@@ -503,7 +489,7 @@
       const { error } = await db
         .from('appliance')
         .update({ status: newStatus })
-        .eq('appliance_id', item.id) // Change the left side to match your actual column title in Supabase!
+        .eq('declaration_id', item.id) // Change the left side to match your actual column title in Supabase!
       if (error) throw error;
 
       item.status = newStatus;
@@ -526,7 +512,7 @@
       const { error } = await db
         .from('appliance')
         .delete()
-        .eq('appliance_id', item.id);
+        .eq('declaration_id', item.id);
 
       if (error) throw error;
 

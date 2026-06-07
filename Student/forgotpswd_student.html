@@ -723,10 +723,18 @@
     resetPasswordBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Resetting...';
     resetPasswordBtn.disabled = true;
 
-    const { error: updateError } = await db
+   const { data: updateData, error: updateError } = await db
       .from('Student')
       .update({ password: newPassword })
-      .eq('email', userEmail);
+      .eq('email', userEmail)
+      .select();
+
+    if (updateError || !updateData || updateData.length === 0) {
+      showMessage('error', 'Failed to update password. No matching record updated.');
+      resetPasswordBtn.innerHTML = 'Reset Password <i class="bi bi-check-circle"></i>';
+      resetPasswordBtn.disabled = false;
+      return;
+    }
 
     if (updateError) {
       showMessage('error', 'Failed to update password. Please try again.');
