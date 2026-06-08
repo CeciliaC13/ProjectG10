@@ -524,11 +524,79 @@
       alert('Failed to delete application row item: ' + err.message);
     }
   }
+    async function loadAdminStaffHeader() {
+    // 1. Normalise role first
+    let currentRole = (localStorage.getItem('staffAdminRole') || '');
+    currentRole = currentRole.charAt(0).toUpperCase() + currentRole.slice(1).toLowerCase();
+
+    const currentEmail = localStorage.getItem('staffAdminEmail');
+    const currentId    = localStorage.getItem('staffAdminId');
+
+    // 2. Guard — redirect if no valid session
+    if (!['Admin', 'Staff'].includes(currentRole)) {
+      window.location.href = '../admin_staff_login.html';
+      return;
+    }
+
+    // 3. Single Supabase query using .or()
+    const currentTable    = currentRole === 'Admin' ? 'Admin' : 'Staff';
+    const currentIdColumn = currentRole === 'Admin' ? 'admin_id' : 'staff_id';
+
+    let data = null;
+    try {
+      const filter = [];
+      if (currentEmail) filter.push(`email.eq.${currentEmail}`);
+      if (currentId)    filter.push(`${currentIdColumn}.eq.${currentId}`);
+
+      if (filter.length > 0) {
+        const { data: row, error } = await db
+          .from(currentTable)
+          .select('*')
+          .or(filter.join(','))
+          .limit(1)
+          .single();
+        if (error) console.warn('Header fetch error:', error.message);
+        else data = row;
+      }
+    } catch (err) {
+      console.warn('Header fetch failed:', err.message);
+    }
+
+    // 4. Update DOM — always has a value now
+    const name  = data?.name || data?.full_name || localStorage.getItem('staffAdminName') || currentRole + ' User';
+    const email = data?.email || currentEmail || 'user@utmspace.my';
+
+    const roleBadge = document.getElementById('roleBadge');
+    if (roleBadge) roleBadge.textContent = currentRole.toUpperCase();
+
+    document.getElementById('dropdownUserRole').textContent  = currentRole;
+    document.getElementById('dropdownUserName').textContent  = name;
+    document.getElementById('dropdownUserEmail').textContent = email;
+    document.getElementById('avatarInitial').textContent     = currentRole.charAt(0);
+
+    if (currentRole === 'Staff') {
+      document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'none');
+    }
+  }
+  document.addEventListener('DOMContentLoaded', function() {
+  // ✅ removed fetchBroadcasts() — doesn't belong here
+  fetchApplianceFormsFromSupabase();
+  loadAdminStaffHeader();
+
+  document.getElementById('logoutBtn').addEventListener('click', function(e) {
+    e.preventDefault();
+    ['staffAdminRole','staffAdminEmail','staffAdminName','staffAdminId','userRole','currentUser']
+      .forEach(k => localStorage.removeItem(k));
+    window.location.href = 'admin_staff_login.html';
+  });
+});
+
 
   document.getElementById('statusFilter')?.addEventListener('change', renderApplianceForms);
   document.getElementById('collegeFilter')?.addEventListener('change', renderApplianceForms);
 
   fetchApplianceFormsFromSupabase();
+  loadAdminStaffHeader()
 </script>
 
 </body>

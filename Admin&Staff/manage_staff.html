@@ -849,8 +849,9 @@ function setFieldError(input, message) {
   err.className = 'field-error';
   err.style.cssText = 'color:#dc2626;font-size:0.75rem;margin-top:4px;display:block';
   err.textContent = message;
-  input.closest('.form-group, .password-wrapper')?.insertAdjacentElement('afterend', err) ||
-  input.insertAdjacentElement('afterend', err);
+  // Insert after the input (or its password wrapper), inside the form-group
+  const wrapper = input.closest('.password-wrapper') || input;
+  wrapper.insertAdjacentElement('afterend', err);
 }
  
 function clearFieldError(input) {
@@ -941,7 +942,8 @@ staffForm.addEventListener('submit', async (e) => {
   }
  
   const table = role === 'Admin' ? 'Admin' : 'Staff';
-  const idCol = role === 'Admin' ? 'admin_id' : 'staff_id';
+  const resolvedSource = editMode ? editSource : table;
+  const idCol = resolvedSource === 'Admin' ? 'admin_id' : 'staff_id';
  
   if (!editMode) {
     const { error } = await _supabase.from(table).insert([{ [idCol]: newId, name, email, password }]);
@@ -976,18 +978,59 @@ window.addEventListener('click', e => { if (e.target === modal) closeModal(); })
  
 // ── Header profile ────────────────────────────────────────────
  
-function loadAdminStaffHeader() {
-  const role  = localStorage.getItem('staffAdminRole') || localStorage.getItem('userRole');
-  const email = localStorage.getItem('staffAdminEmail');
-  const name  = localStorage.getItem('staffAdminName');
- 
-  if (!role && !email) { window.location.href = 'admin_staff_login.html'; return; }
- 
-  const roleText = (role === 'admin' || role === 'Admin') ? 'Admin' : 'Staff';
-  document.getElementById('dropdownUserRole').textContent  = roleText;
-  document.getElementById('dropdownUserName').textContent  = name || roleText + ' User';
+async function loadAdminStaffHeader() {
+  let currentRole = localStorage.getItem('staffAdminRole');
+  const currentEmail = localStorage.getItem('staffAdminEmail');
+  const currentId = localStorage.getItem('staffAdminId');
+
+  if (!currentRole && !currentEmail) {
+    window.location.href = 'admin_staff_login.html';
+    return;
+  }
+
+  if (currentRole === 'admin') currentRole = 'Admin';
+  if (currentRole === 'staff') currentRole = 'Staff';
+
+  const currentTable = currentRole === 'Admin' ? 'Admin' : 'Staff';
+  const currentIdColumn = currentRole === 'Admin' ? 'admin_id' : 'staff_id';
+
+  let data = null;
+
+  if (currentEmail) {
+    const result = await db
+      .from(currentTable)
+      .select('*')
+      .eq('email', currentEmail)
+      .single();
+    data = result.data;
+  }
+
+  if (!data && currentId) {
+    const result = await db
+      .from(currentTable)
+      .select('*')
+      .eq(currentIdColumn, currentId)
+      .single();
+    data = result.data;
+  }
+
+  const roleText = currentRole === 'Admin' ? 'Admin' : 'Staff';
+  const name = data?.name || data?.full_name || localStorage.getItem('staffAdminName');
+  const email = currentEmail || data?.email;
+
+  // Guard: roleBadge doesn't exist on this page, so skip it safely
+  const roleBadge = document.getElementById('roleBadge');
+  if (roleBadge) roleBadge.textContent = roleText.toUpperCase();
+
+  document.getElementById('dropdownUserRole').textContent = roleText;
+  document.getElementById('dropdownUserName').textContent = name || roleText + ' User';
   document.getElementById('dropdownUserEmail').textContent = email || 'user@utmspace.my';
-  document.getElementById('avatarInitial').textContent     = roleText.charAt(0);
+  document.getElementById('avatarInitial').textContent = roleText.charAt(0);
+
+  // This page is admin-only, but guard anyway
+  if (roleText === 'Staff') {
+    document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'none');
+  }
 }
  
 document.getElementById('logoutBtn').addEventListener('click', function (e) {

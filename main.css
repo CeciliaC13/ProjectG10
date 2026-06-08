@@ -117,7 +117,7 @@ h6 {
   padding-right: 0 !important;
 }
 
-@media (max-width: 991px) {  /* was 1200px */
+@media (max-width: 1200px) {
   .header .container {
     justify-content: space-between;
   }
@@ -146,7 +146,7 @@ h6 {
   }
 }
 
-@media (min-width: 991px) {  /* was 1200px */
+@media (min-width: 1200px) {
   .header .logo {
     margin-right: 40px !important;
   }
@@ -430,7 +430,7 @@ h6 {
 /*--------------------------------------------------------------
 # Navigation Menu
 --------------------------------------------------------------*/
-@media (min-width: 992px) {
+@media (min-width: 1200px) {
   .navmenu {
     padding: 0;
   }
@@ -522,7 +522,7 @@ h6 {
   }
 }
 
-@media (max-width: 991px) {
+@media (max-width: 1199px) {
   .mobile-nav-toggle {
     background-color: color-mix(in srgb, var(--default-color) 10%, white 15%);
     color: var(--nav-color);
