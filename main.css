@@ -430,7 +430,7 @@ h6 {
 /*--------------------------------------------------------------
 # Navigation Menu
 --------------------------------------------------------------*/
-@media (min-width: 1200px) {
+@media (min-width: 992px) {
   .navmenu {
     padding: 0;
   }
@@ -522,7 +522,7 @@ h6 {
   }
 }
 
-@media (max-width: 1199px) {
+@media (max-width: 991px) {
   .mobile-nav-toggle {
     background-color: color-mix(in srgb, var(--default-color) 10%, white 15%);
     color: var(--nav-color);
