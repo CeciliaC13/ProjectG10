@@ -117,7 +117,7 @@ h6 {
   padding-right: 0 !important;
 }
 
-@media (max-width: 1200px) {
+@media (max-width: 991px) {  /* was 1200px */
   .header .container {
     justify-content: space-between;
   }
@@ -146,7 +146,7 @@ h6 {
   }
 }
 
-@media (min-width: 1200px) {
+@media (min-width: 991px) {  /* was 1200px */
   .header .logo {
     margin-right: 40px !important;
   }
