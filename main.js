@@ -403,8 +403,10 @@ function updateNotificationBadge(dataArray) {
   // Initialize everything when DOM is ready
   document.addEventListener('DOMContentLoaded', function() {
     // Load user data
+    if (!window.__skipUserManager) {        // <-- add this check
     UserManager.loadUserData();
     loadHeaderProfile();
+  }
     
     // Load notifications
     loadNotificationData();
