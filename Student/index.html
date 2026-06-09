@@ -470,7 +470,7 @@ if (isFromMagicLink) {
 
 function showVerifiedMessage() {
   const errorBox = document.getElementById('errorMessage');
-  errorBox.style.display = 'block';
+  errorBox.className = 'error-message show';
   errorBox.style.backgroundColor = '#dcfce7';
   errorBox.style.color = '#16a34a';
   errorBox.innerHTML = '<i class="bi bi-check-circle-fill"></i> Email verified successfully! Please log in below.';
@@ -482,21 +482,19 @@ document.getElementById('loginBtn').addEventListener('click', async () => {
   const errorBox = document.getElementById('errorMessage');
   const loginBtn = document.getElementById('loginBtn');
 
-  errorBox.style.backgroundColor = '';
-  errorBox.style.color = '';
-  errorBox.classList.remove('show');
-  errorBox.style.display = 'none';
+  // Reset — only use class, no inline styles
+  errorBox.className = 'error-message';
+  errorBox.style = '';
 
   if (!studentid || !password) {
     errorBox.innerHTML = '<i class="bi bi-exclamation-triangle-fill"></i> Please fill in all fields.';
     errorBox.classList.add('show');
     return;
   }
+
   if (!/^[A][0-9A-Z]+$/.test(studentid)) {
     errorBox.innerHTML = '<i class="bi bi-exclamation-triangle-fill"></i> Student ID must start with the letter A (e.g., A24DW0001).';
     errorBox.classList.add('show');
-    loginBtn.innerHTML = 'Login <i class="bi bi-arrow-right"></i>';
-    loginBtn.disabled = false;
     return;
   }
 
@@ -527,8 +525,8 @@ document.getElementById('loginBtn').addEventListener('click', async () => {
   }
 
   localStorage.setItem('studentEmail', data.email);
-  localStorage.setItem('studentId',    data.student_id);
-  localStorage.setItem('studentName',  data.name);
+  localStorage.setItem('studentId', data.student_id);
+  localStorage.setItem('studentName', data.name);
   window.location.href = 'DashBoard.html';
 });
 
@@ -537,6 +535,7 @@ document.addEventListener('keydown', function(e) {
     document.getElementById('loginBtn').click();
   }
 });
+
 </script>
 </body>
 
