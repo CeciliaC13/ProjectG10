@@ -193,7 +193,6 @@ async function markAllNotificationsAsRead() {
   }
 }
 
-// Orchestrated single execution listener loop setup initialization closure
 (function initializeNotificationSystem() {
   const setupUI = () => {
     const btn = document.getElementById('notificationBtn');
