@@ -906,19 +906,22 @@
 
   async function loadHeaderProfile() {
     const email = localStorage.getItem('studentEmail');
-    if (!email || typeof db === 'undefined') return;
-
-    const { data, error } = await db
-      .from('Student')
-      .select('name, email')
-      .eq('email', email)
-      .single();
-
-    if (!error && data) {
-      const initial = data.name ? data.name.charAt(0).toUpperCase() : 'S';
-      document.getElementById('avatarInitial').textContent = initial;
-      document.getElementById('dropdownUserName').textContent = data.name;
-      document.getElementById('dropdownUserEmail').textContent = data.email;
+    if (!email) return;
+ 
+    if (typeof db !== 'undefined' && db) {
+      const { data, error } = await db
+        .from('Student')
+        .select('name, email')
+        .eq('email', email)
+        .single();
+ 
+      if (!error && data) {
+        const initial = data.name ? data.name.charAt(0).toUpperCase() : 'S';
+        const el = (id) => document.getElementById(id);
+        if (el('avatarInitial'))    el('avatarInitial').textContent    = initial;
+        if (el('dropdownUserName')) el('dropdownUserName').textContent = data.name;
+        if (el('dropdownUserEmail'))el('dropdownUserEmail').textContent= data.email;
+      }
     }
   }
 
