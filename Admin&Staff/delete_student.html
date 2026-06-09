@@ -493,6 +493,21 @@
     </div>
   </div>
 </div>
+<!-- Delete Blocked Modal -->
+<div id="deleteBlockedModal" class="confirm-modal-overlay">
+  <div class="confirm-modal">
+    <i class="bi bi-shield-x-fill" style="color: #d97706;"></i>
+    <h3 style="color: #92400e;">Cannot Delete Student</h3>
+    <p>
+      <strong id="blockedStudentName"></strong> has active or pending bookings 
+      and cannot be deleted. Resolve or cancel their reservations first.
+    </p>
+    <ul id="blockedReservationList" style="text-align:left; font-size:13px; color:#555; margin-bottom:20px; padding-left:20px;"></ul>
+    <div class="confirm-modal-actions">
+      <button class="btn-cancel-delete" id="closeBlockedBtn">OK, Got It</button>
+    </div>
+  </div>
+</div>
 
 <footer id="footer" class="footer position-relative light-background">
   <div class="container">
@@ -646,11 +661,44 @@
     });
   }
 
-  function openDeleteModal(studentId, studentName) {
-    studentToDelete = studentId;
-    document.getElementById('studentNameToDelete').innerHTML = studentName;
-    document.getElementById('deleteConfirmModal').classList.add('active');
-  }
+    async function openDeleteModal(studentId, studentName) {
+      // Check for active or pending reservations before opening modal
+      try {
+        const { data: activeReservations, error } = await db
+          .from('reservations')
+          .select('reservation_id, status')
+          .eq('student_id', studentId)
+          .in('status', ['Pending', 'Approved', 'Paid', 'Pending Payment']);  // adjust to your actual status values
+
+        if (error) throw error;
+
+        if (activeReservations && activeReservations.length > 0) {
+          // Block deletion — student has active bookings
+          showBlockedModal(studentName, activeReservations);
+          return;
+        }
+
+        // Safe to delete — open normal confirm modal
+        studentToDelete = studentId;
+        document.getElementById('studentNameToDelete').innerHTML = studentName;
+        document.getElementById('deleteConfirmModal').classList.add('active');
+
+      } catch (err) {
+        console.error('Error checking reservations:', err);
+        alert('Could not verify student reservation status. Please try again.');
+      }
+    }
+
+    function showBlockedModal(studentName, reservations) {
+      const statusList = reservations.map(r => `<li>Reservation #${r.reservation_id} — <strong>${r.status}</strong></li>`).join('');
+      document.getElementById('blockedStudentName').textContent = studentName;
+      document.getElementById('blockedReservationList').innerHTML = statusList;
+      document.getElementById('deleteBlockedModal').classList.add('active');
+    }
+
+    function closeBlockedModal() {
+      document.getElementById('deleteBlockedModal').classList.remove('active');
+    }
 
   function closeDeleteModal() {
     document.getElementById('deleteConfirmModal').classList.remove('active');
@@ -781,6 +829,13 @@
     localStorage.removeItem('currentUser');
     window.location.href = 'admin_staff_login.html';
   });
+  document.getElementById('closeBlockedBtn').addEventListener('click', closeBlockedModal);
+
+// Also close blocked modal when clicking outside
+window.addEventListener('click', (e) => {
+  const blockedModal = document.getElementById('deleteBlockedModal');
+  if (e.target === blockedModal) closeBlockedModal();
+});
 
   // Initialize
   loadAdminStaffHeader();
