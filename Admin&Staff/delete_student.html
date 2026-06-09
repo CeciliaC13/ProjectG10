@@ -556,7 +556,7 @@
 <script src="../main.js"></script>
 
 <script>
-  
+
   window.__skipUserManager = true;
   localStorage.removeItem('studentEmail');
   localStorage.removeItem('studentName');
@@ -674,7 +674,7 @@
           .from('reservations')
           .select('reservation_id, status')
           .eq('student_id', studentId)
-          .in('status', ['Pending', 'Approved', 'Paid', 'Pending Payment']);  // adjust to your actual status values
+          .in('status', ['Pending', 'Approved', 'Pending Payment']);  // adjust to your actual status values
 
         if (error) throw error;
 
