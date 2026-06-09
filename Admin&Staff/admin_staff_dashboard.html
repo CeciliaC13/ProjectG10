@@ -392,8 +392,14 @@
 
 <script>
   
+  // Clear any leftover student session to prevent main.js loading student profile
+  localStorage.removeItem('studentEmail');
+  localStorage.removeItem('studentName');
+  localStorage.removeItem('studentId');
+  
+  // Bridge staffAdminEmail so main.js can find it
   localStorage.setItem('staffEmail', localStorage.getItem('staffAdminEmail') || '');
-
+ 
   let currentRole = '';
   let currentTable = '';
   let currentIdColumn = '';
