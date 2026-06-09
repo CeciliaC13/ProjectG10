@@ -157,7 +157,6 @@
         </div>
         <div class="profile-title">
           <h1 id="profileName">Sarah Johnson</h1>
-          <p>Diploma in Computer Science</p>
           <p>School Of Professional And Continuing Education</p>
           <span class="badge" id="profileGender">Undergraduate Student</span>
         </div>
@@ -216,7 +215,7 @@
     <div class="row gy-5">
       <div class="col-lg-4">
         <div class="footer-brand">
-          <a href="dashboard.html" class="logo d-flex align-items-center mb-3">
+          <a href="DashBoard.html" class="logo d-flex align-items-center mb-3">
             <span class="sitename">UTM SPACE</span>
           </a>
           <p class="tagline">Transforming the way colleges book, manage, and connect — with modern simplicity.</p>
@@ -423,6 +422,7 @@
     document.getElementById('profileAvatar').textContent = initial;
     document.getElementById('dropdownUserName').textContent = data.name;
     document.getElementById('dropdownUserEmail').textContent = data.email;
+    document.getElementById('dropdownUserRole').textContent = 'Student';
 
     document.getElementById('profileName').textContent = data.name;
 
