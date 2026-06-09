@@ -575,7 +575,9 @@
           <label>Student ID <span class="required">*</span></label>
           <div class="input-wrapper">
             <i class="bi bi-card-text left-icon"></i>
-            <input type="text" class="form-control" id="studentId" placeholder="e.g., A24DW0001">
+            <input type="text" class="form-control" id="studentId" 
+              placeholder="e.g., A24DW0001" 
+              style="text-transform: uppercase">
           </div>
         </div>
       </div>
@@ -774,7 +776,7 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="/supabase.js"></script>
+  <script src="../supabase.js"></script>
   <script>
     // Toggle password visibility for Password field
     const togglePassword = document.getElementById('togglePassword');
@@ -840,7 +842,7 @@
     });
 
     document.getElementById('signupBtn').addEventListener('click', async () => {
-      const studentId = document.getElementById('studentId').value.trim();
+      const studentId = document.getElementById('studentId').value.trim().toUpperCase();
       const name = document.getElementById('name').value.trim();
       const email = document.getElementById('email').value.trim();
       const gender = document.getElementById('gender').value;
@@ -861,7 +863,7 @@
         errorAlert.classList.add('show');
         return;
       }
-      if (!/^[Aa][0-9A-Za-z]+$/.test(studentId)) {
+      if (!/^[A][0-9A-Z]+$/.test(studentId)) {
         errorAlert.textContent = 'Student ID must start with the letter A (e.g., A24DW0001).';
         errorAlert.classList.add('show');
         return;
@@ -904,71 +906,67 @@
         return;
       }
 
-      const { data: existing } = await db
-        .from('Student')
-        .select('student_id')
-        .or(`student_id.eq.${studentId},email.eq.${email}`);
+    const { data: existing } = await db
+      .from('Student')
+      .select('student_id, is_verified')
+      .or(`student_id.eq.${studentId},email.eq.${email}`);
 
-      if (existing && existing.length > 0) {
+    if (existing && existing.length > 0) {
+      const verified = existing.find(s => s.is_verified === true);
+      if (verified) {
         errorAlert.textContent = 'Student ID or email already registered.';
         errorAlert.classList.add('show');
         return;
       }
+      // Clean up stale unverified record
+      await db.from('Student').delete()
+        .or(`student_id.eq.${studentId},email.eq.${email}`)
+        .eq('is_verified', false);
+    }
 
-      signupBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Creating account...';
-      signupBtn.disabled = true;
+    signupBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Sending verification...';
+    signupBtn.disabled = true;
 
-      const { error: dbError } = await db
-        .from('Student')
-        .insert({
-          student_id: studentId,
-          name: name,
-          email: email,
-          gender: gender,
-          telephone: telephone,
-          password: password,
-          is_verified: false
-        });
+    // Save before sending OTP
+    localStorage.setItem('pendingStudent', JSON.stringify({
+      student_id: studentId,
+      name:       name,
+      email:      email,
+      gender:     gender,
+      telephone:  telephone,
+      password:   password
+    }));
 
-      console.log('Supabase error:', dbError);
-
-      if (dbError) {
-        errorAlert.textContent = 'Sign Up failed. Please try again.';
-        errorAlert.classList.add('show');
-        signupBtn.innerHTML = 'Create Account <i class="bi bi-arrow-right"></i>';
-        signupBtn.disabled = false;
-        return;
+    // Then send OTP as normal — no metadata needed
+    const { error: otpError } = await db.auth.signInWithOtp({
+      email: email,
+      options: {
+        shouldCreateUser: true,
+        emailRedirectTo: 'https://utmspace-college-booking-system-g10.netlify.app/Student/index.html'
       }
+    });
 
-      const { error: magicError } = await db.auth.signInWithOtp({
-        email: email,
-        options: {
-          shouldCreateUser: true,
-          emailRedirectTo: 'http://127.0.0.1:5500/Student/index.html'
-        }
-      });
+    if (otpError) {
+      errorAlert.textContent = 'Failed to send verification email. Please check the email address.';
+      errorAlert.classList.add('show');
+      signupBtn.innerHTML = 'Create Account <i class="bi bi-arrow-right"></i>';
+      signupBtn.disabled = false;
+      return;
+    }
 
-      if (magicError) {
-        errorAlert.textContent = 'Failed to send verification email. Please try again.';
-        errorAlert.classList.add('show');
-        signupBtn.innerHTML = 'Create Account <i class="bi bi-arrow-right"></i>';
-        signupBtn.disabled = false;
-        return;
+    let countdown = 5;
+    successAlert.textContent = `✅ Verification email sent! Check your inbox and click the link to complete registration. Redirecting in ${countdown}s...`;
+    successAlert.classList.add('show');
+    signupBtn.innerHTML = '<i class="bi bi-check-lg"></i> Check Your Email!';
+
+    const timer = setInterval(() => {
+      countdown--;
+      successAlert.textContent = `✅ Verification email sent! Check your inbox and click the link to complete registration. Redirecting in ${countdown}s...`;
+      if (countdown === 0) {
+        clearInterval(timer);
+        window.location.href = 'index.html';
       }
-
-      let countdown = 5;
-      successAlert.textContent = `✅ Account created! Check your email and click the link to verify. Redirecting in ${countdown}s...`;
-      successAlert.classList.add('show');
-      signupBtn.innerHTML = '<i class="bi bi-check-lg"></i> Check Your Email!';
-
-      const timer = setInterval(() => {
-        countdown--;
-        successAlert.textContent = `✅ Account created! Check your email and click the link to verify. Redirecting in ${countdown}s...`;
-        if (countdown === 0) {
-          clearInterval(timer);
-          window.location.href = 'index.html';
-        }
-      }, 1000);
+    }, 1000);
     });
   </script>
 </body>

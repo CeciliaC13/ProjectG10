@@ -352,7 +352,10 @@
         <label>Student ID</label>
         <div class="input-wrapper">
           <i class="bi bi-person left-icon"></i>
-          <input type="text" class="form-control" id="studentid" placeholder="Enter your Student ID" autocomplete="username">
+          <input type="text" class="form-control" id="studentid" 
+            placeholder="Enter your Student ID" 
+            autocomplete="username"
+            style="text-transform: uppercase">
         </div>
       </div>
 
@@ -360,7 +363,7 @@
         <label>Password</label>
         <div class="password-wrapper">
           <i class="bi bi-lock left-icon"></i>
-          <input type="password" id="password" placeholder="Enter your password" autocomplete="current-password">
+          <input type="password" id="password" placeholder="ENTER YOUR PASSWORD" autocomplete="current-password">
           <i class="bi bi-eye-slash toggle-password" id="togglePassword"></i>
         </div>
       </div>
@@ -382,102 +385,138 @@
     </div>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="../supabase.js"></script>
-  <script>
-    const togglePassword = document.getElementById('togglePassword');
-    const passwordInput = document.getElementById('password');
+ <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../supabase.js"></script>
+<script>
+  const togglePassword = document.getElementById('togglePassword');
+  const passwordInput = document.getElementById('password');
 
-    togglePassword.addEventListener('click', function() {
-      const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
-      passwordInput.setAttribute('type', type);
-      this.classList.toggle('bi-eye');
-      this.classList.toggle('bi-eye-slash');
-    });
+  togglePassword.addEventListener('click', function() {
+    const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+    passwordInput.setAttribute('type', type);
+    this.classList.toggle('bi-eye');
+    this.classList.toggle('bi-eye-slash');
+  });
 
-    db.auth.onAuthStateChange(async (event, session) => {
-      console.log('Auth event:', event);
+  // Handle magic link redirect — runs when user lands back from email link
+  db.auth.onAuthStateChange(async (event, session) => {
+    if (event === 'SIGNED_IN' && session?.user) {
+      const email = session.user.email;
 
-      if ((event === 'SIGNED_IN' || event === 'INITIAL_SESSION') && session?.user) {
-        console.log('User email:', session.user.email);
-
-        const { data: student } = await db
-          .from('Student')
-          .select('is_verified')
-          .eq('email', session.user.email)
-          .single();
-
-        if (student && !student.is_verified) {
-          const { error } = await db
-            .from('Student')
-            .update({ is_verified: true })
-            .eq('email', session.user.email);
-
-          console.log('Verification update error:', error);
-        }
-
-        await db.auth.signOut();
-      }
-    });
-
-    document.getElementById('loginBtn').addEventListener('click', async () => {
-      const studentid = document.getElementById('studentid').value.trim();
-      const password = document.getElementById('password').value.trim();
-      const errorBox = document.getElementById('errorMessage');
-      const loginBtn = document.getElementById('loginBtn');
-
-      errorBox.classList.remove('show');
-
-      if (!studentid || !password) {
-        errorBox.innerHTML = '<i class="bi bi-exclamation-triangle-fill"></i> Please fill in all fields.';
-        errorBox.classList.add('show');
-        return;
-      }
-      if (!/^[Aa][0-9A-Za-z]+$/.test(studentid)) {
-        errorBox.innerHTML = '<i class="bi bi-exclamation-triangle-fill"></i> Student ID must start with the letter A (e.g., A24DW0001).';
-        errorBox.classList.add('show');
-        loginBtn.innerHTML = 'Login <i class="bi bi-arrow-right"></i>';
-        loginBtn.disabled = false;
-        return;
-      }
-
-      loginBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Signing in...';
-      loginBtn.disabled = true;
-
-      const { data, error } = await db
+      // Check if already in Student table
+      const { data: existing } = await db
         .from('Student')
-        .select('*')
-        .eq('student_id', studentid)
-        .eq('password', password)
+        .select('student_id, name, is_verified')
+        .eq('email', email)
+        .maybeSingle();
+
+      if (existing?.is_verified) {
+        // Already registered — store session and redirect
+        localStorage.setItem('studentEmail', email);
+        localStorage.setItem('studentId',    existing.student_id);
+        localStorage.setItem('studentName',  existing.name);
+        window.location.href = 'DashBoard.html';
+        return;
+      }
+
+      // Not yet in Student table — check localStorage for pending data
+      const pending = JSON.parse(localStorage.getItem('pendingStudent'));
+
+      if (!pending || pending.email !== email) {
+        console.log('No pending registration found for this email.');
+        return;
+      }
+
+      // Insert into Student table
+      const { data: insertData, error: insertError } = await db
+        .from('Student')
+        .insert({
+          student_id:  pending.student_id,
+          name:        pending.name,
+          email:       email,
+          gender:      pending.gender,
+          telephone:   pending.telephone,
+          password:    pending.password,
+          is_verified: true
+        })
+        .select()
         .single();
 
-      if (error || !data) {
-        errorBox.innerHTML = '<i class="bi bi-exclamation-triangle-fill"></i> Invalid Student ID or Password.';
-        errorBox.classList.add('show');
-        loginBtn.innerHTML = 'Login <i class="bi bi-arrow-right"></i>';
-        loginBtn.disabled = false;
+      if (insertError) {
+        console.error('Insert error:', insertError);
         return;
       }
 
-      if (!data.is_verified) {
-        errorBox.innerHTML = '<i class="bi bi-exclamation-triangle-fill"></i> Please verify your email before logging in.';
-        errorBox.classList.add('show');
-        loginBtn.innerHTML = 'Login <i class="bi bi-arrow-right"></i>';
-        loginBtn.disabled = false;
-        return;
-      }
+      // Clean up and redirect
+      localStorage.removeItem('pendingStudent');
+      localStorage.setItem('studentEmail', insertData.email);
+      localStorage.setItem('studentId',    insertData.student_id);
+      localStorage.setItem('studentName',  insertData.name);
 
-      localStorage.setItem('studentEmail', data.email);
-      localStorage.setItem('studentId', data.student_id);
-      localStorage.setItem('studentName', data.name);
+      console.log('Student registered and logged in.');
       window.location.href = 'DashBoard.html';
-    });
-    document.addEventListener('keydown', function(e) {
-      if (e.key === 'Enter') {
-        document.getElementById('loginBtn').click();
-      }
-    });
-  </script>
+    }
+  });
+
+  document.getElementById('loginBtn').addEventListener('click', async () => {
+    const studentid = document.getElementById('studentid').value.trim().toUpperCase();
+    const password = document.getElementById('password').value.trim();
+    const errorBox = document.getElementById('errorMessage');
+    const loginBtn = document.getElementById('loginBtn');
+
+    errorBox.classList.remove('show');
+
+    if (!studentid || !password) {
+      errorBox.innerHTML = '<i class="bi bi-exclamation-triangle-fill"></i> Please fill in all fields.';
+      errorBox.classList.add('show');
+      return;
+    }
+    if (!/^[A][0-9A-Z]+$/.test(studentid)) {
+      errorBox.innerHTML = '<i class="bi bi-exclamation-triangle-fill"></i> Student ID must start with the letter A (e.g., A24DW0001).';
+      errorBox.classList.add('show');
+      loginBtn.innerHTML = 'Login <i class="bi bi-arrow-right"></i>';
+      loginBtn.disabled = false;
+      return;
+    }
+
+    loginBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Signing in...';
+    loginBtn.disabled = true;
+
+    const { data, error } = await db
+      .from('Student')
+      .select('*')
+      .eq('student_id', studentid)
+      .eq('password', password)
+      .single();
+
+    if (error || !data) {
+      errorBox.innerHTML = '<i class="bi bi-exclamation-triangle-fill"></i> Invalid Student ID or Password.';
+      errorBox.classList.add('show');
+      loginBtn.innerHTML = 'Login <i class="bi bi-arrow-right"></i>';
+      loginBtn.disabled = false;
+      return;
+    }
+
+    if (!data.is_verified) {
+      errorBox.innerHTML = '<i class="bi bi-exclamation-triangle-fill"></i> Please verify your email before logging in.';
+      errorBox.classList.add('show');
+      loginBtn.innerHTML = 'Login <i class="bi bi-arrow-right"></i>';
+      loginBtn.disabled = false;
+      return;
+    }
+
+    localStorage.setItem('studentEmail', data.email);
+    localStorage.setItem('studentId',    data.student_id);
+    localStorage.setItem('studentName',  data.name);
+    window.location.href = 'DashBoard.html';
+  });
+
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') {
+      document.getElementById('loginBtn').click();
+    }
+  });
+</script>
 </body>
 
 </html>
