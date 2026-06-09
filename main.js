@@ -351,30 +351,51 @@ function updateNotificationBadge(dataArray) {
 
   // Auto-sync header dropdown with Supabase
   async function loadHeaderProfile() {
-    const email = localStorage.getItem('studentEmail');
+    const studentEmail = localStorage.getItem('studentEmail');
+    const staffEmail = localStorage.getItem('staffEmail');      
+    const adminEmail = localStorage.getItem('adminEmail');      
+
+    const email = studentEmail || staffEmail || adminEmail;
     if (!email) return;
 
-    // Check if dropdown elements exist on this page
     const nameEl = document.getElementById('dropdownUserName');
     const emailEl = document.getElementById('dropdownUserEmail');
     const avatarEl = document.getElementById('avatarInitial');
-    const roleEl = document.getElementById('dropdownUserRole'); 
+    const roleEl = document.getElementById('dropdownUserRole');
     if (!nameEl || !emailEl || !avatarEl) return;
 
-    // Check if db is defined (Supabase)
     if (typeof db !== 'undefined' && db) {
-      const { data, error } = await db
-        .from('Student')
-        .select('name, email')
-        .eq('email', email)
-        .single();
+      if (studentEmail) {
+        // Student page
+        const { data, error } = await db
+          .from('Student')
+          .select('name, email')
+          .eq('email', studentEmail)
+          .single();
 
-      if (!error && data) {
-        const initial = data.name ? data.name.charAt(0).toUpperCase() : 'S';
-        avatarEl.textContent = initial;
-        nameEl.textContent = data.name;
-        emailEl.textContent = data.email;
-         if (roleEl) roleEl.textContent = 'Student';
+        if (!error && data) {
+          const initial = data.name ? data.name.charAt(0).toUpperCase() : 'S';
+          avatarEl.textContent = initial;
+          nameEl.textContent = data.name;
+          emailEl.textContent = data.email;
+          if (roleEl) roleEl.textContent = 'Student';
+        }
+
+      } else if (staffEmail || adminEmail) {
+        // Admin or Staff page
+        const { data, error } = await db
+          .from('Staff')
+          .select('name, email, role')
+          .eq('email', email)
+          .single();
+
+        if (!error && data) {
+          const initial = data.name ? data.name.charAt(0).toUpperCase() : 'A';
+          avatarEl.textContent = initial;
+          nameEl.textContent = data.name;
+          emailEl.textContent = data.email;
+          if (roleEl) roleEl.textContent = data.role || 'Staff';
+        }
       }
     }
   }
