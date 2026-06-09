@@ -358,6 +358,7 @@ function updateNotificationBadge(dataArray) {
     const nameEl = document.getElementById('dropdownUserName');
     const emailEl = document.getElementById('dropdownUserEmail');
     const avatarEl = document.getElementById('avatarInitial');
+    const roleEl = document.getElementById('dropdownUserRole'); 
     if (!nameEl || !emailEl || !avatarEl) return;
 
     // Check if db is defined (Supabase)
@@ -373,6 +374,7 @@ function updateNotificationBadge(dataArray) {
         avatarEl.textContent = initial;
         nameEl.textContent = data.name;
         emailEl.textContent = data.email;
+         if (roleEl) roleEl.textContent = 'Student';
       }
     }
   }
