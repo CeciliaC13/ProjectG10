@@ -535,13 +535,13 @@ document.getElementById('reportForm').addEventListener('submit', async function(
     successModal.show();
     
     document.getElementById('modalOkBtn').addEventListener('click', function() {
-      window.location.href = 'dashboard.html';
+      window.location.href = 'DashBoard.html';
     });
   } else {
     // If your browser cache is stubborn and STILL cannot find the HTML container elements, 
     // fall back to a clean native popup alert box so it never throws an innerHTML crash again.
     alert(`Submission Successful!\n\nYour report has been securely saved.\nReference ID: ${generatedReportId}`);
-    window.location.href = 'dashboard.html';
+    window.location.href = 'DashBoard.html';
   }
 
   document.getElementById('reportForm').reset();
