@@ -3,8 +3,8 @@
 
 <head>
   <meta charset="utf-8">
-  <meta content="width=device-width, initial-scale=1.0" name="viewport">
-  <title>Contact </title>
+  <meta content="width=device-width, initial-scale=1.0, user-scalable=yes" name="viewport">
+  <title>Contact - UTMSPACE College Booking</title>
   <meta name="description" content="">
   <meta name="keywords" content="">
 
@@ -22,9 +22,238 @@
   <link href="../notification.css" rel="stylesheet">
   <link href="../main.css" rel="stylesheet">
 
+  <style>
+    /* Contact Page Specific Styles */
+    .contact-page {
+      padding: 60px 0;
+      background: #f8f9fa;
+      min-height: 100vh;
+    }
+
+    .page-header-box {
+      background: linear-gradient(135deg, #6b092a, #8b0e35);
+      color: white;
+      border-radius: 22px;
+      padding: 35px;
+      margin-bottom: 35px;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.12);
+    }
+
+    .page-header-box h1 {
+      color: white;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+
+    .page-header-box p {
+      margin: 0;
+      color: rgba(255,255,255,0.85);
+    }
+
+    .back-link-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: white;
+      background: rgba(255,255,255,0.18);
+      padding: 8px 16px;
+      border-radius: 30px;
+      text-decoration: none;
+      font-weight: 600;
+      margin-bottom: 18px;
+    }
+
+    .back-link-btn:hover {
+      color: white;
+      background: rgba(255,255,255,0.28);
+    }
+
+    .contact-wrapper {
+      display: flex;
+      flex-direction: column;
+      gap: 30px;
+    }
+
+    @media (min-width: 992px) {
+      .contact-wrapper {
+        flex-direction: row;
+      }
+    }
+
+    .contact-info-panel {
+      flex: 1;
+      background: white;
+      border-radius: 20px;
+      padding: 30px;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+    }
+
+    .contact-info-header {
+      margin-bottom: 30px;
+    }
+
+    .contact-info-header h3 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #1a3c5e;
+      margin-bottom: 10px;
+    }
+
+    .contact-info-header p {
+      color: #666;
+      font-size: 0.9rem;
+    }
+
+    .contact-info-cards {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+
+    .info-card {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      padding: 15px;
+      background: #f8f9fa;
+      border-radius: 12px;
+      transition: all 0.3s ease;
+    }
+
+    .info-card:hover {
+      transform: translateX(5px);
+      background: #eef2f9;
+    }
+
+    .icon-container {
+      width: 50px;
+      height: 50px;
+      background: linear-gradient(135deg, #6b092a, #8b0e35);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .icon-container i {
+      font-size: 22px;
+      color: white;
+    }
+
+    .card-content h4 {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #1a3c5e;
+      margin-bottom: 5px;
+    }
+
+    .card-content p {
+      font-size: 0.85rem;
+      color: #666;
+      margin: 0;
+    }
+
+    .social-links-panel {
+      margin-top: 20px;
+      padding-top: 20px;
+      border-top: 1px solid #eee;
+    }
+
+    .social-links-panel h5 {
+      font-size: 1rem;
+      font-weight: 600;
+      color: #1a3c5e;
+      margin-bottom: 15px;
+    }
+
+    .social-icons {
+      display: flex;
+      gap: 12px;
+    }
+
+    .social-icons a {
+      width: 40px;
+      height: 40px;
+      background: #f8f9fa;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #6b092a;
+      font-size: 18px;
+      transition: all 0.3s ease;
+    }
+
+    .social-icons a:hover {
+      background: #6b092a;
+      color: white;
+      transform: translateY(-3px);
+    }
+
+    .map-panel {
+      flex: 1;
+      background: white;
+      border-radius: 20px;
+      padding: 0;
+      overflow: hidden;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .map-container {
+      width: 100%;
+      height: 500px;
+    }
+
+    .map-container iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+
+    .map-footer {
+      padding: 20px;
+      background: #f8f9fa;
+      text-align: center;
+    }
+
+    .map-footer p {
+      margin: 0;
+      color: #666;
+      font-size: 0.85rem;
+    }
+
+    .map-footer i {
+      color: #6b092a;
+      margin-right: 5px;
+    }
+
+    @media (max-width: 768px) {
+      .page-header-box {
+        padding: 25px;
+      }
+      
+      .page-header-box h1 {
+        font-size: 1.5rem;
+      }
+      
+      .map-container {
+        height: 350px;
+      }
+      
+      .contact-info-panel {
+        padding: 20px;
+      }
+    }
+  </style>
 </head>
 
 <body class="index-page">
+
+<!-- SAME HEADER as formKP_student.html -->
 <header id="header" class="logo d-flex align-items-center" style="margin-right: auto;">
   <div class="container position-relative d-flex align-items-center">
 
@@ -34,7 +263,7 @@
 
     <nav id="navmenu" class="navmenu">
       <ul>
-        <li><a href="DashBoard.html" class="active">Home</a></li>
+        <li><a href="DashBoard.html">Home</a></li>
         <li><a href="booking_history.html">History</a></li>
         <li><a href="applianceform_student.html">Appliance Form</a></li>
         <li><a href="reportform_student.html">Report</a></li>
@@ -49,29 +278,21 @@
         <a href="https://www.instagram.com/spaceutm_official/?hl=en" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><i class="bi bi-instagram"></i></a>
       </div>
 
-    <div class="notification-wrapper">
-    <button class="notification-btn" id="notificationBtn" title="Notifications">
-    <i class="bi bi-bell-fill"></i>
-    <span class="notification-badge" 
-          id="notificationBadge" 
-          style="display: none;">0</span>
-    </button>
-  
-    <div class="notification-dropdown" id="notificationDropdown">
-    <div class="notification-dropdown-header">
-      <h4><i class="bi bi-bell-fill"></i> Notifications</h4>
+      <div class="notification-wrapper">
+        <button class="notification-btn" id="notificationBtn" title="Notifications">
+          <i class="bi bi-bell-fill"></i>
+          <span class="notification-badge" id="notificationBadge" style="display: none;">0</span>
+        </button>
       
-      <a href="#" 
-         class="mark-all-link" 
-         id="markAllNotifications" 
-         onclick="event.preventDefault(); markAllNotificationsAsRead();">
-         Mark all as read
-      </a>
-    </div>
-    
-    <div class="notification-list" id="notificationList"></div>
-  </div>
-</div>
+        <div class="notification-dropdown" id="notificationDropdown">
+          <div class="notification-dropdown-header">
+            <h4><i class="bi bi-bell-fill"></i> Notifications</h4>
+            <a href="#" class="mark-all-link" id="markAllNotifications" onclick="event.preventDefault(); markAllNotificationsAsRead();">Mark all as read</a>
+          </div>
+          <div class="notification-list" id="notificationList"></div>
+        </div>
+      </div>
+
       <div class="user-profile">
         <div class="user-avatar">
           <div class="avatar-placeholder" id="avatarInitial">S</div>
@@ -94,159 +315,129 @@
   </div>
 </header>
 
-  <main class="main">
+<main class="contact-page">
+  <div class="container">
 
-    <div class="page-title">
-      <div class="heading">
-        <div class="container">
-          <div class="row d-flex justify-content-center text-center">
-            <div class="col-lg-8">
-              <h1 class="heading-title">Contact</h1>
+    <div class="page-header-box">
+      <a href="DashBoard.html" class="back-link-btn">
+        <i class="bi bi-arrow-left"></i> Back to Dashboard
+      </a>
+      <h1><i class="bi bi-geo-alt-fill"></i> Contact Us</h1>
+      <p>Get in touch with UTMSPACE for any inquiries or support</p>
+    </div>
+
+    <div class="contact-wrapper">
+      <!-- Contact Information Panel -->
+      <div class="contact-info-panel">
+        <div class="contact-info-header">
+          <h3>Contact Information</h3>
+          <p>Reach out to us through any of these channels. We're here to help!</p>
+        </div>
+
+        <div class="contact-info-cards">
+          <div class="info-card">
+            <div class="icon-container">
+              <i class="bi bi-pin-map-fill"></i>
             </div>
+            <div class="card-content">
+              <h4>Our Location</h4>
+              <p>Aras 4 dan 5, Blok T05, Skudai, 81310 Johor Bahru, Johor Darul Ta'zim, Malaysia</p>
+            </div>
+          </div>
+
+          <div class="info-card">
+            <div class="icon-container">
+              <i class="bi bi-envelope-open"></i>
+            </div>
+            <div class="card-content">
+              <h4>Email Us</h4>
+              <p>corporate@utmspace.edu.my</p>
+            </div>
+          </div>
+
+          <div class="info-card">
+            <div class="icon-container">
+              <i class="bi bi-telephone-fill"></i>
+            </div>
+            <div class="card-content">
+              <h4>Call Us</h4>
+              <p>+60 7-531 8000</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="social-links-panel">
+          <h5>Follow Us</h5>
+          <div class="social-icons">
+            <a href="https://www.facebook.com/utmspace/" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><i class="bi bi-facebook"></i></a>
+            <a href="https://www.instagram.com/spaceutm_official/?hl=en" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><i class="bi bi-instagram"></i></a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Map Panel -->
+      <div class="map-panel">
+        <div class="map-container">
+          <iframe 
+            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3988.764!2d103.6526624!3d1.5628565!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x31da7144b481abf3%3A0x4cc971cc1cb65ed8!2sUTMSPACE%20JOHOR%20T05!5e0!3m2!1sen!2smy!4v1712045678901!5m2!1sen!2smy" 
+            width="100%" 
+            height="100%" 
+            style="border:0;" 
+            allowfullscreen="" 
+            loading="lazy" 
+            referrerpolicy="no-referrer-when-downgrade">
+          </iframe>
+        </div>
+        <div class="map-footer">
+          <p><i class="bi bi-pin-map-fill"></i> UTMSPACE Johor, Block T05, Universiti Teknologi Malaysia</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<footer id="footer" class="footer position-relative light-background">
+  <div class="container">
+    <div class="row gy-5">
+      <div class="col-lg-4">
+        <div class="footer-brand">
+          <a href="index.html" class="logo d-flex align-items-center mb-3">
+            <span class="sitename">UTM SPACE</span>
+          </a>
+          <p class="tagline">Transforming the way colleges book, manage, and connect — with modern simplicity.</p>
+          <div class="social-links mt-4">
+            <a href="https://www.facebook.com/utmspace/" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><i class="bi bi-facebook"></i></a>
+            <a href="https://www.instagram.com/spaceutm_official/?hl=en" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><i class="bi bi-instagram"></i></a>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-6">
+        <div class="footer-links-grid">
+          <div class="col-6 col-md-4">
+            <h5>Support</h5>
+            <ul class="list-unstyled">
+              <li><a href="#">Contact Us: +607-531 8000</a></li>
+              <li><a href="policy.html">Privacy Policy</a></li>
+              <li><a href="terms_service.html">Terms of Service</a></li>
+            </ul>
           </div>
         </div>
       </div>
     </div>
-
-    <section id="contact" class="contact section">
-
-      <div class="container">
-        <div class="contact-wrapper">
-          <div class="contact-info-panel">
-            <div class="contact-info-header">
-              <h3>Contact Information</h3>
-              <p>Dignissimos deleniti accusamus rerum voluptate. Dignissimos rerum sit maiores reiciendis voluptate inventore ut.</p>
-            </div>
-
-            <div class="contact-info-cards">
-              <div class="info-card">
-                <div class="icon-container">
-                  <i class="bi bi-pin-map-fill"></i>
-                </div>
-                <div class="card-content">
-                  <h4>Our Location</h4>
-                  <p>Aras 4 dan 5, Blok T05, Skudai, 81310 Johor Bahru, Johor Darul Ta'zim, Malaysia</p>
-                </div>
-              </div>
-
-              <div class="info-card">
-                <div class="icon-container">
-                  <i class="bi bi-envelope-open"></i>
-                </div>
-                <div class="card-content">
-                  <h4>Email Us</h4>
-                  <p>corporate@utmspace.edu.my</p>
-                </div>
-              </div>
-
-              <div class="info-card">
-                <div class="icon-container">
-                  <i class="bi bi-telephone-fill"></i>
-                </div>
-                <div class="card-content">
-                  <h4>Call Us</h4>
-                  <p>+60 7-531 8000</p>
-                </div>
-              </div>
-            </div>
-
-            <div class="social-links-panel">
-              <h5>Follow Us</h5>
-              <div class="social-icons">
-                <a href="https://www.facebook.com/utmspace/" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><i class="bi bi-facebook"></i></a>
-                <a href="https://www.instagram.com/spaceutm_official/?hl=en" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><i class="bi bi-instagram"></i></a>
-              </div>
-            </div>
-          </div>
-
-          <div class="contact-form-panel">
-            <div class="map-container">
-              <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3988.764!2d103.6526624!3d1.5628565!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x31da7144b481abf3%3A0x4cc971cc1cb65ed8!2sUTMSPACE%20JOHOR%20T05!5e0!3m2!1sen!2smy!4v1712045678901!5m2!1sen!2smy" width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
-            </div>
-
-            <div class="form-container">
-              <h3>Send Us a Message</h3>
-
-              <form action="forms/contact.php" method="post" class="php-email-form">
-                <div class="form-floating mb-3">
-                  <input type="text" class="form-control" id="nameInput" name="name" placeholder="Full Name" required="">
-                  <label for="nameInput">Full Name</label>
-                </div>
-
-                <div class="form-floating mb-3">
-                  <input type="email" class="form-control" id="emailInput" name="email" placeholder="Email Address" required="">
-                  <label for="emailInput">Email Address</label>
-                </div>
-
-                <div class="form-floating mb-3">
-                  <input type="text" class="form-control" id="subjectInput" name="subject" placeholder="Subject" required="">
-                  <label for="subjectInput">Subject</label>
-                </div>
-
-                <div class="form-floating mb-3">
-                  <textarea class="form-control" id="messageInput" name="message" rows="5" placeholder="Your Message" style="height: 150px" required=""></textarea>
-                  <label for="messageInput">Your Message</label>
-                </div>
-
-                <div class="d-grid">
-                  <button type="submit" class="btn-submit">Send Message <i class="bi bi-send-fill ms-2"></i></button>
-                </div>
-              </form>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-  </main>
-
-  <footer id="footer" class="footer position-relative light-background">
-
+  </div>
+  <div class="footer-bottom">
     <div class="container">
-      <div class="row gy-5">
-
-        <div class="col-lg-4">
-          <div class="footer-brand">
-            <a href="index.html" class="logo d-flex align-items-center mb-3">
-              <span class="sitename">UTM SPACE</span>
-            </a>
-            <p class="tagline">Transforming the way colleges book, manage, and connect — with modern simplicity.</p>
-
-            <div class="social-links mt-4">
-              <a href="https://www.facebook.com/utmspace/" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><i class="bi bi-facebook"></i></a>
-              <a href="https://www.instagram.com/spaceutm_official/?hl=en" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><i class="bi bi-instagram"></i></a>
-            </div>
-          </div>
-        </div>
-
-        <div class="col-lg-6">
-          <div class="footer-links-grid">
-              <div class="col-6 col-md-4">
-                <h5>Support</h5>
-                <ul class="list-unstyled">
-                  <li><a href="#">Contact Us: +607-531 8000</a></li>
-                  <li><a href="policy.html">Privacy Policy</a></li>
-                  <li><a href="terms_service.html">Terms of Service</a></li>
-                </ul>
-              </div>
-          </div>
-        </div>
-
-      </div>
-    </div>
-
-    <div class="footer-bottom">
-      <div class="container">
-        <div class="row">
-          <div class="col-12">
-            <div class="footer-bottom-content">
-              <p class="mb-0">© <strong>UTMSPACE</strong>. All rights reserved.</p>
-            </div>
+      <div class="row">
+        <div class="col-12">
+          <div class="footer-bottom-content">
+            <p class="mb-0">© <strong>UTMSPACE</strong>. All rights reserved.</p>
           </div>
         </div>
       </div>
     </div>
+  </div>
+</footer>
 
-  </footer>
 <a href="#" id="scroll-top" class="scroll-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
 <div id="preloader"></div>
 
@@ -261,6 +452,30 @@
 <script src="../supabase.js"></script>
 <script src="../main.js"></script>
 
-</body>
+<script>
+  // Load header profile
+  async function loadHeaderProfile() {
+    const email = localStorage.getItem('studentEmail');
+    if (!email) return;
 
+    if (typeof db !== 'undefined' && db) {
+      const { data, error } = await db
+        .from('Student')
+        .select('name, email')
+        .eq('email', email)
+        .single();
+
+      if (!error && data) {
+        const initial = data.name ? data.name.charAt(0).toUpperCase() : 'S';
+        document.getElementById('avatarInitial').textContent = initial;
+        document.getElementById('dropdownUserName').textContent = data.name;
+        document.getElementById('dropdownUserEmail').textContent = data.email;
+      }
+    }
+  }
+
+  loadHeaderProfile();
+</script>
+
+</body>
 </html>
