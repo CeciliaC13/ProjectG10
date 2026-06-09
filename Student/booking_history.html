@@ -3,7 +3,7 @@
  
 <head>
   <meta charset="utf-8">
-  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <meta content="width=device-width, initial-scale=1.0, user-scalable=yes" name="viewport">
   <title>My Booking History - UTMSPACE College Booking</title>
  
   <link href="../img/favicon.png" rel="icon">
@@ -49,11 +49,13 @@
       color: white;
       font-weight: 700;
       margin-bottom: 10px;
+      font-size: 1.8rem;
     }
  
     .page-header-box p {
       margin: 0;
       color: rgba(255,255,255,0.85);
+      font-size: 0.85rem;
     }
  
     .back-link-btn {
@@ -67,6 +69,7 @@
       text-decoration: none;
       font-weight: 600;
       margin-bottom: 18px;
+      font-size: 0.85rem;
     }
  
     .back-link-btn:hover {
@@ -86,7 +89,7 @@
     .booking-table {
       width: 100%;
       border-collapse: collapse;
-      min-width: 1100px;
+      min-width: 900px;
     }
  
     .table-wrapper {
@@ -96,16 +99,17 @@
     .booking-table th {
       background: #6b092a;
       color: white;
-      padding: 14px;
+      padding: 12px 10px;
       font-weight: 600;
       text-align: center;
+      font-size: 0.8rem;
     }
  
     .booking-table td {
-      padding: 14px;
+      padding: 10px 8px;
       border-bottom: 1px solid #eee;
       text-align: center;
-      font-size: 14px;
+      font-size: 0.75rem;
       vertical-align: middle;
     }
  
@@ -115,9 +119,9 @@
  
     .status-badge {
       display: inline-block;
-      padding: 6px 14px;
+      padding: 4px 10px;
       border-radius: 20px;
-      font-size: 12px;
+      font-size: 0.7rem;
       font-weight: 700;
     }
  
@@ -145,9 +149,9 @@
       background: #2c5a7a;
       color: white;
       border: none;
-      border-radius: 10px;
-      padding: 7px 14px;
-      font-size: 13px;
+      border-radius: 8px;
+      padding: 5px 10px;
+      font-size: 0.7rem;
       font-weight: 600;
       margin: 2px;
       cursor: pointer;
@@ -161,9 +165,9 @@
       background: #dc2626;
       color: white;
       border: none;
-      border-radius: 10px;
-      padding: 7px 14px;
-      font-size: 13px;
+      border-radius: 8px;
+      padding: 5px 10px;
+      font-size: 0.7rem;
       font-weight: 600;
       margin: 2px;
       cursor: pointer;
@@ -182,9 +186,9 @@
       background: #b45309;
       color: white;
       border: none;
-      border-radius: 10px;
-      padding: 7px 16px;
-      font-size: 13px;
+      border-radius: 8px;
+      padding: 5px 12px;
+      font-size: 0.7rem;
       font-weight: 600;
       margin: 2px;
       cursor: pointer;
@@ -197,65 +201,89 @@
       background: #92400e;
     }
  
+    /* Mobile-friendly Stats Grid */
     .stats-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-      gap: 20px;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 15px;
       margin-bottom: 30px;
     }
  
     .stat-card {
       background: white;
       border-radius: 16px;
-      padding: 20px;
+      padding: 15px;
       text-align: center;
       box-shadow: 0 4px 15px rgba(0,0,0,0.05);
     }
  
     .stat-card i {
-      font-size: 35px;
+      font-size: 28px;
       color: #6b092a;
-      margin-bottom: 10px;
+      margin-bottom: 8px;
     }
  
     .stat-number {
-      font-size: 32px;
+      font-size: 24px;
       font-weight: 700;
       color: #1a3c5e;
     }
  
     .stat-label {
-      font-size: 13px;
+      font-size: 11px;
       color: #666;
       margin-top: 5px;
     }
  
+    /* Desktop: 3 columns for larger screens */
+    @media (min-width: 768px) {
+      .stats-grid {
+        grid-template-columns: repeat(5, 1fr);
+      }
+      
+      .stat-card {
+        padding: 20px;
+      }
+      
+      .stat-number {
+        font-size: 32px;
+      }
+      
+      .stat-label {
+        font-size: 13px;
+      }
+      
+      .stat-card i {
+        font-size: 35px;
+      }
+    }
+ 
     .empty-state {
       text-align: center;
-      padding: 60px;
+      padding: 40px;
       color: #999;
     }
  
     .empty-state i {
-      font-size: 64px;
-      margin-bottom: 20px;
+      font-size: 48px;
+      margin-bottom: 15px;
     }
  
     .how-it-works-bar {
       background: #eff6ff;
       border: 1px solid #bfdbfe;
       border-radius: 10px;
-      padding: 12px 16px;
-      font-size: 13px;
+      padding: 10px 12px;
+      font-size: 0.7rem;
       color: #1e40af;
       margin-bottom: 20px;
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 8px;
     }
  
     .how-it-works-bar i {
-      font-size: 18px;
+      font-size: 14px;
       flex-shrink: 0;
     }
  
@@ -284,11 +312,11 @@
  
     .cancel-popup {
       background: white;
-      max-width: 400px;
+      max-width: 350px;
       width: 90%;
       border-radius: 24px;
       text-align: center;
-      padding: 35px 30px;
+      padding: 25px 20px;
       transform: scale(0.9);
       transition: transform 0.3s ease;
       box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
@@ -299,35 +327,35 @@
     }
  
     .cancel-popup i {
-      font-size: 60px;
+      font-size: 50px;
       color: #dc2626;
-      margin-bottom: 20px;
+      margin-bottom: 15px;
     }
  
     .cancel-popup h3 {
-      font-size: 22px;
+      font-size: 20px;
       font-weight: 700;
       color: #1a3c5e;
-      margin-bottom: 12px;
+      margin-bottom: 10px;
     }
  
     .cancel-popup p {
-      font-size: 14px;
+      font-size: 13px;
       color: #666;
-      margin-bottom: 25px;
-      line-height: 1.6;
+      margin-bottom: 20px;
+      line-height: 1.5;
     }
  
     .cancel-popup-actions {
       display: flex;
-      gap: 12px;
+      gap: 10px;
       justify-content: center;
     }
  
     .cancel-popup-actions button {
-      padding: 10px 24px;
+      padding: 8px 20px;
       border-radius: 40px;
-      font-size: 14px;
+      font-size: 13px;
       font-weight: 600;
       cursor: pointer;
       border: none;
@@ -349,9 +377,51 @@
  
     .action-cell {
       display: flex;
-      gap: 8px;
+      gap: 6px;
       justify-content: center;
       flex-wrap: wrap;
+    }
+    
+    /* Filter box responsive */
+    .filter-box .row {
+      margin: 0;
+    }
+    
+    .filter-box .col-md-6 {
+      padding: 0 10px;
+    }
+    
+    /* Mobile adjustments */
+    @media (max-width: 768px) {
+      .booking-history-page {
+        padding: 30px 0;
+      }
+      
+      .page-header-box {
+        padding: 20px;
+      }
+      
+      .page-header-box h1 {
+        font-size: 1.4rem;
+      }
+      
+      .filter-box, .table-box {
+        padding: 15px;
+      }
+      
+      .table-box h3 {
+        font-size: 1.1rem;
+      }
+      
+      .action-cell {
+        flex-direction: column;
+        gap: 5px;
+      }
+      
+      .view-btn, .cancel-btn, .pay-btn {
+        width: 100%;
+        justify-content: center;
+      }
     }
   </style>
 </head>
@@ -444,7 +514,7 @@
       <p>Track your booking status and make payment after key collection.</p>
     </div>
  
-    <!-- Stats Grid -->
+    <!-- Stats Grid - Mobile friendly (2 columns on mobile, 5 on desktop) -->
     <div class="stats-grid" id="statsGrid">
       <div class="stat-card">
         <i class="bi bi-calendar-check"></i>
@@ -637,7 +707,7 @@
     if (s === 'approved') return 'status-confirmed';
     if (s === 'paid') return 'status-completed';
     if (s === 'cancelled' || s === 'rejected') return 'status-cancelled';
-    return 'status-pending'; // pending, pending payment, etc.
+    return 'status-pending';
   }
  
   // -------------------------------------------------------
@@ -753,10 +823,7 @@
       const totalAmount    = booking.total_amount ? `RM ${booking.total_amount}` : 'RM 0';
       const originalIndex  = bookings.indexOf(booking);
  
-      // Only allow cancel when Pending (review) or Approved
       const canCancel      = booking.status === 'Pending' || booking.status === 'Approved';
- 
-      // Show Pay Now only when status is exactly 'Pending Payment'
       const isPendingPayment = booking.status === 'Pending Payment';
  
       return `
