@@ -399,64 +399,67 @@
   });
 
   // Handle magic link redirect — runs when user lands back from email link
-  db.auth.onAuthStateChange(async (event, session) => {
-    if (event === 'SIGNED_IN' && session?.user) {
-      const email = session.user.email;
+      db.auth.onAuthStateChange(async (event, session) => {
+      if (event === 'SIGNED_IN' && session?.user) {
+        const email = session.user.email;
 
-      // Check if already in Student table
-      const { data: existing } = await db
-        .from('Student')
-        .select('student_id, name, is_verified')
-        .eq('email', email)
-        .maybeSingle();
+        // Sign them out immediately so they can't auto-access dashboard
+        await db.auth.signOut();
 
-      if (existing?.is_verified) {
-        // Already registered — store session and redirect
-        localStorage.setItem('studentEmail', email);
-        localStorage.setItem('studentId',    existing.student_id);
-        localStorage.setItem('studentName',  existing.name);
-        window.location.href = 'DashBoard.html';
-        return;
+        const { data: existing } = await db
+          .from('Student')
+          .select('student_id, name, is_verified')
+          .eq('email', email)
+          .maybeSingle();
+
+        if (existing?.is_verified) {
+          // Already registered — just show success message
+          showVerifiedMessage();
+          return;
+        }
+
+        // New registration — insert into Student table
+        const pending = JSON.parse(localStorage.getItem('pendingStudent'));
+
+        if (!pending || pending.email !== email) {
+          console.log('No pending registration found.');
+          return;
+        }
+
+        const { error: insertError } = await db
+          .from('Student')
+          .insert({
+            student_id:  pending.student_id,
+            name:        pending.name,
+            email:       email,
+            gender:      pending.gender,
+            telephone:   pending.telephone,
+            password:    pending.password,
+            is_verified: true
+          });
+
+        if (insertError) {
+          console.error('Insert error:', insertError);
+          return;
+        }
+
+        localStorage.removeItem('pendingStudent');
+        showVerifiedMessage();
       }
+    });
 
-      // Not yet in Student table — check localStorage for pending data
-      const pending = JSON.parse(localStorage.getItem('pendingStudent'));
+    function showVerifiedMessage() {
+      // Hide the loading overlay if visible
+      const overlay = document.getElementById('authLoading');
+      if (overlay) overlay.style.display = 'none';
 
-      if (!pending || pending.email !== email) {
-        console.log('No pending registration found for this email.');
-        return;
-      }
-
-      // Insert into Student table
-      const { data: insertData, error: insertError } = await db
-        .from('Student')
-        .insert({
-          student_id:  pending.student_id,
-          name:        pending.name,
-          email:       email,
-          gender:      pending.gender,
-          telephone:   pending.telephone,
-          password:    pending.password,
-          is_verified: true
-        })
-        .select()
-        .single();
-
-      if (insertError) {
-        console.error('Insert error:', insertError);
-        return;
-      }
-
-      // Clean up and redirect
-      localStorage.removeItem('pendingStudent');
-      localStorage.setItem('studentEmail', insertData.email);
-      localStorage.setItem('studentId',    insertData.student_id);
-      localStorage.setItem('studentName',  insertData.name);
-
-      console.log('Student registered and logged in.');
-      window.location.href = 'DashBoard.html';
+      // Show a green success banner above the login form
+      const errorBox = document.getElementById('errorMessage');
+      errorBox.style.display = 'block';
+      errorBox.style.backgroundColor = '#dcfce7';
+      errorBox.style.color = '#16a34a';
+      errorBox.innerHTML = '<i class="bi bi-check-circle-fill"></i> Email verified! Please log in below.';
     }
-  });
 
   document.getElementById('loginBtn').addEventListener('click', async () => {
     const studentid = document.getElementById('studentid').value.trim().toUpperCase();
