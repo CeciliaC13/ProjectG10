@@ -812,56 +812,56 @@
   }
 
   async function loadAdminStaffHeader() {
-  // 1. Normalise role first
-  let currentRole = (localStorage.getItem('staffAdminRole') || '');
-  currentRole = currentRole.charAt(0).toUpperCase() + currentRole.slice(1).toLowerCase();
-
+  let currentRole = localStorage.getItem('staffAdminRole');
   const currentEmail = localStorage.getItem('staffAdminEmail');
-  const currentId    = localStorage.getItem('staffAdminId');
+  const currentId = localStorage.getItem('staffAdminId');
 
-  // 2. Guard — redirect if no valid session
-  if (!['Admin', 'Staff'].includes(currentRole)) {
-    window.location.href = '../admin_staff_login.html';
+  if (!currentRole && !currentEmail) {
+    window.location.href = 'admin_staff_login.html';
     return;
   }
 
-  // 3. Single Supabase query using .or()
-  const currentTable    = currentRole === 'Admin' ? 'Admin' : 'Staff';
+  if (currentRole === 'admin') currentRole = 'Admin';
+  if (currentRole === 'staff') currentRole = 'Staff';
+
+  const currentTable = currentRole === 'Admin' ? 'Admin' : 'Staff';
   const currentIdColumn = currentRole === 'Admin' ? 'admin_id' : 'staff_id';
 
   let data = null;
-  try {
-    const filter = [];
-    if (currentEmail) filter.push(`email.eq.${currentEmail}`);
-    if (currentId)    filter.push(`${currentIdColumn}.eq.${currentId}`);
 
-    if (filter.length > 0) {
-      const { data: row, error } = await db
-        .from(currentTable)
-        .select('*')
-        .or(filter.join(','))
-        .limit(1)
-        .single();
-      if (error) console.warn('Header fetch error:', error.message);
-      else data = row;
-    }
-  } catch (err) {
-    console.warn('Header fetch failed:', err.message);
+  if (currentEmail) {
+    const result = await db
+      .from(currentTable)
+      .select('*')
+      .eq('email', currentEmail)
+      .single();
+    data = result.data;
   }
 
-  // 4. Update DOM — always has a value now
-  const name  = data?.name || data?.full_name || localStorage.getItem('staffAdminName') || currentRole + ' User';
-  const email = data?.email || currentEmail || 'user@utmspace.my';
+  if (!data && currentId) {
+    const result = await db
+      .from(currentTable)
+      .select('*')
+      .eq(currentIdColumn, currentId)
+      .single();
+    data = result.data;
+  }
 
+  const roleText = currentRole === 'Admin' ? 'Admin' : 'Staff';
+  const name = data?.name || data?.full_name || localStorage.getItem('staffAdminName');
+  const email = currentEmail || data?.email;
+
+  // Guard: roleBadge doesn't exist on this page, so skip it safely
   const roleBadge = document.getElementById('roleBadge');
-  if (roleBadge) roleBadge.textContent = currentRole.toUpperCase();
+  if (roleBadge) roleBadge.textContent = roleText.toUpperCase();
 
-  document.getElementById('dropdownUserRole').textContent  = currentRole;
-  document.getElementById('dropdownUserName').textContent  = name;
-  document.getElementById('dropdownUserEmail').textContent = email;
-  document.getElementById('avatarInitial').textContent     = currentRole.charAt(0);
+  document.getElementById('dropdownUserRole').textContent = roleText;
+  document.getElementById('dropdownUserName').textContent = name || roleText + ' User';
+  document.getElementById('dropdownUserEmail').textContent = email || 'user@utmspace.my';
+  document.getElementById('avatarInitial').textContent = roleText.charAt(0);
 
-  if (currentRole === 'Staff') {
+  // This page is admin-only, but guard anyway
+  if (roleText === 'Staff') {
     document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'none');
   }
 }
