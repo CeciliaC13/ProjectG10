@@ -397,8 +397,8 @@
   let currentEmail = '';
 
   async function loadAdminStaffHeader() {
-  currentRole = localStorage.getItem('staffAdminRole');   // fixed: was missing =
-  currentEmail = localStorage.getItem('staffAdminEmail');
+  let currentRole = localStorage.getItem('staffAdminRole');
+  const currentEmail = localStorage.getItem('staffAdminEmail');
   const currentId = localStorage.getItem('staffAdminId');
 
   if (!currentRole && !currentEmail) {
@@ -409,8 +409,8 @@
   if (currentRole === 'admin') currentRole = 'Admin';
   if (currentRole === 'staff') currentRole = 'Staff';
 
-  currentTable = currentRole === 'Admin' ? 'Admin' : 'Staff';
-  currentIdColumn = currentRole === 'Admin' ? 'admin_id' : 'staff_id';
+  const currentTable = currentRole === 'Admin' ? 'Admin' : 'Staff';
+  const currentIdColumn = currentRole === 'Admin' ? 'admin_id' : 'staff_id';
 
   let data = null;
 
@@ -432,21 +432,22 @@
     data = result.data;
   }
 
-  // Fixed: use currentRole/currentEmail/data instead of undefined role/name/email
   const roleText = currentRole === 'Admin' ? 'Admin' : 'Staff';
   const name = data?.name || data?.full_name || localStorage.getItem('staffAdminName');
   const email = currentEmail || data?.email;
 
-  document.getElementById('roleBadge').textContent = roleText.toUpperCase();
+  // Guard: roleBadge doesn't exist on this page, so skip it safely
+  const roleBadge = document.getElementById('roleBadge');
+  if (roleBadge) roleBadge.textContent = roleText.toUpperCase();
+
   document.getElementById('dropdownUserRole').textContent = roleText;
   document.getElementById('dropdownUserName').textContent = name || roleText + ' User';
   document.getElementById('dropdownUserEmail').textContent = email || 'user@utmspace.my';
   document.getElementById('avatarInitial').textContent = roleText.charAt(0);
 
+  // This page is admin-only, but guard anyway
   if (roleText === 'Staff') {
-    document.querySelectorAll('.admin-only').forEach(function(item) {
-      item.style.display = 'none';
-    });
+    document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'none');
   }
 }
 
