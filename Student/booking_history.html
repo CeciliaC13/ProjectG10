@@ -235,7 +235,7 @@
       margin-top: 5px;
     }
  
-    /* Desktop: 3 columns for larger screens */
+    /* Desktop: 5 columns for larger screens */
     @media (min-width: 768px) {
       .stats-grid {
         grid-template-columns: repeat(5, 1fr);
@@ -423,6 +423,190 @@
         justify-content: center;
       }
     }
+
+    /* ================================================
+       MOBILE HEADER FIX - Burger menu on left, profile on right
+       ================================================ */
+
+    /* Header container */
+    #header .container {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      position: relative;
+      width: 100%;
+    }
+
+    /* Logo - keep on left */
+    #header .logo {
+      order: 1;
+      flex-shrink: 0;
+    }
+
+    /* Mobile nav toggle button */
+    .mobile-nav-toggle-btn {
+      order: 2;
+      display: block;
+      font-size: 28px;
+      cursor: pointer;
+      margin-left: 15px;
+      background: none;
+      border: none;
+      color: white;
+    }
+
+    /* Header actions - keep on far right */
+    .header-actions {
+      order: 3;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      margin-left: auto;
+      flex-shrink: 0;
+    }
+
+    /* Navigation menu - full width on mobile, hidden by default */
+    .navmenu {
+      order: 4;
+      width: 100%;
+      margin-top: 15px;
+    }
+
+    .navmenu ul {
+      display: none;
+      flex-direction: column;
+      background: white;
+      border-radius: 12px;
+      padding: 15px;
+      margin: 0;
+      list-style: none;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    }
+
+    .navmenu ul.show {
+      display: flex;
+    }
+
+    .navmenu ul li {
+      margin: 5px 0;
+    }
+
+    .navmenu ul li a {
+      color: #333 !important;
+      padding: 10px 15px;
+      display: block;
+      border-radius: 8px;
+    }
+
+    .navmenu ul li a:hover {
+      background: #6b092a;
+      color: white !important;
+    }
+
+    /* Desktop view */
+    @media (min-width: 1200px) {
+      .mobile-nav-toggle-btn {
+        display: none;
+      }
+      
+      .navmenu {
+        order: 2;
+        width: auto;
+        flex: 1;
+        margin-top: 0;
+      }
+      
+      .navmenu ul {
+        display: flex !important;
+        flex-direction: row;
+        background: transparent;
+        box-shadow: none;
+        padding: 0;
+      }
+      
+      .navmenu ul li a {
+        color: white !important;
+      }
+      
+      .navmenu ul li a:hover {
+        background: transparent;
+        color: rgba(255,255,255,0.8) !important;
+      }
+      
+      .header-actions {
+        order: 3;
+      }
+    }
+
+    /* Social links visibility */
+    .header-social-links {
+      display: flex;
+      gap: 10px;
+    }
+
+    .header-social-links a {
+      color: white;
+      font-size: 18px;
+    }
+
+    /* Hide social links on very small screens if needed */
+    @media (max-width: 576px) {
+      .header-social-links {
+        display: flex;
+        gap: 8px;
+      }
+    }
+
+    /* Ensure profile dropdown works on mobile */
+    .user-profile {
+      position: relative;
+    }
+
+    .user-dropdown {
+      position: absolute;
+      top: 45px;
+      right: 0;
+      width: 250px;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 5px 25px rgba(0,0,0,0.15);
+      z-index: 1000;
+      display: none;
+    }
+
+    .user-dropdown.show {
+      display: block;
+    }
+
+    /* Notification dropdown on mobile */
+    .notification-dropdown {
+      position: absolute;
+      top: 45px;
+      right: 0;
+      width: 300px;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 5px 25px rgba(0,0,0,0.15);
+      z-index: 1000;
+      display: none;
+    }
+
+    .notification-dropdown.show {
+      display: block;
+    }
+
+    /* For very small screens */
+    @media (max-width: 480px) {
+      .notification-dropdown {
+        width: 280px;
+        right: -50px;
+      }
+      
+      .user-dropdown {
+        width: 220px;
+      }
+    }
   </style>
 </head>
  
@@ -434,16 +618,20 @@
     <a href="dashboard.html" class="logo d-flex align-items-center">
       <img src="../img/spacelogo.png" alt="UTM Space Logo" style="height: 50px; width: auto; max-height:60px;">
     </a>
+
+    <!-- Mobile nav toggle button (burger menu) -->
+    <button class="mobile-nav-toggle-btn d-xl-none" id="mobileNavToggle">
+      <i class="bi bi-list"></i>
+    </button>
  
     <nav id="navmenu" class="navmenu">
-      <ul>
+      <ul id="navmenuList">
         <li><a href="dashboard.html">Home</a></li>
         <li><a href="booking_history.html" class="active">History</a></li>
         <li><a href="applianceform_student.html">Appliance Form</a></li>
         <li><a href="reportform_student.html">Report</a></li>
         <li><a href="contact.html">Contact</a></li>
       </ul>
-      <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>
     </nav>
  
     <div class="header-actions">
@@ -482,7 +670,7 @@
           <div class="avatar-placeholder" id="avatarInitial">S</div>
         </div>
  
-        <div class="user-dropdown">
+        <div class="user-dropdown" id="userDropdown">
           <div class="dropdown-header">
             <div class="user-info">
               <div class="user-name" id="dropdownUserName">Student name</div>
@@ -698,6 +886,16 @@
   let bookings = [];
   let studentId = null;
   let pendingCancelId = null;
+ 
+  // Mobile nav toggle functionality
+  const mobileNavToggle = document.getElementById('mobileNavToggle');
+  const navmenuList = document.getElementById('navmenuList');
+
+  if (mobileNavToggle && navmenuList) {
+    mobileNavToggle.addEventListener('click', function() {
+      navmenuList.classList.toggle('show');
+    });
+  }
  
   // -------------------------------------------------------
   // Status helpers
