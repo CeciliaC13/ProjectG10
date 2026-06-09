@@ -391,6 +391,9 @@
 <script src="../main.js"></script>
 
 <script>
+  
+  localStorage.setItem('staffEmail', localStorage.getItem('staffAdminEmail') || '');
+
   let currentRole = '';
   let currentTable = '';
   let currentIdColumn = '';
