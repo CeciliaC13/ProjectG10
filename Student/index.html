@@ -403,50 +403,66 @@ const isFromMagicLink = window.location.hash.includes('access_token')
                      || window.location.search.includes('code=');
 
 if (isFromMagicLink) {
-  // Coming from email link — handle registration only, no dashboard redirect
   db.auth.onAuthStateChange(async (event, session) => {
     if (event === 'SIGNED_IN' && session?.user) {
-      const email = session.user.email;
+      const user = session.user;
+      const email = user.email;
+      const meta = user.user_metadata;
 
-      // Sign out immediately — force them to login manually
-      await db.auth.signOut();
+      console.log('Magic link verified for:', email);
+      console.log('Metadata:', JSON.stringify(meta));
 
-      // Check if already registered
+      // Check if already in DB
       const { data: existing } = await db
         .from('Student')
         .select('student_id, is_verified')
         .eq('email', email)
         .maybeSingle();
 
-      if (!existing) {
-        // New student — insert from localStorage
-        const pending = JSON.parse(localStorage.getItem('pendingStudent'));
+      console.log('Existing:', existing);
 
-        if (pending && pending.email === email) {
-          const { error: insertError } = await db
+      if (!existing) {
+        // Try metadata first, then localStorage fallback
+        const pending = JSON.parse(localStorage.getItem('pendingStudent') || 'null');
+        const source = (meta?.student_id) ? meta : pending;
+
+        console.log('Source data:', source);
+
+        if (source) {
+          const { data: insertData, error: insertError } = await db
             .from('Student')
             .insert({
-              student_id:  pending.student_id,
-              name:        pending.name,
+              student_id:  source.student_id,
+              name:        source.name,
               email:       email,
-              gender:      pending.gender,
-              telephone:   pending.telephone,
-              password:    pending.password,
+              gender:      source.gender,
+              telephone:   source.telephone,
+              password:    source.password,
               is_verified: true
-            });
+            })
+            .select();
+
+          console.log('Insert result:', insertData);
+          console.log('Insert error:', insertError);
 
           if (!insertError) {
             localStorage.removeItem('pendingStudent');
-          } else {
-            console.error('Insert error:', insertError);
           }
+        } else {
+          console.error('No source data found in metadata or localStorage!');
         }
+
+      } else if (!existing.is_verified) {
+        await db.from('Student')
+          .update({ is_verified: true })
+          .eq('email', email);
+        console.log('Updated is_verified to true');
       }
 
-      // Always show success message and stay on login page
-      showVerifiedMessage();
+      // Sign out AFTER all DB operations are done
+      await db.auth.signOut();
 
-      // Clean URL so magic link params are gone
+      showVerifiedMessage();
       window.history.replaceState({}, document.title, window.location.pathname);
     }
   });
