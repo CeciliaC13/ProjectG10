@@ -678,7 +678,7 @@
   let studentData = {};
 
   // Display error alerts within your form UI context fields
- function showValidationError(message) {
+  function showError(message) {
   const errorAlert = document.getElementById('errorAlert');
   if (errorAlert) {
     errorAlert.textContent = message;
@@ -689,6 +689,7 @@
     alert(message);
   }
 }
+
   // Formatting tool helper for rendering timestamps visually
   function formatDateToDisplay(dateString) {
     if (!dateString) return '_________';
