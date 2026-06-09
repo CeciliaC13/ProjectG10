@@ -372,6 +372,11 @@
 <script src="../main.js"></script>
 
 <script>
+  window.__skipUserManager = true;
+  localStorage.removeItem('studentEmail');
+  localStorage.removeItem('studentName');
+  localStorage.removeItem('studentId');
+  
   let applianceForms = [];
 
   function getStatusClass(status) {

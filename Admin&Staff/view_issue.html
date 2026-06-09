@@ -488,6 +488,12 @@
 <script src="../supabase.js"></script>
 
 <script>
+
+  window.__skipUserManager = true;
+  localStorage.removeItem('studentEmail');
+  localStorage.removeItem('studentName');
+  localStorage.removeItem('studentId');
+  
   // ── Header loader (same as dashboard) ──────────────────────────────────────
   async function loadAdminStaffHeader() {
     // 1. Normalise role first

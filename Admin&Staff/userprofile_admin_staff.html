@@ -291,6 +291,11 @@
 <script src="../supabase.js"></script>
 
 <script>
+  window.__skipUserManager = true;
+  localStorage.removeItem('studentEmail');
+  localStorage.removeItem('studentName');
+  localStorage.removeItem('studentId');
+  
   let currentRole = '';
   let currentTable = '';
   let currentIdColumn = '';
