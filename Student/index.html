@@ -472,7 +472,7 @@
   }
 
   // ── Login ───────────────────────────────────────────────────────────────────
-  aasync function handleLogin() {
+  async function handleLogin() {
     const studentid = document.getElementById('studentid').value.trim().toUpperCase();
     const password  = document.getElementById('password').value.trim();
     const errorBox  = document.getElementById('errorMessage');
