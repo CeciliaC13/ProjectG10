@@ -25,6 +25,7 @@ Deno.serve(async (req) => {
       college,
       studentName,
       studentEmail,
+      studentPhone,
       returnUrl,
     } = await req.json();
 
@@ -45,7 +46,7 @@ Deno.serve(async (req) => {
     formData.append('billExternalReferenceNo', reservationId);
     formData.append('billTo',                  studentName  || 'Student');
     formData.append('billEmail',               studentEmail || 'student@utm.my');
-    formData.append('billPhone',               '0111234567');
+    formData.append('billPhone', studentPhone || '0111234567');
     formData.append('billSplitPayment',        '0');
     formData.append('billSplitPaymentArgs',    '');
     formData.append('billPaymentChannel',      '0');

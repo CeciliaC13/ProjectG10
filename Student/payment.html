@@ -813,47 +813,55 @@
   }
 
   async function initiatePayment() {
-    if (!bookingData) return;
+  if (!bookingData) return;
 
-    const btn = document.getElementById('payNowBtn');
-    const btnText = document.getElementById('btnText');
+  const btn = document.getElementById('payNowBtn');
+  const btnText = document.getElementById('btnText');
 
-    btn.disabled = true;
-    btnText.innerHTML = '<i class="bi bi-hourglass-split"></i> Processing...';
+  btn.disabled = true;
+  btnText.innerHTML = '<i class="bi bi-hourglass-split"></i> Processing...';
 
-    try {
-      const returnUrl = `${window.location.origin}${window.location.pathname}?id=${bookingData.reservation_id}`;
-      const rawAmount = parseFloat(bookingData.total_amount || 0);
-      const chargedAmount = rawAmount + 1;  // +RM1 ToyyibPay fee
+  try {
+    // Fetch student phone first
+    const { data: studentData } = await db
+      .from('Student')
+      .select('telephone')
+      .eq('student_id', localStorage.getItem('studentId'))
+      .single();
 
-      const response = await fetch(EDGE_FUNCTION_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          reservationId: bookingData.reservation_id,
-          amount: chargedAmount,   // ← was bookingData.total_amount
-          college: bookingData.college,
-          studentName: localStorage.getItem('studentName') || 'Student',
-          studentEmail: localStorage.getItem('studentEmail') || 'student@utm.my',
-          returnUrl: returnUrl,
-        }),
-      });
+    const returnUrl = `${window.location.origin}${window.location.pathname}?id=${bookingData.reservation_id}`;
+    const rawAmount = parseFloat(bookingData.total_amount || 0);
+    const chargedAmount = rawAmount + 1;
 
-      const result = await response.json();
+    const response = await fetch(EDGE_FUNCTION_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        reservationId: bookingData.reservation_id,
+        amount:        chargedAmount,
+        college:       bookingData.college,
+        studentName:   localStorage.getItem('studentName')  || 'Student',
+        studentEmail:  localStorage.getItem('studentEmail') || 'student@utm.my',
+        studentPhone:  studentData?.telephone || '',
+        returnUrl:     returnUrl,
+      }),
+    });
 
-      if (result.success && result.paymentUrl) {
-        window.location.href = result.paymentUrl;
-      } else {
-        throw new Error(result.error || 'Failed to create bill');
-      }
+    const result = await response.json();
 
-    } catch (err) {
-      console.error('Payment error:', err);
-      alert('Failed to initiate payment. Please try again.\n\nError: ' + err.message);
-      btn.disabled = false;
-      btnText.innerHTML = '<i class="bi bi-lock-fill"></i> Proceed to Pay';
+    if (result.success && result.paymentUrl) {
+      window.location.href = result.paymentUrl;
+    } else {
+      throw new Error(result.error || 'Failed to create bill');
     }
+
+  } catch (err) {
+    console.error('Payment error:', err);
+    alert('Failed to initiate payment. Please try again.\n\nError: ' + err.message);
+    btn.disabled = false;
+    btnText.innerHTML = '<i class="bi bi-lock-fill"></i> Proceed to Pay';
   }
+}
 
   async function handlePaymentSuccess() {
     if (bookingData) {
