@@ -777,11 +777,13 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="../supabase.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../supabase.js"></script>
 <script>
-  // Toggle password visibility
+  // ── Toggle password visibility ──────────────────────────────────────────────
   document.getElementById('togglePassword').addEventListener('click', function() {
     const input = document.getElementById('password');
-    const type = input.type === 'password' ? 'text' : 'password';
+    const type  = input.type === 'password' ? 'text' : 'password';
     input.setAttribute('type', type);
     this.classList.toggle('bi-eye');
     this.classList.toggle('bi-eye-slash');
@@ -789,19 +791,19 @@
 
   document.getElementById('toggleConfirmPassword').addEventListener('click', function() {
     const input = document.getElementById('confirmPassword');
-    const type = input.type === 'password' ? 'text' : 'password';
+    const type  = input.type === 'password' ? 'text' : 'password';
     input.setAttribute('type', type);
     this.classList.toggle('bi-eye');
     this.classList.toggle('bi-eye-slash');
   });
 
-  // Terms / Privacy popups
-  function openTermsPopup()   { document.getElementById('termsPopup').classList.add('active'); }
-  function closeTermsPopup()  { document.getElementById('termsPopup').classList.remove('active'); }
-  function openPrivacyPopup() { document.getElementById('privacyPopup').classList.add('active'); }
-  function closePrivacyPopup(){ document.getElementById('privacyPopup').classList.remove('active'); }
+  // ── Terms / Privacy popups ──────────────────────────────────────────────────
+  function openTermsPopup()    { document.getElementById('termsPopup').classList.add('active'); }
+  function closeTermsPopup()   { document.getElementById('termsPopup').classList.remove('active'); }
+  function openPrivacyPopup()  { document.getElementById('privacyPopup').classList.add('active'); }
+  function closePrivacyPopup() { document.getElementById('privacyPopup').classList.remove('active'); }
 
-  document.getElementById('termsLink').addEventListener('click', e => { e.preventDefault(); openTermsPopup(); });
+  document.getElementById('termsLink').addEventListener('click',   e => { e.preventDefault(); openTermsPopup(); });
   document.getElementById('privacyLink').addEventListener('click', e => { e.preventDefault(); openPrivacyPopup(); });
 
   window.addEventListener('click', function(e) {
@@ -809,6 +811,7 @@
     if (e.target === document.getElementById('privacyPopup')) closePrivacyPopup();
   });
 
+  // ── Sign Up ─────────────────────────────────────────────────────────────────
   document.getElementById('signupBtn').addEventListener('click', async () => {
     const studentId       = document.getElementById('studentId').value.trim().toUpperCase();
     const name            = document.getElementById('name').value.trim();
@@ -826,7 +829,7 @@
     errorAlert.classList.remove('show');
     successAlert.classList.remove('show');
 
-    // --- Validation ---
+    // ── Validation ────────────────────────────────────────────────────────────
     if (!studentId || !name || !email || !gender || !telephone || !password || !confirmPassword) {
       errorAlert.textContent = 'Please fill in all fields.';
       errorAlert.classList.add('show');
@@ -867,7 +870,7 @@
       return;
     }
 
-    // --- Check for duplicate in Student table ---
+    // ── Check duplicate in Student table ─────────────────────────────────────
     const { data: existing } = await db
       .from('Student')
       .select('student_id, is_verified')
@@ -880,7 +883,7 @@
         errorAlert.classList.add('show');
         return;
       }
-      // Remove stale unverified rows so the new signup can proceed
+      // Remove stale unverified rows
       await db.from('Student')
         .delete()
         .or(`student_id.eq.${studentId},email.eq.${email}`)
@@ -890,94 +893,81 @@
     signupBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Sending verification...';
     signupBtn.disabled = true;
 
-    // --- Register with Supabase Auth, passing all data as metadata ---
+    // ── Helper: show success countdown ───────────────────────────────────────
+    function showSuccessCountdown(message) {
+      let countdown = 5;
+      successAlert.textContent = `${message} Redirecting in ${countdown}s...`;
+      successAlert.classList.add('show');
+      signupBtn.innerHTML = '<i class="bi bi-check-lg"></i> Check Your Email!';
+      const timer = setInterval(() => {
+        countdown--;
+        successAlert.textContent = `${message} Redirecting in ${countdown}s...`;
+        if (countdown === 0) {
+          clearInterval(timer);
+          window.location.href = 'index.html';
+        }
+      }, 1000);
+    }
+
+    // ── Register via Supabase Auth ────────────────────────────────────────────
     const { data: signUpData, error: signUpError } = await db.auth.signUp({
       email,
       password,
       options: {
-        // This URL is where the user lands after clicking the email link
         emailRedirectTo: 'https://ceciliac13.github.io/ProjectG10/Student/index.html',
         data: {
-          student_id: studentId,
+          student_id:    studentId,
           name,
           gender,
           telephone,
-          // Store password in metadata so we can save it to Student table on verify
-          // (since you use plaintext password matching in login)
           plain_password: password
         }
       }
     });
 
     if (signUpError) {
-      // "User already registered" means they exist in Auth but never verified
       if (signUpError.message?.includes('already registered')) {
-        errorAlert.textContent = 'This email is already registered. Please check your inbox for the verification email or try logging in.';
-      } else {
-        errorAlert.textContent = 'Failed to send verification email: ' + signUpError.message;
-      }
-      errorAlert.classList.add('show');
-      signupBtn.innerHTML = 'Create Account <i class="bi bi-arrow-right"></i>';
-      signupBtn.disabled = false;
-      return;
-    }if (signUpError) {
-  if (signUpError.message?.includes('already registered')) {
-    // Ghost auth user exists — resend the confirmation email
-    const { error: resendError } = await db.auth.resend({
-      type: 'signup',
-      email: email,
-      options: {
-        emailRedirectTo: 'https://ceciliac13.github.io/ProjectG10/Student/index.html'
-      }
-    });
+        // Ghost auth user exists — try to resend confirmation
+        const { error: resendError } = await db.auth.resend({
+          type: 'signup',
+          email: email,
+          options: {
+            emailRedirectTo: 'https://ceciliac13.github.io/ProjectG10/Student/index.html'
+          }
+        });
 
-    if (resendError) {
-      errorAlert.textContent = 'Failed to resend verification email. Please wait a few minutes and try again.';
+        // Save to localStorage as fallback (resend can't update metadata)
+        localStorage.setItem('pendingStudent', JSON.stringify({
+          student_id: studentId, name, email, gender,
+          telephone, plain_password: password
+        }));
+
+        if (resendError) {
+          errorAlert.innerHTML = `
+            ⚠️ This email has a conflict with an old registration attempt.<br>
+            <strong>Please contact your admin to remove the account, then try again.</strong><br>
+            <small style="color:#888">Or try a different email address.</small>
+          `;
+          errorAlert.classList.add('show');
+          signupBtn.innerHTML = 'Create Account <i class="bi bi-arrow-right"></i>';
+          signupBtn.disabled = false;
+          return;
+        }
+
+        showSuccessCountdown('✅ Verification email resent! Check your inbox and click the link.');
+        return;
+      }
+
+      // Any other Supabase error
+      errorAlert.textContent = 'Failed to send verification email: ' + signUpError.message;
       errorAlert.classList.add('show');
       signupBtn.innerHTML = 'Create Account <i class="bi bi-arrow-right"></i>';
       signupBtn.disabled = false;
       return;
     }
 
-    // Treat resend as success — update metadata too
-    // (metadata can't be updated without admin key, so save to localStorage as fallback)
-    localStorage.setItem('pendingStudent', JSON.stringify({
-      student_id: studentId, name, email, gender, telephone,
-      plain_password: password
-    }));
-
-    let countdown = 5;
-    successAlert.textContent = `✅ Verification email resent! Check your inbox and click the link. Redirecting in ${countdown}s...`;
-    successAlert.classList.add('show');
-    signupBtn.innerHTML = '<i class="bi bi-check-lg"></i> Check Your Email!';
-    const timer = setInterval(() => {
-      countdown--;
-      successAlert.textContent = `✅ Verification email resent! Check your inbox and click the link. Redirecting in ${countdown}s...`;
-      if (countdown === 0) { clearInterval(timer); window.location.href = 'index.html'; }
-    }, 1000);
-    return;
-    }
-
-    errorAlert.textContent = 'Failed to send verification email: ' + signUpError.message;
-    errorAlert.classList.add('show');
-    signupBtn.innerHTML = 'Create Account <i class="bi bi-arrow-right"></i>';
-    signupBtn.disabled = false;
-    return;
-  }
-
-    let countdown = 5;
-    successAlert.textContent = `✅ Verification email sent! Check your inbox and click the link to complete registration. Redirecting in ${countdown}s...`;
-    successAlert.classList.add('show');
-    signupBtn.innerHTML = '<i class="bi bi-check-lg"></i> Check Your Email!';
-
-    const timer = setInterval(() => {
-      countdown--;
-      successAlert.textContent = `✅ Verification email sent! Check your inbox and click the link to complete registration. Redirecting in ${countdown}s...`;
-      if (countdown === 0) {
-        clearInterval(timer);
-        window.location.href = 'index.html';
-      }
-    }, 1000);
+    // ── signUp succeeded ─────────────────────────────────────────────────────
+    showSuccessCountdown('✅ Verification email sent! Check your inbox and click the link to complete registration.');
   });
 </script>
 </body>
