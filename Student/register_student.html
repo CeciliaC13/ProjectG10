@@ -920,7 +920,50 @@
       signupBtn.innerHTML = 'Create Account <i class="bi bi-arrow-right"></i>';
       signupBtn.disabled = false;
       return;
+    }if (signUpError) {
+  if (signUpError.message?.includes('already registered')) {
+    // Ghost auth user exists — resend the confirmation email
+    const { error: resendError } = await db.auth.resend({
+      type: 'signup',
+      email: email,
+      options: {
+        emailRedirectTo: 'https://ceciliac13.github.io/ProjectG10/Student/index.html'
+      }
+    });
+
+    if (resendError) {
+      errorAlert.textContent = 'Failed to resend verification email. Please wait a few minutes and try again.';
+      errorAlert.classList.add('show');
+      signupBtn.innerHTML = 'Create Account <i class="bi bi-arrow-right"></i>';
+      signupBtn.disabled = false;
+      return;
     }
+
+    // Treat resend as success — update metadata too
+    // (metadata can't be updated without admin key, so save to localStorage as fallback)
+    localStorage.setItem('pendingStudent', JSON.stringify({
+      student_id: studentId, name, email, gender, telephone,
+      plain_password: password
+    }));
+
+    let countdown = 5;
+    successAlert.textContent = `✅ Verification email resent! Check your inbox and click the link. Redirecting in ${countdown}s...`;
+    successAlert.classList.add('show');
+    signupBtn.innerHTML = '<i class="bi bi-check-lg"></i> Check Your Email!';
+    const timer = setInterval(() => {
+      countdown--;
+      successAlert.textContent = `✅ Verification email resent! Check your inbox and click the link. Redirecting in ${countdown}s...`;
+      if (countdown === 0) { clearInterval(timer); window.location.href = 'index.html'; }
+    }, 1000);
+    return;
+    }
+
+    errorAlert.textContent = 'Failed to send verification email: ' + signUpError.message;
+    errorAlert.classList.add('show');
+    signupBtn.innerHTML = 'Create Account <i class="bi bi-arrow-right"></i>';
+    signupBtn.disabled = false;
+    return;
+  }
 
     let countdown = 5;
     successAlert.textContent = `✅ Verification email sent! Check your inbox and click the link to complete registration. Redirecting in ${countdown}s...`;

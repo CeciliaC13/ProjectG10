@@ -388,169 +388,16 @@
  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="../supabase.js"></script>
 <script>
-  const togglePassword = document.getElementById('togglePassword');
-const passwordInput = document.getElementById('password');
-
-togglePassword.addEventListener('click', function() {
-  const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
-  passwordInput.setAttribute('type', type);
-  this.classList.toggle('bi-eye');
-  this.classList.toggle('bi-eye-slash');
-});
-
-// Detect if this page load came from a magic link
-const isFromMagicLink = window.location.hash.includes('access_token')
-                     || window.location.search.includes('code=');
-
-if (isFromMagicLink) {
-  db.auth.onAuthStateChange(async (event, session) => {
-    if (event === 'SIGNED_IN' && session?.user) {
-      const user = session.user;
-      const email = user.email;
-      const meta = user.user_metadata;
-
-      console.log('Magic link verified for:', email);
-      console.log('Metadata:', JSON.stringify(meta));
-
-      // Check if already in DB
-      const { data: existing } = await db
-        .from('Student')
-        .select('student_id, is_verified')
-        .eq('email', email)
-        .maybeSingle();
-
-      console.log('Existing:', existing);
-
-      if (!existing) {
-        // Try metadata first, then localStorage fallback
-        const pending = JSON.parse(localStorage.getItem('pendingStudent') || 'null');
-        const source = (meta?.student_id) ? meta : pending;
-
-        console.log('Source data:', source);
-
-        if (source) {
-          const { data: insertData, error: insertError } = await db
-            .from('Student')
-            .insert({
-              student_id:  source.student_id,
-              name:        source.name,
-              email:       email,
-              gender:      source.gender,
-              telephone:   source.telephone,
-              password:    source.password,
-              is_verified: true
-            })
-            .select();
-
-          console.log('Insert result:', insertData);
-          console.log('Insert error:', insertError);
-
-          if (!insertError) {
-            localStorage.removeItem('pendingStudent');
-          }
-        } else {
-          console.error('No source data found in metadata or localStorage!');
-        }
-
-      } else if (!existing.is_verified) {
-        await db.from('Student')
-          .update({ is_verified: true })
-          .eq('email', email);
-        console.log('Updated is_verified to true');
-      }
-
-      // Sign out AFTER all DB operations are done
-      await db.auth.signOut();
-
-      showVerifiedMessage();
-      window.history.replaceState({}, document.title, window.location.pathname);
-    }
-  });
-}
-
-function showVerifiedMessage() {
-  const errorBox = document.getElementById('errorMessage');
-  errorBox.className = 'error-message show';
-  errorBox.style.backgroundColor = '#dcfce7';
-  errorBox.style.color = '#16a34a';
-  errorBox.innerHTML = '<i class="bi bi-check-circle-fill"></i> Email verified successfully! Please log in below.';
-}
-
-document.getElementById('loginBtn').addEventListener('click', async () => {
-  const studentid = document.getElementById('studentid').value.trim().toUpperCase();
-  const password = document.getElementById('password').value.trim();
-  const errorBox = document.getElementById('errorMessage');
-  const loginBtn = document.getElementById('loginBtn');
-
-  // Reset — only use class, no inline styles
-  errorBox.className = 'error-message';
-  errorBox.style = '';
-
-  if (!studentid || !password) {
-    errorBox.innerHTML = '<i class="bi bi-exclamation-triangle-fill"></i> Please fill in all fields.';
-    errorBox.classList.add('show');
-    return;
-  }
-
-  if (!/^[A][0-9A-Z]+$/.test(studentid)) {
-    errorBox.innerHTML = '<i class="bi bi-exclamation-triangle-fill"></i> Student ID must start with the letter A (e.g., A24DW0001).';
-    errorBox.classList.add('show');
-    return;
-  }
-
-  loginBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Signing in...';
-  loginBtn.disabled = true;
-
-  const { data, error } = await db
-    .from('Student')
-    .select('*')
-    .eq('student_id', studentid)
-    .eq('password', password)
-    .single();
-
-  if (error || !data) {
-    errorBox.innerHTML = '<i class="bi bi-exclamation-triangle-fill"></i> Invalid Student ID or Password.';
-    errorBox.classList.add('show');
-    loginBtn.innerHTML = 'Login <i class="bi bi-arrow-right"></i>';
-    loginBtn.disabled = false;
-    return;
-  }
-
-  if (!data.is_verified) {
-    errorBox.innerHTML = '<i class="bi bi-exclamation-triangle-fill"></i> Please verify your email before logging in.';
-    errorBox.classList.add('show');
-    loginBtn.innerHTML = 'Login <i class="bi bi-arrow-right"></i>';
-    loginBtn.disabled = false;
-    return;
-  }
-
-  localStorage.setItem('studentEmail', data.email);
-  localStorage.setItem('studentId', data.student_id);
-  localStorage.setItem('studentName', data.name);
-  window.location.href = 'DashBoard.html';
-});
-
-document.addEventListener('keydown', function(e) {
-  if (e.key === 'Enter') {
-    document.getElementById('loginBtn').click();
-  }
-});
-
-</script><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="../supabase.js"></script>
-<script>
-  // Toggle password visibility
+  // ── Toggle password visibility ──────────────────────────────────────────────
   document.getElementById('togglePassword').addEventListener('click', function() {
     const input = document.getElementById('password');
-    const type = input.type === 'password' ? 'text' : 'password';
+    const type  = input.type === 'password' ? 'text' : 'password';
     input.setAttribute('type', type);
     this.classList.toggle('bi-eye');
     this.classList.toggle('bi-eye-slash');
   });
 
-  // ── Handle email verification callback ──────────────────────────────────────
-  // Supabase appends #access_token=... or ?code=... when the user clicks
-  // the confirmation link in their email.
+  // ── Handle email verification callback ─────────────────────────────────────
   const isCallback = window.location.hash.includes('access_token')
                   || window.location.search.includes('code=');
 
@@ -561,40 +408,54 @@ document.addEventListener('keydown', function(e) {
         const meta  = user.user_metadata || {};
         const email = user.email;
 
-        // Check if Student row already exists (e.g. double-click on link)
         const { data: existing } = await db
           .from('Student')
-          .select('student_id')
+          .select('student_id, is_verified')
           .eq('email', email)
           .maybeSingle();
 
-        if (!existing && meta.student_id) {
-          // Insert the student row now that email is confirmed
-          const { error: insertError } = await db.from('Student').insert({
-            student_id:  meta.student_id,
-            name:        meta.name,
-            email:       email,
-            gender:      meta.gender,
-            telephone:   meta.telephone,
-            password:    meta.plain_password,   // matches your plaintext login check
-            is_verified: true
-          });
+        if (!existing) {
+          // Normal signUp flow — metadata carries all fields
+          if (meta.student_id) {
+            const { error: insertError } = await db.from('Student').insert({
+              student_id:  meta.student_id,
+              name:        meta.name,
+              email:       email,
+              gender:      meta.gender,
+              telephone:   meta.telephone,
+              password:    meta.plain_password,
+              is_verified: true
+            });
+            if (insertError) console.error('Insert error:', insertError);
 
-          if (insertError) {
-            console.error('Insert error:', insertError);
+          } else {
+            // Resend flow — metadata missing, fall back to localStorage
+            const pending = JSON.parse(localStorage.getItem('pendingStudent') || 'null');
+            if (pending) {
+              const { error: insertError } = await db.from('Student').insert({
+                student_id:  pending.student_id,
+                name:        pending.name,
+                email:       email,
+                gender:      pending.gender,
+                telephone:   pending.telephone,
+                password:    pending.plain_password,
+                is_verified: true
+              });
+              if (!insertError) localStorage.removeItem('pendingStudent');
+              else console.error('Insert error (localStorage fallback):', insertError);
+            } else {
+              console.error('No source data found in metadata or localStorage!');
+            }
           }
-        } else if (existing) {
-          // Row exists but maybe is_verified is still false
+
+        } else if (!existing.is_verified) {
+          // Row exists but not yet verified
           await db.from('Student')
             .update({ is_verified: true })
             .eq('email', email);
         }
 
-        // Sign out of Supabase Auth session — your app uses its own session
-        // (localStorage studentId / studentEmail), not Supabase Auth sessions
         await db.auth.signOut();
-
-        // Clean up URL and show success message
         window.history.replaceState({}, document.title, window.location.pathname);
         showVerifiedBanner();
       }
@@ -603,6 +464,7 @@ document.addEventListener('keydown', function(e) {
 
   function showVerifiedBanner() {
     const box = document.getElementById('errorMessage');
+    box.removeAttribute('style');
     box.style.backgroundColor = '#dcfce7';
     box.style.color = '#16a34a';
     box.style.display = 'block';
@@ -616,7 +478,6 @@ document.addEventListener('keydown', function(e) {
     const errorBox  = document.getElementById('errorMessage');
     const loginBtn  = document.getElementById('loginBtn');
 
-    // Reset error box to default red style
     errorBox.removeAttribute('style');
     errorBox.className = 'error-message';
 
