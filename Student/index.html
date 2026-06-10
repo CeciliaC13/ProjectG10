@@ -472,7 +472,7 @@
   }
 
   // ── Login ───────────────────────────────────────────────────────────────────
-  async function handleLogin() {
+  aasync function handleLogin() {
     const studentid = document.getElementById('studentid').value.trim().toUpperCase();
     const password  = document.getElementById('password').value.trim();
     const errorBox  = document.getElementById('errorMessage');
@@ -495,23 +495,86 @@
     loginBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Signing in...';
     loginBtn.disabled = true;
 
-    const { data, error } = await db
+    // ── Step 1: Check if matric ID exists at all ────────────────────────────
+    const { data: studentRecord, error: lookupError } = await db
       .from('Student')
-      .select('*')
+      .select('student_id, password, is_verified')
       .eq('student_id', studentid)
-      .eq('password', password)
-      .single();
+      .maybeSingle();                     // null if not found, no error thrown
 
-    if (error || !data) {
-      errorBox.innerHTML = '<i class="bi bi-exclamation-triangle-fill"></i> Invalid Student ID or Password.';
+    if (lookupError) {
+      errorBox.innerHTML = '<i class="bi bi-exclamation-triangle-fill"></i> Something went wrong. Please try again.';
       errorBox.classList.add('show');
       loginBtn.innerHTML = 'Login <i class="bi bi-arrow-right"></i>';
       loginBtn.disabled = false;
       return;
     }
 
-    if (!data.is_verified) {
-      errorBox.innerHTML = '<i class="bi bi-exclamation-triangle-fill"></i> Please verify your email before logging in.';
+    if (!studentRecord) {
+      // Matric ID doesn't exist in the system at all
+      errorBox.innerHTML = '<i class="bi bi-exclamation-triangle-fill"></i> Student ID <strong>' + studentid + '</strong> is not registered. Please <a href="register_student.html" style="color:#dc2626;font-weight:700;">create an account</a> first.';
+      errorBox.classList.add('show');
+      loginBtn.innerHTML = 'Login <i class="bi bi-arrow-right"></i>';
+      loginBtn.disabled = false;
+      return;
+    }
+
+    // ── Step 2: Check if registered but email not verified ──────────────────
+    if (!studentRecord.is_verified) {
+      errorBox.innerHTML = `
+        <i class="bi bi-envelope-exclamation-fill"></i>
+        Your account is not verified yet. Please check your email inbox and click the verification link.
+        <br><br>
+        <span style="font-size:12px;">Didn't receive it?
+          <a href="#" id="resendLink" style="color:#dc2626;font-weight:700;">Resend verification email</a>
+        </span>`;
+      errorBox.classList.add('show');
+      loginBtn.innerHTML = 'Login <i class="bi bi-arrow-right"></i>';
+      loginBtn.disabled = false;
+
+      // Resend handler — needs the email, so fetch it first
+      document.getElementById('resendLink').addEventListener('click', async (e) => {
+        e.preventDefault();
+        const { data: fullRecord } = await db
+          .from('Student')
+          .select('email')
+          .eq('student_id', studentid)
+          .maybeSingle();
+
+        if (fullRecord?.email) {
+          const { error: resendError } = await db.auth.resend({
+            type: 'signup',
+            email: fullRecord.email
+          });
+          if (!resendError) {
+            document.getElementById('resendLink').textContent = 'Sent! Check your inbox.';
+            document.getElementById('resendLink').style.pointerEvents = 'none';
+          } else {
+            document.getElementById('resendLink').textContent = 'Failed to resend. Try again later.';
+          }
+        }
+      });
+      return;
+    }
+
+    // ── Step 3: Validate password ───────────────────────────────────────────
+    if (studentRecord.password !== password) {
+      errorBox.innerHTML = '<i class="bi bi-exclamation-triangle-fill"></i> Incorrect password. Please try again.';
+      errorBox.classList.add('show');
+      loginBtn.innerHTML = 'Login <i class="bi bi-arrow-right"></i>';
+      loginBtn.disabled = false;
+      return;
+    }
+
+    // ── Step 4: All good — fetch full record and proceed ────────────────────
+    const { data, error } = await db
+      .from('Student')
+      .select('*')
+      .eq('student_id', studentid)
+      .single();
+
+    if (error || !data) {
+      errorBox.innerHTML = '<i class="bi bi-exclamation-triangle-fill"></i> Something went wrong. Please try again.';
       errorBox.classList.add('show');
       loginBtn.innerHTML = 'Login <i class="bi bi-arrow-right"></i>';
       loginBtn.disabled = false;
