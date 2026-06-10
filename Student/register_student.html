@@ -857,11 +857,11 @@
       errorAlert.classList.add('show');
       return;
     }
-    // if (!email.endsWith('@graduate.utm.my') && !email.endsWith('@utm.my')) {
-    //   errorAlert.textContent = 'Please use your UTM email address (@graduate.utm.my or @utm.my).';
-    //   errorAlert.classList.add('show');
-    //   return;
-    // }
+    if (!email.endsWith('@graduate.utm.my') && !email.endsWith('@utm.my')) {
+      errorAlert.textContent = 'Please use your UTM email address (@graduate.utm.my or @utm.my).';
+      errorAlert.classList.add('show');
+      return;
+    }
     if (!agreeTerms) {
       errorAlert.textContent = 'Please agree to the Terms of Service and Privacy Policy.';
       errorAlert.classList.add('show');
