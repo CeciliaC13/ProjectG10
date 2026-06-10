@@ -776,136 +776,98 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="../supabase.js"></script>
-  <script>
-    // Toggle password visibility for Password field
-    const togglePassword = document.getElementById('togglePassword');
-    const passwordInput = document.getElementById('password');
+<script src="../supabase.js"></script>
+<script>
+  // Toggle password visibility
+  document.getElementById('togglePassword').addEventListener('click', function() {
+    const input = document.getElementById('password');
+    const type = input.type === 'password' ? 'text' : 'password';
+    input.setAttribute('type', type);
+    this.classList.toggle('bi-eye');
+    this.classList.toggle('bi-eye-slash');
+  });
 
-    togglePassword.addEventListener('click', function() {
-      const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
-      passwordInput.setAttribute('type', type);
-      this.classList.toggle('bi-eye');
-      this.classList.toggle('bi-eye-slash');
-    });
+  document.getElementById('toggleConfirmPassword').addEventListener('click', function() {
+    const input = document.getElementById('confirmPassword');
+    const type = input.type === 'password' ? 'text' : 'password';
+    input.setAttribute('type', type);
+    this.classList.toggle('bi-eye');
+    this.classList.toggle('bi-eye-slash');
+  });
 
-    // Toggle password visibility for Confirm Password field
-    const toggleConfirmPassword = document.getElementById('toggleConfirmPassword');
-    const confirmPasswordInput = document.getElementById('confirmPassword');
+  // Terms / Privacy popups
+  function openTermsPopup()   { document.getElementById('termsPopup').classList.add('active'); }
+  function closeTermsPopup()  { document.getElementById('termsPopup').classList.remove('active'); }
+  function openPrivacyPopup() { document.getElementById('privacyPopup').classList.add('active'); }
+  function closePrivacyPopup(){ document.getElementById('privacyPopup').classList.remove('active'); }
 
-    toggleConfirmPassword.addEventListener('click', function() {
-      const type = confirmPasswordInput.getAttribute('type') === 'password' ? 'text' : 'password';
-      confirmPasswordInput.setAttribute('type', type);
-      this.classList.toggle('bi-eye');
-      this.classList.toggle('bi-eye-slash');
-    });
+  document.getElementById('termsLink').addEventListener('click', e => { e.preventDefault(); openTermsPopup(); });
+  document.getElementById('privacyLink').addEventListener('click', e => { e.preventDefault(); openPrivacyPopup(); });
 
-    // Terms Popup Functions
-    function openTermsPopup() {
-      document.getElementById('termsPopup').classList.add('active');
+  window.addEventListener('click', function(e) {
+    if (e.target === document.getElementById('termsPopup'))   closeTermsPopup();
+    if (e.target === document.getElementById('privacyPopup')) closePrivacyPopup();
+  });
+
+  document.getElementById('signupBtn').addEventListener('click', async () => {
+    const studentId       = document.getElementById('studentId').value.trim().toUpperCase();
+    const name            = document.getElementById('name').value.trim();
+    const email           = document.getElementById('email').value.trim();
+    const gender          = document.getElementById('gender').value;
+    const password        = document.getElementById('password').value.trim();
+    const confirmPassword = document.getElementById('confirmPassword').value.trim();
+    const agreeTerms      = document.getElementById('agreeTerms').checked;
+    let   telephone       = document.getElementById('telephone').value.trim();
+
+    const errorAlert   = document.getElementById('errorMessage');
+    const successAlert = document.getElementById('successMessage');
+    const signupBtn    = document.getElementById('signupBtn');
+
+    errorAlert.classList.remove('show');
+    successAlert.classList.remove('show');
+
+    // --- Validation ---
+    if (!studentId || !name || !email || !gender || !telephone || !password || !confirmPassword) {
+      errorAlert.textContent = 'Please fill in all fields.';
+      errorAlert.classList.add('show');
+      return;
+    }
+    if (!/^[A][0-9A-Z]+$/.test(studentId)) {
+      errorAlert.textContent = 'Student ID must start with the letter A (e.g., A24DW0001).';
+      errorAlert.classList.add('show');
+      return;
+    }
+    const telDigits = telephone.replace(/[-\s]/g, '');
+    if (!/^0[0-9]{9,10}$/.test(telDigits)) {
+      errorAlert.textContent = 'Please enter a valid Malaysian phone number (e.g., 0123456789).';
+      errorAlert.classList.add('show');
+      return;
+    }
+    if (telephone.startsWith('0')) {
+      telephone = '+60' + telephone.substring(1);
+    }
+    if (!/^(?=.*[a-zA-Z])(?=.*[0-9])(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]).{8,}$/.test(password)) {
+      errorAlert.textContent = 'Password must be at least 8 characters with letters, numbers & symbols (e.g. Adam@1234).';
+      errorAlert.classList.add('show');
+      return;
+    }
+    if (password !== confirmPassword) {
+      errorAlert.textContent = 'Passwords do not match.';
+      errorAlert.classList.add('show');
+      return;
+    }
+    if (!email.endsWith('@graduate.utm.my') && !email.endsWith('@utm.my')) {
+      errorAlert.textContent = 'Please use your UTM email address (@graduate.utm.my or @utm.my).';
+      errorAlert.classList.add('show');
+      return;
+    }
+    if (!agreeTerms) {
+      errorAlert.textContent = 'Please agree to the Terms of Service and Privacy Policy.';
+      errorAlert.classList.add('show');
+      return;
     }
 
-    function closeTermsPopup() {
-      document.getElementById('termsPopup').classList.remove('active');
-    }
-
-    // Privacy Popup Functions
-    function openPrivacyPopup() {
-      document.getElementById('privacyPopup').classList.add('active');
-    }
-
-    function closePrivacyPopup() {
-      document.getElementById('privacyPopup').classList.remove('active');
-    }
-
-    // Add event listeners to the links
-    document.getElementById('termsLink').addEventListener('click', function(e) {
-      e.preventDefault();
-      openTermsPopup();
-    });
-
-    document.getElementById('privacyLink').addEventListener('click', function(e) {
-      e.preventDefault();
-      openPrivacyPopup();
-    });
-
-    // Close popup when clicking outside
-    window.addEventListener('click', function(e) {
-      const termsPopup = document.getElementById('termsPopup');
-      const privacyPopup = document.getElementById('privacyPopup');
-      if (e.target === termsPopup) {
-        closeTermsPopup();
-      }
-      if (e.target === privacyPopup) {
-        closePrivacyPopup();
-      }
-    });
-
-    document.getElementById('signupBtn').addEventListener('click', async () => {
-      const studentId = document.getElementById('studentId').value.trim().toUpperCase();
-      const name = document.getElementById('name').value.trim();
-      const email = document.getElementById('email').value.trim();
-      const gender = document.getElementById('gender').value;
-      const password = document.getElementById('password').value.trim();
-      const confirmPassword = document.getElementById('confirmPassword').value.trim();
-      const agreeTerms = document.getElementById('agreeTerms').checked;
-      let telephone = document.getElementById('telephone').value.trim();
-
-      const errorAlert = document.getElementById('errorMessage');
-      const successAlert = document.getElementById('successMessage');
-      const signupBtn = document.getElementById('signupBtn');
-
-      errorAlert.classList.remove('show');
-      successAlert.classList.remove('show');
-
-      if (!studentId || !name || !email || !gender || !telephone || !password || !confirmPassword) {
-        errorAlert.textContent = 'Please fill in all fields.';
-        errorAlert.classList.add('show');
-        return;
-      }
-      if (!/^[A][0-9A-Z]+$/.test(studentId)) {
-        errorAlert.textContent = 'Student ID must start with the letter A (e.g., A24DW0001).';
-        errorAlert.classList.add('show');
-        return;
-      }
-      
-      const telDigits = telephone.replace(/[-\s]/g, '');
-      if (!/^0[0-9]{9,10}$/.test(telDigits)) {
-        errorAlert.textContent = 'Please enter a valid Malaysian phone number (e.g., 0123456789).';
-        errorAlert.classList.add('show');
-        return;
-      }
-
-      // Auto-convert to +60 after validation passes
-      if (telephone.startsWith('0')) {
-        telephone = '+60' + telephone.substring(1);
-      }
-     
-      const passwordRegex = /^(?=.*[a-zA-Z])(?=.*[0-9])(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]).{8,}$/;
-      if (!passwordRegex.test(password)) {
-        errorAlert.textContent = 'Password must be at least 8 characters with letters, numbers & symbols (e.g. Adam@1234).';
-        errorAlert.classList.add('show');
-        return;
-      }
-
-      if (password !== confirmPassword) {
-        errorAlert.textContent = 'Passwords do not match.';
-        errorAlert.classList.add('show');
-        return;
-      }
-
-      if (!email.endsWith('@graduate.utm.my') && !email.endsWith('@utm.my')) {
-        errorAlert.textContent = 'Please use your UTM email address (@graduate.utm.my or @utm.my).';
-        errorAlert.classList.add('show');
-        return;
-      }
-
-      if (!agreeTerms) {
-        errorAlert.textContent = 'Please agree to the Terms of Service and Privacy Policy.';
-        errorAlert.classList.add('show');
-        return;
-      }
-
+    // --- Check for duplicate in Student table ---
     const { data: existing } = await db
       .from('Student')
       .select('student_id, is_verified')
@@ -918,8 +880,9 @@
         errorAlert.classList.add('show');
         return;
       }
-      // Clean up stale unverified record
-      await db.from('Student').delete()
+      // Remove stale unverified rows so the new signup can proceed
+      await db.from('Student')
+        .delete()
         .or(`student_id.eq.${studentId},email.eq.${email}`)
         .eq('is_verified', false);
     }
@@ -927,27 +890,32 @@
     signupBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Sending verification...';
     signupBtn.disabled = true;
 
-    // Save before sending OTP
-    localStorage.setItem('pendingStudent', JSON.stringify({
-      student_id: studentId,
-      name:       name,
-      email:      email,
-      gender:     gender,
-      telephone:  telephone,
-      password:   password
-    }));
-
-    // Then send OTP as normal — no metadata needed
-    const { error: otpError } = await db.auth.signInWithOtp({
-      email: email,
+    // --- Register with Supabase Auth, passing all data as metadata ---
+    const { data: signUpData, error: signUpError } = await db.auth.signUp({
+      email,
+      password,
       options: {
-        shouldCreateUser: true,
-        emailRedirectTo: 'https://ceciliac13.github.io/ProjectG10/Student/index.html'
+        // This URL is where the user lands after clicking the email link
+        emailRedirectTo: 'https://ceciliac13.github.io/ProjectG10/Student/index.html',
+        data: {
+          student_id: studentId,
+          name,
+          gender,
+          telephone,
+          // Store password in metadata so we can save it to Student table on verify
+          // (since you use plaintext password matching in login)
+          plain_password: password
+        }
       }
     });
 
-    if (otpError) {
-      errorAlert.textContent = 'Failed to send verification email. Please check the email address.';
+    if (signUpError) {
+      // "User already registered" means they exist in Auth but never verified
+      if (signUpError.message?.includes('already registered')) {
+        errorAlert.textContent = 'This email is already registered. Please check your inbox for the verification email or try logging in.';
+      } else {
+        errorAlert.textContent = 'Failed to send verification email: ' + signUpError.message;
+      }
       errorAlert.classList.add('show');
       signupBtn.innerHTML = 'Create Account <i class="bi bi-arrow-right"></i>';
       signupBtn.disabled = false;
@@ -967,8 +935,8 @@
         window.location.href = 'index.html';
       }
     }, 1000);
-    });
-  </script>
+  });
+</script>
 </body>
 
 </html>
