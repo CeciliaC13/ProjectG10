@@ -330,62 +330,76 @@
   const currentUserRole = (localStorage.getItem('staffAdminRole') || 'staff').toLowerCase();
   const isAdmin = currentUserRole === 'admin';
 
-  // ═══════════════════════════════════════════════════════════════════════════
-  // AUTO-CANCEL OVERDUE PAYMENTS (3 days after approval)
+ // ═══════════════════════════════════════════════════════════════════════════
+  // AUTO-CANCEL OVERDUE PAYMENTS (3 days after approval) - BUG FIXED
   // ═══════════════════════════════════════════════════════════════════════════
   async function autoCancelOverduePayments() {
     let cancelledCount = 0;
+    const THREE_DAYS_IN_MS = 3 * 24 * 60 * 60 * 1000; // 3 days in milliseconds
+    const currentDate = new Date();
     
     for (const booking of bookings) {
       // Only check bookings that are in "Pending Payment" status
       if (booking.status !== 'Pending Payment') continue;
       
-      // Get the approval date (when status changed to Approved)
       const approvedDate = booking.approved_at;
       
       if (approvedDate) {
         const approvedDateTime = new Date(approvedDate);
-        const currentDate = new Date();
-        const daysDiff = Math.floor((currentDate - approvedDateTime) / (1000 * 60 * 60 * 24));
+        const timeDiffInMs = currentDate.getTime() - approvedDateTime.getTime();
         
-        // If more than 3 days have passed since approval
-        if (daysDiff >= 3) {
-          cancelledCount++;
+        // If 3 or more full days have passed since approval
+        if (timeDiffInMs >= THREE_DAYS_IN_MS) {
           
-          // Cancel the overdue booking
+          // Fallback check to make sure we grab the ID safely
+          const currentBookingId = booking.bookingId || booking.reservation_id;
+          
+          if (!currentBookingId) {
+            console.error("Skipping cancellation: Missing reservation ID mapping.", booking);
+            continue;
+          }
+
           try {
-            const { error } = await db
+            // Update Supabase Database (Only using the 'status' column to avoid schema errors)
+            const { data, error } = await db
               .from('reservations')
               .update({ 
-                status: 'Cancelled',
-                cancellation_reason: 'Payment overdue - expired after 3 days',
-                cancelled_at: new Date().toISOString()
+                status: 'Cancelled'
               })
-              .eq('reservation_id', booking.bookingId);
+              .eq('reservation_id', currentBookingId)
+              .select();
             
             if (error) {
-              console.error(`Error cancelling overdue booking ${booking.bookingId}:`, error);
-            } else {
-              console.log(`Auto-cancelled overdue booking: ${booking.bookingId}`);
-              
-              // Restore room availability
-              await adjustRoomAvailability(booking.college, booking.roomType, 'restore');
-              
-              // Send notification to student
-              if (booking.studentId) {
-                await sendNotification(
-                  booking.studentId.trim(),
-                  'Booking Cancelled - Payment Overdue',
-                  `Your booking (${booking.bookingId}) has been automatically cancelled because payment was not completed within 3 days of approval. Please submit a new booking if you still need a room.`,
-                  booking.bookingId
-                );
-              }
-              
-              // Update local booking status
-              booking.status = 'Cancelled';
+              console.error(`Error cancelling overdue booking ${currentBookingId}:`, error);
+              continue;
             }
+
+            if (!data || data.length === 0) {
+              console.warn(`⚠️ DB connection successful, but 0 rows were updated for ID: ${currentBookingId}. Check RLS policies.`);
+              continue;
+            }
+            
+            console.log(`Auto-cancelled overdue booking successfully: ${currentBookingId}`);
+            cancelledCount++;
+            
+            // Restore room availability
+            await adjustRoomAvailability(booking.college, booking.roomType, 'restore');
+            
+            // Send notification to student
+            if (booking.studentId) {
+              await sendNotification(
+                booking.studentId.trim(),
+                'Booking Cancelled - Payment Overdue',
+                `Your booking (${currentBookingId}) has been automatically cancelled because payment was not completed within 3 days of approval. Please submit a new booking if you still need a room.`,
+                currentBookingId
+              );
+            }
+            
+            // Update local booking status in memory
+            booking.status = 'Cancelled';
+
           } catch (err) {
-            console.error(`Failed to cancel booking ${booking.bookingId}:`, err);
+            console.error(`Failed to execute cancellation process for ${currentBookingId}:`, err);
           }
         }
       }
@@ -393,7 +407,7 @@
     
     if (cancelledCount > 0) {
       showMessage(`${cancelledCount} overdue booking(s) have been automatically cancelled.`, 'error');
-      renderBookings(); // Refresh the table
+      renderBookings(); // Refresh the table UI view
     }
   }
 
